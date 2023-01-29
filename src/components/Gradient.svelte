@@ -197,12 +197,19 @@
           <div class="chip color-stop">
             <input class="round" type="color" bind:value="{stop.color}">
             <span>{stop.color}</span>
+            <button class="remove container-absolute" type="reset">✕</button>
           </div>
           {#if stop.position1 != null}
-            <input type="range" bind:value="{stop.position1}">
+            <div class="chip color-position">
+              <input type="range" bind:value="{stop.position1}">
+              <button class="remove" type="reset">✕</button>
+            </div>
           {/if}
           {#if stop.position2 != null}
-            <input type="range" bind:value="{stop.position2}">
+            <div class="chip color-position">
+              <input type="range" bind:value="{stop.position2}">
+              <button class="remove" type="reset">✕</button>
+            </div>
           {/if}
         </fieldset>
       {/if}
@@ -213,6 +220,7 @@
           <div class="color-hint">
             <input type="range" bind:value="{stop.percentage}" style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1].color}, {$gradient_stops[i+1].color})">
           </div>
+          <button class="remove container-absolute" type="reset">✕</button>
         </fieldset>
       {/if}
     {/each}
@@ -238,6 +246,10 @@
 
   input[readonly] {
     text-align: center;
+  }
+
+  fieldset {
+    position: relative;
   }
 
   .preview {
@@ -302,5 +314,23 @@
   
   .color-hint > input:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .remove {
+    padding: var(--size-1);
+    border-radius: var(--radius-round);
+    line-height: .75;
+    font-size: var(--font-size-0);
+    transition: opacity .2s var(--ease-3);
+  }
+
+  fieldset:not(:hover, :focus-within) .remove {
+    opacity: 0;
+  }
+
+  .container-absolute {
+    position: absolute;
+    inset-block-start: -1.5rem;
+    inset-inline-end: -0.5rem;
   }
 </style>
