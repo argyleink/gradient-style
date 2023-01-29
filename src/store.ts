@@ -1,14 +1,24 @@
 import { writable } from 'svelte/store';
 
 export const gradient_type = writable('linear');
-export const gradient_angle = writable('to right');
 export const gradient_space = writable('oklab');
+export const gradient_interpolation = writable('shorter');
 export const gradient_stops = writable([
   {kind: 'stop', color: '#ffff00', size: null}, 
-  {kind: 'hint', percentage: '50'},
+  {kind: 'hint', percentage: '15'},
   {kind: 'stop', color: '#ff00ff', size: null},
-  {kind: 'hint', percentage: '50'},
+  {kind: 'hint', percentage: '80'},
   {kind: 'stop', color: '#00ffff', size: '100%'},
 ]);
-// export const radial_shapes = writable();
-// export const radial_positions = writable();
+
+// linear specific
+export const linear_angle = writable('to right');
+
+// radial specific
+export const radial_shape = writable('circle');
+export const radial_position = writable('center');
+export const radial_size = writable('farthest-corner');
+
+// conic specific
+export const conic_angle = writable('0');
+export const conic_position = writable('center');

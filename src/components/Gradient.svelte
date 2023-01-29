@@ -1,31 +1,51 @@
 <script>
   import {
     gradient_type, 
-    gradient_angle, 
     gradient_space, 
-    gradient_stops
+    gradient_interpolation,
+    gradient_stops,
+    linear_angle, 
+    radial_shape, 
+    radial_position, 
+    radial_size, 
+    conic_angle, 
+    conic_position, 
   } from '../store.ts'
 
   const gradient_types = ['linear','radial','conic']
 
-  const gradient_directions = [
+  const linear_directions = [
     'to right',
-    'to bottom',
     'to bottom right',
+    'to bottom',
     'to bottom left',
     'to left',
+    'to top left',
     'to top',
     'to top right',
-    'to top left',
   ]
+
+  const radial_shapes = ['circle', 'ellipse']
+  const radial_sizes = ['closest-side', 'closest-corner', 'farthest-side', 'farthest-corner', '250px', '50vw', '50cqi']
+  const radial_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
+
+  function isCylindricalSpace(space) {
+    return ['hsl','hwb','lch','oklch'].includes(space)
+  }
 
   const gensyntax = {
     'linear': () => 
-      `linear-gradient(${$gradient_angle} in ${$gradient_space}, ${stopsToStrings()})`,
+      `linear-gradient(${$linear_angle} ${spaceToString()}, ${stopsToStrings()})`,
     'radial': () => 
-      `radial-gradient(circle at center in ${$gradient_space}, ${stopsToStrings()})`,
+      `radial-gradient(${$radial_size} ${$radial_shape} at ${$radial_position} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
-      `conic-gradient(in ${$gradient_space}, ${stopsToStrings()})`
+      `conic-gradient(from ${$conic_angle}deg at ${$conic_position} ${spaceToString()}, ${stopsToStrings()})`
+  }
+
+  function spaceToString() {
+    return isCylindricalSpace($gradient_space)
+      ? `in ${$gradient_space} ${$gradient_interpolation} hue`
+      : `in ${$gradient_space}`
   }
 
   function stopsToStrings() {
@@ -45,9 +65,15 @@
   }
 
   $: user_gradient = gensyntax[$gradient_type](
-    $gradient_angle,
+    $linear_angle,
     $gradient_space,
-    $gradient_stops
+    $gradient_interpolation,
+    $gradient_stops,
+    $radial_shape,
+    $radial_size,
+    $radial_position,
+    $conic_angle,
+    $conic_position
   )
 </script>
 
@@ -75,9 +101,51 @@
     {#if $gradient_type === 'linear'}
       <fieldset>
         <legend>Direction</legend>
-        <select name="named-directions" bind:value={$gradient_angle}>
-          {#each gradient_directions as dir}
+        <select name="named-directions" bind:value={$linear_angle}>
+          {#each linear_directions as dir}
             <option value={dir}>{dir}</option>  
+          {/each}
+        </select>
+      </fieldset>
+    {/if}
+
+    {#if $gradient_type === 'radial'}
+      <fieldset>
+        <legend>Size</legend>
+        <select name="radial-size" bind:value={$radial_size}>
+          {#each radial_sizes as size}
+            <option value={size}>{size}</option>  
+          {/each}
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>Shape</legend>
+        <select name="radial-shape" bind:value={$radial_shape}>
+          {#each radial_shapes as shape}
+            <option value={shape}>{shape}</option>  
+          {/each}
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>Position</legend>
+        <select name="radial-position" bind:value={$radial_position}>
+          {#each radial_positions as pos}
+            <option value={pos}>{pos}</option>  
+          {/each}
+        </select>
+      </fieldset>
+    {/if}
+
+    {#if $gradient_type === 'conic'}
+      <fieldset>
+        <legend>Angle</legend>
+        <input type="range" bind:value={$conic_angle} min="0" max="360" step="1" />
+      </fieldset>
+      <fieldset>
+        <legend>Position</legend>
+        <select name="conic-position" bind:value={$conic_position}>
+          {#each radial_positions as pos}
+            <option value={pos}>{pos}</option>  
           {/each}
         </select>
       </fieldset>
@@ -104,25 +172,41 @@
       </select>
     </fieldset>
 
+    {#if isCylindricalSpace($gradient_space)}
+      <fieldset>
+        <legend>Hue Interpolation</legend>
+        <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation}> 
+          <optgroup label="Default interpolation">
+            <option selected>shorter</option>
+          </optgroup>
+          <option>longer</option>
+          <option>decreasing</option>
+          <option>increasing</option>
+        </select>
+      </fieldset>
+    {/if}
+
     <!-- color stops -->
     <fieldset>
       <legend>Colors & Hints</legend>
-      {#each $gradient_stops as stop}
-        {#if stop.kind === 'stop'}
-          <div class="chip color-stop">
-            <input class="round" type="color" bind:value="{stop.color}">
-            <span>{stop.color}</span>
-            {#if stop.size}
-              <span>{stop.size}</span>
-            {/if}
-          </div>
-        {/if}
-        {#if stop.kind === 'hint'}
-          <div class="chip color-hint">
-            <input type="range" bind:value="{stop.percentage}">
-          </div>
-        {/if}
-      {/each}
+      <div class="chips">
+        {#each $gradient_stops as stop}
+          {#if stop.kind === 'stop'}
+            <div class="chip color-stop">
+              <input class="round" type="color" bind:value="{stop.color}">
+              <span>{stop.color}</span>
+              {#if stop.size}
+                <span>{stop.size}</span>
+              {/if}
+            </div>
+          {/if}
+          {#if stop.kind === 'hint'}
+            <div class="color-hint">
+              <input type="range" bind:value="{stop.percentage}">
+            </div>
+          {/if}
+        {/each}
+      </div>
     </fieldset>
   </div>
 </div>
@@ -153,6 +237,12 @@
   }
 
   .type-switch {
+    display: flex;
+    align-items: center;
+    gap: var(--size-2);
+  }
+
+  .chips {
     display: flex;
     align-items: center;
     gap: var(--size-2);
