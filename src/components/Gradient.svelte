@@ -3,7 +3,7 @@
     gradient_type, 
     gradient_angle, 
     gradient_space, 
-    gradient_colors
+    gradient_stops
   } from '../store.ts'
 
   const gradient_types = ['linear','radial','conic']
@@ -21,23 +21,48 @@
 
   const gensyntax = {
     'linear': () => 
-      `linear-gradient(${$gradient_angle} in ${$gradient_space}, ${$gradient_colors.join(', ')})`,
+      `linear-gradient(${$gradient_angle} in ${$gradient_space}, ${stopsToStrings()})`,
     'radial': () => 
-      `radial-gradient(circle at center in ${$gradient_space}, ${$gradient_colors.join(', ')})`,
+      `radial-gradient(circle at center in ${$gradient_space}, ${stopsToStrings()})`,
     'conic': () => 
-      `conic-gradient(in ${$gradient_space}, ${$gradient_colors.join(', ')})`
+      `conic-gradient(in ${$gradient_space}, ${stopsToStrings()})`
   }
 
-  $: user_gradient = gensyntax[$gradient_type]($gradient_angle,$gradient_space,$gradient_colors)
+  function stopsToStrings() {
+    return $gradient_stops
+      .filter(s => s?.percentage !== '50')
+      .map(s => {
+        if (s.kind === 'stop') {
+          return s.size
+            ? s.color + ' ' + s.size
+            : s.color
+        }
+        else if (s.kind === 'hint') {
+          return s.percentage + '%'
+        }
+      })
+      .join(', ')
+  }
+
+  $: user_gradient = gensyntax[$gradient_type](
+    $gradient_angle,
+    $gradient_space,
+    $gradient_stops
+  )
 </script>
 
 <div class="gradient">
+
+  <!-- output -->
+  <input type="text" bind:value={user_gradient} onclick="this.select()" readonly />
+  <!-- modern and legacy for copy -->
+
   <div class="preview" style={`background:${user_gradient}`}></div>
 
   <!-- todo: multiple gradients -->
 
   <div class="controls">
-    <fieldset style="accent-color: {$gradient_colors[0]}">
+    <fieldset style="accent-color: {$gradient_stops[0]}">
       <legend>Type</legend>
       {#each gradient_types as t}
         <div class="type-switch">
@@ -81,22 +106,24 @@
 
     <!-- color stops -->
     <fieldset>
-      <legend>Colors</legend>
-      {#each $gradient_colors as color}
-        <input type="color" bind:value="{color}">  
+      <legend>Colors & Hints</legend>
+      {#each $gradient_stops as stop}
+        {#if stop.kind === 'stop'}
+          <div class="chip color-stop">
+            <input class="round" type="color" bind:value="{stop.color}">
+            <span>{stop.color}</span>
+            {#if stop.size}
+              <span>{stop.size}</span>
+            {/if}
+          </div>
+        {/if}
+        {#if stop.kind === 'hint'}
+          <div class="chip color-hint">
+            <input type="range" bind:value="{stop.percentage}">
+          </div>
+        {/if}
       {/each}
-      <!-- <color> <length-percentage> -->
     </fieldset>
-
-    <!-- color hints -->
-    <fieldset>
-      <legend>Hints</legend>
-      <input type="number" value="50">
-    </fieldset>
-
-    <!-- output -->
-    <output>{user_gradient}</output>
-    <!-- modern and legacy for copy -->
   </div>
 </div>
 
@@ -105,6 +132,7 @@
 	.gradient {
 		display: grid;
     gap: var(--size-3);
+    padding-block: var(--size-3);
 	}
 
   .controls {
@@ -112,12 +140,11 @@
     flex-flow: row wrap;
     align-items: start;
     gap: var(--size-3);
-    padding: var(--size-3);
+    padding-inline: var(--size-3);
   }
 
-  output {
-    max-inline-size: 100%;
-    overflow: scroll;
+  input[readonly] {
+    text-align: center;
   }
 
   .preview {
@@ -129,5 +156,31 @@
     display: flex;
     align-items: center;
     gap: var(--size-2);
+  }
+
+  .chip {
+    background: var(--surface-2);
+    border-radius: var(--radius-round);
+    display: inline-flex;
+    place-items: center;
+    gap: var(--size-2);
+    padding-block: var(--size-1);
+    padding-inline: var(--size-2) var(--size-3);
+  }
+
+  input[type="color"].round {
+    inline-size: 2ch;
+    block-size: 2ch;
+    border-radius: var(--radius-round);
+    padding: 0;
+  }
+
+  input[type="color"].round::-webkit-color-swatch-wrapper {
+    padding: 0;
+    clip-path: circle(50%);
+  }
+
+  input[type="color"].round::-webkit-color-swatch {
+    border: none;
   }
 </style>
