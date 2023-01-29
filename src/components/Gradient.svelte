@@ -53,9 +53,12 @@
       .filter(s => s?.percentage !== '50')
       .map(s => {
         if (s.kind === 'stop') {
-          return s.size
-            ? s.color + ' ' + s.size
-            : s.color
+          if (s.position1 != null && s.position2 != null)
+            return s.color + ' ' + s.position1 + '% ' + s.position2 + '%'
+          else 
+            return s.position1 != null
+              ? s.color + ' ' + s.position1 + '%'
+              : s.color
         }
         else if (s.kind === 'hint') {
           return s.percentage + '%'
@@ -187,27 +190,32 @@
     {/if}
 
     <!-- color stops -->
-    <fieldset>
-      <legend>Colors & Hints</legend>
-      <div class="chips">
-        {#each $gradient_stops as stop}
-          {#if stop.kind === 'stop'}
-            <div class="chip color-stop">
-              <input class="round" type="color" bind:value="{stop.color}">
-              <span>{stop.color}</span>
-              {#if stop.size}
-                <span>{stop.size}</span>
-              {/if}
-            </div>
+    {#each $gradient_stops as stop}
+      {#if stop.kind === 'stop'}
+        <fieldset>
+          <legend>Color</legend>
+          <div class="chip color-stop">
+            <input class="round" type="color" bind:value="{stop.color}">
+            <span>{stop.color}</span>
+          </div>
+          {#if stop.position1 != null}
+            <input type="range" bind:value="{stop.position1}">
           {/if}
-          {#if stop.kind === 'hint'}
-            <div class="color-hint">
-              <input type="range" bind:value="{stop.percentage}">
-            </div>
+          {#if stop.position2 != null}
+            <input type="range" bind:value="{stop.position2}">
           {/if}
-        {/each}
-      </div>
-    </fieldset>
+        </fieldset>
+      {/if}
+      {#if stop.kind === 'hint'}
+        <fieldset>
+          <legend>Easing</legend>
+          <div class="color-hint">
+            <input type="range" bind:value="{stop.percentage}">
+          </div>
+        </fieldset>
+      {/if}
+    {/each}
+
   </div>
 </div>
 
@@ -240,12 +248,6 @@
   }
 
   .type-switch {
-    display: flex;
-    align-items: center;
-    gap: var(--size-2);
-  }
-
-  .chips {
     display: flex;
     align-items: center;
     gap: var(--size-2);
