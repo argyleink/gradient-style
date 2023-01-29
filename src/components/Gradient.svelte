@@ -88,7 +88,7 @@
   <!-- todo: multiple gradients -->
 
   <div class="controls">
-    <fieldset style="accent-color: {$gradient_stops[0]}">
+    <fieldset style="accent-color: {$gradient_stops[0].color}">
       <legend>Type</legend>
       {#each gradient_types as t}
         <div class="type-switch">
@@ -232,8 +232,11 @@
   }
 
   .preview {
-    min-block-size: var(--size-content-1);
+    block-size: var(--size-content-1);
+    max-inline-size: 100vw;
     animation: var(--animation-fade-out) reverse;
+    resize: both;
+    overflow: hidden;
   }
 
   .type-switch {
