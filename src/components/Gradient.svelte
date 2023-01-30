@@ -4,6 +4,7 @@
     gradient_space, 
     gradient_interpolation,
     gradient_stops,
+    linear_named_angle, 
     linear_angle, 
     radial_shape, 
     radial_position, 
@@ -40,7 +41,7 @@
 
   const gensyntax = {
     'linear': () => 
-      `linear-gradient(${$linear_angle} ${spaceToString()}, ${stopsToStrings()})`,
+      `linear-gradient(${linearAngleToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'radial': () => 
       `radial-gradient(${$radial_size} ${$radial_shape} at ${positionToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
@@ -87,6 +88,12 @@
     }
   }
 
+  function linearAngleToString() {
+    if ($linear_angle !== null)
+      return $linear_angle + 'deg'
+    return $linear_named_angle
+  }
+
   function removeStopByIndex(pos) {
     $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
   }
@@ -109,10 +116,11 @@
   }
 
   $: user_gradient = gensyntax[$gradient_type](
-    $linear_angle,
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
+    $linear_named_angle,
+    $linear_angle,
     $radial_shape,
     $radial_size,
     $radial_position,
@@ -144,13 +152,19 @@
     </fieldset>
 
     {#if $gradient_type === 'linear'}
-      <fieldset>
+      <fieldset class="stack">
         <legend>Direction</legend>
-        <select name="named-directions" bind:value={$linear_angle}>
+        <select name="named-directions" bind:value={$linear_named_angle} disabled={$linear_angle !== null}>
           {#each linear_directions as dir}
             <option value={dir}>{dir}</option>  
           {/each}
         </select>
+        <div class="chip linear-angle">
+          <input type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'gray' : 'inherit'}" />
+          {#if $linear_angle != null}
+            <button class="remove container-absolute" type="reset" on:click={() => $linear_angle = null}>✕</button>
+          {/if}
+        </div>
       </fieldset>
     {/if}
 
@@ -177,20 +191,20 @@
       </fieldset>
       <fieldset>
         <legend>Position</legend>
-        <select name="radial-position" bind:value={$radial_named_position}>
+        <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
           {#each radial_named_positions as pos}
             <option value={pos}>{pos}</option>  
           {/each}
         </select>
         <div class="stack">
           <div class="chip radial-position">
-            <input type="range" bind:value={$radial_position.x} min="-100" max="200" step="1" />
+            <input type="range" bind:value={$radial_position.x} min="-100" max="200" step="1" style="accent-color: {$radial_position.x === null ? 'gray' : 'inherit'}" />
             {#if $radial_position.x != null}
               <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
             {/if}
           </div>
           <div class="chip radial-position">
-            <input type="range" bind:value={$radial_position.y} min="-100" max="200" step="1" />
+            <input type="range" bind:value={$radial_position.y} min="-100" max="200" step="1" style="accent-color: {$radial_position.y === null ? 'gray' : 'inherit'}" />
             {#if $radial_position.y != null}
               <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
             {/if}
@@ -313,8 +327,14 @@
     text-align: center;
   }
 
-  fieldset, .color-position, .radial-position {
+  fieldset, .color-position, .radial-position, .linear-angle {
     position: relative;
+  }
+
+  .color-position > .remove,
+  .radial-position > .remove,
+  .linear-angle > .remove {
+    inset-block-start: -0.75rem;
   }
 
   .preview {
@@ -365,11 +385,6 @@
 
   input[type="color"].round::-webkit-color-swatch {
     border: none;
-  }
-
-  .color-position > .remove,
-  .radial-position > .remove {
-    inset-block-start: -0.75rem;
   }
 
   .color-hint > input {
