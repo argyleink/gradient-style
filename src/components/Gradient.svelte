@@ -306,11 +306,17 @@
   }
 
   .preview {
-    block-size: var(--size-content-1);
+    block-size: 30vh;
     max-inline-size: 100vw;
     animation: var(--animation-fade-out) reverse;
     resize: both;
     overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .preview {
+      block-size: 50vh;
+    }
   }
 
   .type-switch {
