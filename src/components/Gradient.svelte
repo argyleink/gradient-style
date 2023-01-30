@@ -11,7 +11,8 @@
     radial_named_position, 
     radial_size, 
     conic_angle, 
-    conic_position, 
+    conic_position,
+    conic_named_position,
   } from '../store.ts'
 
   const gradient_types = ['linear','radial','conic']
@@ -43,9 +44,9 @@
     'linear': () => 
       `linear-gradient(${linearAngleToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'radial': () => 
-      `radial-gradient(${$radial_size} ${$radial_shape} at ${positionToString()} ${spaceToString()}, ${stopsToStrings()})`,
+      `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
-      `conic-gradient(from ${$conic_angle}deg at ${$conic_position} ${spaceToString()}, ${stopsToStrings()})`
+      `conic-gradient(from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, ${stopsToStrings()})`
   }
 
   function spaceToString() {
@@ -77,7 +78,7 @@
       .join(', ')
   }
 
-  function positionToString() {
+  function radialPositionToString() {
     if ($radial_position.x != null) {
       if ($radial_position.y == null)
         $radial_position.y = '50'
@@ -85,6 +86,17 @@
     }
     else {
       return $radial_named_position
+    }
+  }
+
+  function conicPositionToString() {
+    if ($conic_position.x != null) {
+      if ($conic_position.y == null)
+        $conic_position.y = '50'
+      return $conic_position.x + '% ' + $conic_position.y + '%'
+    }
+    else {
+      return $conic_named_position
     }
   }
 
@@ -110,9 +122,14 @@
     $gradient_stops = [...$gradient_stops, {kind: 'stop', color: '#999999', position1: null, position2: null}]
   }
 
-  function removePositions() {
+  function removeRadialPositions() {
     $radial_position.x = null
     $radial_position.y = null
+  }
+
+  function removeConicPositions() {
+    $conic_position.x = null
+    $conic_position.y = null
   }
 
   $: user_gradient = gensyntax[$gradient_type](
@@ -126,7 +143,8 @@
     $radial_position,
     $radial_named_position,
     $conic_angle,
-    $conic_position
+    $conic_position,
+    $conic_named_position
   )
 </script>
 
@@ -183,11 +201,6 @@
       </fieldset>
       <fieldset>
         <legend>Shape</legend>
-        <!-- <select name="radial-shape" bind:value={$radial_shape}>
-          {#each radial_shapes as shape}
-            <option value={shape}>{shape}</option>  
-          {/each}
-        </select> -->
         {#each radial_shapes as shape}
           <div class="type-switch">
             <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
@@ -206,13 +219,13 @@
           <div class="chip radial-position">
             <input type="range" bind:value={$radial_position.x} min="-100" max="200" step="1" style="accent-color: {$radial_position.x === null ? 'gray' : 'inherit'}" />
             {#if $radial_position.x != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
+              <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
             {/if}
           </div>
           <div class="chip radial-position">
             <input type="range" bind:value={$radial_position.y} min="-100" max="200" step="1" style="accent-color: {$radial_position.y === null ? 'gray' : 'inherit'}" />
             {#if $radial_position.y != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
+              <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
             {/if}
           </div>
         </div>
@@ -226,11 +239,25 @@
       </fieldset>
       <fieldset>
         <legend>Position</legend>
-        <select name="conic-position" bind:value={$conic_position}>
+        <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
           {#each radial_named_positions as pos}
             <option value={pos}>{pos}</option>  
           {/each}
         </select>
+        <div class="stack">
+          <div class="chip conic-position">
+            <input type="range" bind:value={$conic_position.x} min="-100" max="200" step="1" style="accent-color: {$conic_position.x === null ? 'gray' : 'inherit'}" />
+            {#if $conic_position.x != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
+            {/if}
+          </div>
+          <div class="chip conic-position">
+            <input type="range" bind:value={$conic_position.y} min="-100" max="200" step="1" style="accent-color: {$conic_position.y === null ? 'gray' : 'inherit'}" />
+            {#if $conic_position.y != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
+            {/if}
+          </div>
+        </div>
       </fieldset>
     {/if}
 
@@ -333,12 +360,17 @@
     text-align: center;
   }
 
-  fieldset, .color-position, .radial-position, .linear-angle {
+  fieldset, 
+  .color-position, 
+  .radial-position, 
+  .linear-angle, 
+  .conic-position {
     position: relative;
   }
 
   .color-position > .remove,
   .radial-position > .remove,
+  .conic-position > .remove,
   .linear-angle > .remove {
     inset-block-start: -0.75rem;
   }
