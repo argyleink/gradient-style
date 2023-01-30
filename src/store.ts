@@ -13,7 +13,7 @@ export const gradient_stops = writable([
 
 // linear specific
 export const linear_named_angle = writable('to right');
-export const linear_angle = writable('0');
+export const linear_angle = writable(null);
 
 // radial specific
 export const radial_shape = writable('circle');
