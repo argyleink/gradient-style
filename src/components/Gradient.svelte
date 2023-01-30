@@ -7,6 +7,7 @@
     linear_angle, 
     radial_shape, 
     radial_position, 
+    radial_named_position, 
     radial_size, 
     conic_angle, 
     conic_position, 
@@ -27,7 +28,7 @@
 
   const radial_shapes = ['circle', 'ellipse']
   const radial_sizes = ['closest-side', 'closest-corner', 'farthest-side', 'farthest-corner', '250px', '50vw', '50cqi']
-  const radial_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
+  const radial_named_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
 
   function isCylindricalSpace(space) {
     return ['hsl','hwb','lch','oklch'].includes(space)
@@ -37,7 +38,7 @@
     'linear': () => 
       `linear-gradient(${$linear_angle} ${spaceToString()}, ${stopsToStrings()})`,
     'radial': () => 
-      `radial-gradient(${$radial_size} ${$radial_shape} at ${$radial_position} ${spaceToString()}, ${stopsToStrings()})`,
+      `radial-gradient(${$radial_size} ${$radial_shape} at ${positionToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
       `conic-gradient(from ${$conic_angle}deg at ${$conic_position} ${spaceToString()}, ${stopsToStrings()})`
   }
@@ -67,6 +68,17 @@
       .join(', ')
   }
 
+  function positionToString() {
+    if ($radial_position.x != null) {
+      if ($radial_position.y == null)
+        $radial_position.y = '50'
+      return $radial_position.x + '% ' + $radial_position.y + '%'
+    }
+    else {
+      return $radial_named_position
+    }
+  }
+
   function removeStopByIndex(pos) {
     $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
   }
@@ -83,6 +95,11 @@
     $gradient_stops = [...$gradient_stops, {kind: 'stop', color: '#999999', position1: null, position2: null}]
   }
 
+  function removePositions() {
+    $radial_position.x = null
+    $radial_position.y = null
+  }
+
   $: user_gradient = gensyntax[$gradient_type](
     $linear_angle,
     $gradient_space,
@@ -91,6 +108,7 @@
     $radial_shape,
     $radial_size,
     $radial_position,
+    $radial_named_position,
     $conic_angle,
     $conic_position
   )
@@ -147,11 +165,25 @@
       </fieldset>
       <fieldset>
         <legend>Position</legend>
-        <select name="radial-position" bind:value={$radial_position}>
-          {#each radial_positions as pos}
+        <select name="radial-position" bind:value={$radial_named_position}>
+          {#each radial_named_positions as pos}
             <option value={pos}>{pos}</option>  
           {/each}
         </select>
+        <div class="stack">
+          <div class="chip radial-position">
+            <input type="range" bind:value={$radial_position.x} min="-100" max="200" step="1" />
+            {#if $radial_position.x != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
+            {/if}
+          </div>
+          <div class="chip radial-position">
+            <input type="range" bind:value={$radial_position.y} min="-100" max="200" step="1" />
+            {#if $radial_position.y != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removePositions()}>✕</button>
+            {/if}
+          </div>
+        </div>
       </fieldset>
     {/if}
 
@@ -163,7 +195,7 @@
       <fieldset>
         <legend>Position</legend>
         <select name="conic-position" bind:value={$conic_position}>
-          {#each radial_positions as pos}
+          {#each radial_named_positions as pos}
             <option value={pos}>{pos}</option>  
           {/each}
         </select>
@@ -217,17 +249,19 @@
             <span>{stop.color}</span>
             <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
           </div>
-          <div class="chip color-position">
-            <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
-            {#if stop.position1 != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
-            {/if}
-          </div>
-          <div class="chip color-position">
-            <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
-            {#if stop.position2 != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
-            {/if}
+          <div class="stack">
+            <div class="chip color-position">
+              <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
+              {#if stop.position1 != null}
+                <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
+              {/if}
+            </div>
+            <div class="chip color-position">
+              <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
+              {#if stop.position2 != null}
+                <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
+              {/if}
+            </div>
           </div>
         </fieldset>
       {/if}
@@ -267,7 +301,7 @@
     text-align: center;
   }
 
-  fieldset {
+  fieldset, .color-position, .radial-position {
     position: relative;
   }
 
@@ -311,11 +345,8 @@
     border: none;
   }
 
-  .color-position {
-    position: relative;
-  }
-
-  .color-position > .remove {
+  .color-position > .remove,
+  .radial-position > .remove {
     inset-block-start: -0.75rem;
   }
 
@@ -363,5 +394,10 @@
     position: absolute;
     inset-block-start: -1.5rem;
     inset-inline-end: -0.5rem;
+  }
+
+  .stack {
+    display: inline-grid;
+    gap: var(--size-2);
   }
 </style>
