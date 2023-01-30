@@ -54,8 +54,12 @@
       .filter(s => s?.percentage !== '50')
       .map(s => {
         if (s.kind === 'stop') {
-          if (s.position1 != null && s.position2 != null)
+          if (s.position1 != null && s.position2 != null) 
             return s.color + ' ' + s.position1 + '% ' + s.position2 + '%'
+          else if (s.position1 == null && s.position2 != null) {
+            s.position1 = 50
+            return s.color + ' ' + s.position1 + '% ' + s.position2 + '%'
+          }
           else 
             return s.position1 != null
               ? s.color + ' ' + s.position1 + '%'
