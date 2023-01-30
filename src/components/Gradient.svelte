@@ -67,6 +67,17 @@
       .join(', ')
   }
 
+  function removeStopByIndex(pos) {
+    $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
+  }
+
+  function removePositionByIndex(index, pos) {
+    $gradient_stops[index]['position'+pos] = null
+
+    if (pos === 1 && $gradient_stops[index].position2 !== null)
+      $gradient_stops[index]['position2'] = null      
+  }
+
   $: user_gradient = gensyntax[$gradient_type](
     $linear_angle,
     $gradient_space,
@@ -197,20 +208,20 @@
           <div class="chip color-stop">
             <input class="round" type="color" bind:value="{stop.color}">
             <span>{stop.color}</span>
-            <button class="remove container-absolute" type="reset">✕</button>
+            <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
           </div>
-          {#if stop.position1 != null}
-            <div class="chip color-position">
-              <input type="range" bind:value="{stop.position1}">
-              <button class="remove" type="reset">✕</button>
-            </div>
-          {/if}
-          {#if stop.position2 != null}
-            <div class="chip color-position">
-              <input type="range" bind:value="{stop.position2}">
-              <button class="remove" type="reset">✕</button>
-            </div>
-          {/if}
+          <div class="chip color-position">
+            <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
+            {#if stop.position1 != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
+            {/if}
+          </div>
+          <div class="chip color-position">
+            <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
+            {#if stop.position2 != null}
+              <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
+            {/if}
+          </div>
         </fieldset>
       {/if}
       {#if stop.kind === 'hint'}
@@ -218,9 +229,9 @@
         <fieldset>
           <legend>Easing</legend>
           <div class="color-hint">
-            <input type="range" bind:value="{stop.percentage}" style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1].color}, {$gradient_stops[i+1].color})">
+            <input type="range" bind:value="{stop.percentage}" style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})">
           </div>
-          <button class="remove container-absolute" type="reset">✕</button>
+          <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
         </fieldset>
       {/if}
     {/each}
@@ -273,7 +284,7 @@
     place-items: center;
     gap: var(--size-2);
     padding-block: var(--size-1);
-    padding-inline: var(--size-2) var(--size-3);
+    padding-inline: var(--size-2);
   }
 
   input[type="color"].round {
@@ -290,6 +301,14 @@
 
   input[type="color"].round::-webkit-color-swatch {
     border: none;
+  }
+
+  .color-position {
+    position: relative;
+  }
+
+  .color-position > .remove {
+    inset-block-start: -0.75rem;
   }
 
   .color-hint > input {
