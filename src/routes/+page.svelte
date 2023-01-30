@@ -4,8 +4,8 @@
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Modern Gradient Generator</title>
+	<meta name="description" content="Color 4 complaint gradient builder." />
 </svelte:head>
 
 <section>
