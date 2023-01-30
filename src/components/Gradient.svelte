@@ -27,7 +27,11 @@
   ]
 
   const radial_shapes = ['circle', 'ellipse']
-  const radial_sizes = ['closest-side', 'closest-corner', 'farthest-side', 'farthest-corner', '250px', '50vw', '50cqi']
+  const radial_sizes = {
+    'Spec Default': ['farthest-corner'],
+    'Special Angles': ['closest-side', 'closest-corner', 'farthest-side'],
+    'Lengths': ['250px', '50vw', '25rem'],
+  }
   const radial_named_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
 
   function isCylindricalSpace(space) {
@@ -154,8 +158,12 @@
       <fieldset>
         <legend>Size</legend>
         <select name="radial-size" bind:value={$radial_size}>
-          {#each radial_sizes as size}
-            <option value={size}>{size}</option>  
+          {#each Object.entries(radial_sizes) as [key, val]}
+            <optgroup label={key}>
+              {#each val as entry}
+                <option value={entry}>{entry}</option>  
+              {/each}
+            </optgroup>
           {/each}
         </select>
       </fieldset>
