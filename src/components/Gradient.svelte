@@ -74,8 +74,13 @@
   function removePositionByIndex(index, pos) {
     $gradient_stops[index]['position'+pos] = null
 
+    // spec fix, cant have 2nd position without the 1st one
     if (pos === 1 && $gradient_stops[index].position2 !== null)
       $gradient_stops[index]['position2'] = null      
+  }
+
+  function addStop() {
+    $gradient_stops = [...$gradient_stops, {kind: 'stop', color: '#999999', position1: null, position2: null}]
   }
 
   $: user_gradient = gensyntax[$gradient_type](
@@ -225,7 +230,6 @@
         </fieldset>
       {/if}
       {#if stop.kind === 'hint'}
-        <!--  style="accent-color: {$gradient_stops[i-1].color}" -->
         <fieldset>
           <legend>Easing</legend>
           <div class="color-hint">
@@ -235,6 +239,8 @@
         </fieldset>
       {/if}
     {/each}
+
+    <button on:click={() => addStop()}>Add a color</button>
 
   </div>
 </div>
