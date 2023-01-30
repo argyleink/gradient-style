@@ -183,11 +183,17 @@
       </fieldset>
       <fieldset>
         <legend>Shape</legend>
-        <select name="radial-shape" bind:value={$radial_shape}>
+        <!-- <select name="radial-shape" bind:value={$radial_shape}>
           {#each radial_shapes as shape}
             <option value={shape}>{shape}</option>  
           {/each}
-        </select>
+        </select> -->
+        {#each radial_shapes as shape}
+          <div class="type-switch">
+            <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
+            <label for="radial-{shape}">{shape}</label>
+          </div>
+        {/each}
       </fieldset>
       <fieldset>
         <legend>Position</legend>
