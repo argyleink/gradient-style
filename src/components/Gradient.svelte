@@ -335,6 +335,10 @@
     padding-inline: var(--size-2);
   }
 
+  .color-stop {
+    padding-inline-end: var(--size-3);
+  }
+
   input[type="color"].round {
     inline-size: 2ch;
     block-size: 2ch;
