@@ -198,9 +198,11 @@
           <optgroup label="Default interpolation">
             <option selected>shorter</option>
           </optgroup>
-          <option>longer</option>
-          <option>decreasing</option>
-          <option>increasing</option>
+          <optgroup label="Other">
+            <option>longer</option>
+            <option>decreasing</option>
+            <option>increasing</option>
+          </optgroup>
         </select>
       </fieldset>
     {/if}
@@ -240,7 +242,7 @@
       {/if}
     {/each}
 
-    <button on:click={() => addStop()}>Add a color</button>
+    <button class="add-color" on:click={() => addStop()}>Add a color</button>
 
   </div>
 </div>
@@ -339,6 +341,10 @@
   
   .color-hint > input:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .add-color {
+    align-self: end;
   }
 
   .remove {
