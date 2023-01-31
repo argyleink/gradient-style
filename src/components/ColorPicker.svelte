@@ -3,6 +3,7 @@
     colorspace, 
     labL, labA, labB, labAlpha,
     hslH, hslS, hslL, hslAlpha,
+    hwbH, hwbW, hwbB, hwbAlpha,
     rgbR, rgbG, rgbB, rgbAlpha,
     colorR, colorG, colorB, colorAlpha
   } from '../store/colorpicker.ts'
@@ -12,6 +13,8 @@
       `oklab(${$labL}% ${$labA} ${$labB} / ${$labAlpha}%)`,
     'hsl': () => 
       `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`,
+    'hwb': () => 
+      `hwb(${$hwbH} ${$hwbW}% ${$hwbB}% / ${$hwbAlpha}%)`,
     'srgb': () => 
       `rgb(${$rgbR} ${$rgbG} ${$rgbB} / ${$rgbAlpha}%)`,
     'srgb-linear': rgbColor,
@@ -44,6 +47,7 @@
   $: user_color = gencolor[$colorspace](
     $labL, $labA, $labB, $labAlpha,
     $hslH, $hslS, $hslL, $hslAlpha,
+    $hwbH, $hwbW, $hwbB, $hwbAlpha,
     $rgbR, $rgbG, $rgbB, $rgbAlpha,
     $colorR, $colorG, $colorB, $colorAlpha
   )
@@ -53,7 +57,7 @@
 
   <select class="colorspace" bind:value={$colorspace}> 
     <option selected>hsl</option>
-    <option disabled>hwb</option>
+    <option>hwb</option>
     <option>srgb</option>
     <option>srgb-linear</option>
     <option disabled>lch</option> 
@@ -122,6 +126,32 @@
       <span class="control-channel">A</span>
       <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hslAlpha}>
       <span class="control-value">{$hslAlpha}%</span>
+    </div>
+  {/if}
+
+  {#if $colorspace === 'hwb'}
+    <div class="control">
+      <span class="control-channel">H</span>
+      <input class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+      <span class="control-value">{$hwbH}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">W</span>
+      <input class="control-input" type="range" bind:value={$hwbW} style={`background-image: linear-gradient(to right in oklab, #fff0, #fff); background-color: black`}>
+      <span class="control-value">{$hwbW}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">B</span>
+      <input class="control-input" type="range" bind:value={$hwbB} style={`background-image: linear-gradient(to right in oklab, #0000, #000); background-color: white`}>
+      <span class="control-value">{$hwbB}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hwbAlpha}>
+      <span class="control-value">{$hwbAlpha}%</span>
     </div>
   {/if}
 
