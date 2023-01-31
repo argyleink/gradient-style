@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export const colorspace = writable('oklab');
+export const colorspace = writable('oklch');
 
 export const oklabL = writable(100);
 export const oklabA = writable(-.2);
@@ -8,7 +8,7 @@ export const oklabB = writable(.5);
 export const oklabAlpha = writable(100);
 
 export const oklchL = writable(50);
-export const oklchC = writable(.32);
+export const oklchC = writable(.5);
 export const oklchH = writable(220);
 export const oklchAlpha = writable(100);
 

@@ -68,13 +68,13 @@
 <div class="hd-color-picker" style={`accent-color:${user_color}`}>
 
   <select class="colorspace" bind:value={$colorspace}> 
-    <option selected>hsl</option>
+    <option>hsl</option>
     <option>hwb</option>
     <option>srgb</option>
     <option>srgb-linear</option>
     <option>lch</option> 
     <option>lab</option>
-    <option>oklch</option>
+    <option selected>oklch</option>
     <option>oklab</option>
     <option>display-p3</option>
     <option>rec2020</option>
