@@ -16,3 +16,8 @@ export const rgbR = writable(0);
 export const rgbG = writable(255);
 export const rgbB = writable(255);
 export const rgbAlpha = writable(100);
+
+export const colorR = writable(0);
+export const colorG = writable(100);
+export const colorB = writable(100);
+export const colorAlpha = writable(100);

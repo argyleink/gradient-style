@@ -14,7 +14,7 @@
       <option>hsl</option>
       <option>hwb</option>
     </optgroup>
-    <optgroup label="Polar">
+    <optgroup label="Rectangular">
       <option>lab</option>
       <option>srgb</option>
       <option>srgb-linear</option>

@@ -3,7 +3,8 @@
     colorspace, 
     labL, labA, labB, labAlpha,
     hslH, hslS, hslL, hslAlpha,
-    rgbR, rgbG, rgbB, rgbAlpha
+    rgbR, rgbG, rgbB, rgbAlpha,
+    colorR, colorG, colorB, colorAlpha
   } from '../store/colorpicker.ts'
 
   const gencolor = {
@@ -13,33 +14,59 @@
       `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`,
     'srgb': () => 
       `rgb(${$rgbR} ${$rgbG} ${$rgbB} / ${$rgbAlpha}%)`,
+    'srgb-linear': rgbColor,
+    'display-p3': rgbColor,
+    'rec2020': rgbColor,
+    'a98-rgb': rgbColor,
+    'prophoto-rgb': rgbColor,
+    'xyz': rgbColor,
+    'xyz-d50': rgbColor,
+    'xyz-d65': rgbColor,
+  }
+
+  function rgbColor() {
+    return `color(${$colorspace} ${$colorR}% ${$colorG}% ${$colorB}% / ${$colorAlpha}%)`
+  }
+
+  function isRGBcolor(space) {
+    return [
+      'srgb-linear',
+      'display-p3',
+      'rec2020',
+      'a98-rgb',
+      'prophoto-rgb',
+      'xyz',
+      'xyz-d50',
+      'xyz-d65',
+    ].includes(space)
   }
 
   $: user_color = gencolor[$colorspace](
     $labL, $labA, $labB, $labAlpha,
     $hslH, $hslS, $hslL, $hslAlpha,
-    $rgbR, $rgbG, $rgbB, $rgbAlpha
+    $rgbR, $rgbG, $rgbB, $rgbAlpha,
+    $colorR, $colorG, $colorB, $colorAlpha
   )
 </script>
 
 <div class="hd-color-picker" style={`accent-color:${user_color}`}>
 
   <select class="colorspace" bind:value={$colorspace}> 
-    <optgroup label="Default colorspace">
-      <option selected>oklab</option>
-    </optgroup>
-    <optgroup label="Cylinderical">
-      <option>lch</option> 
-      <option>oklch</option>
-      <option>hsl</option>
-      <option>hwb</option>
-    </optgroup>
-    <optgroup label="Polar">
-      <option>lab</option>
-      <option>srgb</option>
-      <option>srgb-linear</option>
-      <option>xyz</option>
-    </optgroup>
+    <option selected>hsl</option>
+    <option disabled>hwb</option>
+    <option>srgb</option>
+    <option>srgb-linear</option>
+    <option disabled>lch</option> 
+    <option disabled>lab</option>
+    <option disabled>oklch</option>
+    <option>oklab</option>
+    <option>display-p3</option>
+    <option>rec2020</option>
+    <option>a98-rgb</option>
+    <option>prophoto-rgb</option>
+    <option>xyz</option>
+    <option>xyz-d50</option>
+    <option>xyz-d65</option>
   </select>
 
   <output><code>{user_color}</code></output>
@@ -119,8 +146,34 @@
 
     <div class="control">
       <span class="control-channel">A</span>
-      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hslAlpha}>
-      <span class="control-value">{$hslAlpha}%</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$rgbAlpha}>
+      <span class="control-value">{$rgbAlpha}%</span>
+    </div>
+  {/if}
+
+  {#if isRGBcolor($colorspace)}
+    <div class="control">
+      <span class="control-channel">R</span>
+      <input class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+      <span class="control-value">{$colorR}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">G</span>
+      <input class="control-input" type="range" bind:value={$colorG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
+      <span class="control-value">{$colorG}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">B</span>
+      <input class="control-input" type="range" bind:value={$colorB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
+      <span class="control-value">{$colorB}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$colorAlpha}>
+      <span class="control-value">{$colorAlpha}%</span>
     </div>
   {/if}
 
