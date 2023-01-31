@@ -10,17 +10,18 @@
   } from '../store/conic.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
+  import {isCylindricalSpace} from '../utils/colorspace.ts'
 
   import GradientType from './GradientType.svelte'
+  import GradientStops from './GradientStops.svelte'
+  import GradientColorSpace from './GradientColorSpace.svelte'
+  import HueInterpolation from './HueInterpolation.svelte'
   import LinearAngle from './LinearAngle.svelte'
   import RadialSize from './RadialSize.svelte'
   import RadialShape from './RadialShape.svelte'
   import RadialPosition from './RadialPosition.svelte'
   import ConicAngle from './ConicAngle.svelte'
-
-  function isCylindricalSpace(space) {
-    return ['hsl','hwb','lch','oklch'].includes(space)
-  }
+  import ConicPosition from './ConicPosition.svelte'
 
   const gensyntax = {
     'linear': () => 
@@ -82,25 +83,8 @@
     }
   }
 
-  function removeStopByIndex(pos) {
-    $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
-  }
-
-  function removePositionByIndex(index, pos) {
-    $gradient_stops[index]['position'+pos] = null
-
-    // spec fix, cant have 2nd position without the 1st one
-    if (pos === 1 && $gradient_stops[index].position2 !== null)
-      $gradient_stops[index]['position2'] = null      
-  }
-
   function addStop() {
     $gradient_stops = [...$gradient_stops, {kind: 'stop', color: '#999999', position1: null, position2: null}]
-  }
-
-  function removeConicPositions() {
-    $conic_position.x = null
-    $conic_position.y = null
   }
 
   $: user_gradient = gensyntax[$gradient_type](
@@ -143,103 +127,16 @@
 
     {#if $gradient_type === 'conic'}
       <ConicAngle />
-      <fieldset>
-        <legend>Position</legend>
-        <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
-          {#each gradient_positions as pos}
-            <option value={pos}>{pos}</option>  
-          {/each}
-        </select>
-        <div class="stack">
-          <div class="chip conic-position">
-            <input type="range" bind:value={$conic_position.x} min="-100" max="200" step="1" style="accent-color: {$conic_position.x === null ? 'gray' : 'inherit'}" />
-            {#if $conic_position.x != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
-            {/if}
-          </div>
-          <div class="chip conic-position">
-            <input type="range" bind:value={$conic_position.y} min="-100" max="200" step="1" style="accent-color: {$conic_position.y === null ? 'gray' : 'inherit'}" />
-            {#if $conic_position.y != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
-            {/if}
-          </div>
-        </div>
-      </fieldset>
+      <ConicPosition />
     {/if}
 
-    <fieldset>
-      <legend>Color Space</legend>
-      <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
-        <optgroup label="Default colorspace">
-          <option selected>oklab</option>
-        </optgroup>
-        <optgroup label="Cylinderical">
-          <option>lch</option> 
-          <option>oklch</option>
-          <option>hsl</option>
-          <option>hwb</option>
-        </optgroup>
-        <optgroup label="Polar">
-          <option>lab</option>
-          <option>srgb</option>
-          <option>srgb-linear</option>
-          <option>xyz</option>
-        </optgroup>
-      </select>
-    </fieldset>
+    <GradientColorSpace />
 
     {#if isCylindricalSpace($gradient_space)}
-      <fieldset>
-        <legend>Hue Interpolation</legend>
-        <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation}> 
-          <optgroup label="Default interpolation">
-            <option selected>shorter</option>
-          </optgroup>
-          <optgroup label="Other">
-            <option>longer</option>
-            <option>decreasing</option>
-            <option>increasing</option>
-          </optgroup>
-        </select>
-      </fieldset>
+      <HueInterpolation />
     {/if}
 
-    <!-- color stops -->
-    {#each $gradient_stops as stop, i}
-      {#if stop.kind === 'stop'}
-        <fieldset style="accent-color: {stop.color}">
-          <legend>Color</legend>
-          <div class="chip color-stop">
-            <input class="round" type="color" bind:value="{stop.color}">
-            <span>{stop.color}</span>
-            <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
-          </div>
-          <div class="stack">
-            <div class="chip color-position">
-              <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
-              {#if stop.position1 != null}
-                <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
-              {/if}
-            </div>
-            <div class="chip color-position">
-              <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
-              {#if stop.position2 != null}
-                <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
-              {/if}
-            </div>
-          </div>
-        </fieldset>
-      {/if}
-      {#if stop.kind === 'hint'}
-        <fieldset>
-          <legend>Easing</legend>
-          <div class="color-hint">
-            <input type="range" bind:value="{stop.percentage}" style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})">
-          </div>
-          <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
-        </fieldset>
-      {/if}
-    {/each}
+    <GradientStops />
 
     <button class="add-color" on:click={() => addStop()}>Add a color</button>
 
@@ -266,7 +163,7 @@
     text-align: center;
   }
 
-  fieldset, 
+  :global(fieldset), 
   :global(.chip:has(.remove)) {
     position: relative;
   }
@@ -305,34 +202,30 @@
     padding-inline: var(--size-2);
   }
 
-  .color-stop {
-    padding-inline-end: var(--size-3);
-  }
-
-  input[type="color"].round {
+  :global(input[type="color"].round) {
     inline-size: 2ch;
     block-size: 2ch;
     border-radius: var(--radius-round);
     padding: 0;
   }
 
-  input[type="color"].round::-webkit-color-swatch-wrapper {
+  :global(input[type="color"].round::-webkit-color-swatch-wrapper) {
     padding: 0;
     clip-path: circle(50%);
   }
 
-  input[type="color"].round::-webkit-color-swatch {
+  :global(input[type="color"].round::-webkit-color-swatch) {
     border: none;
   }
 
-  .color-hint > input {
+  :global(.color-hint > input) {
     appearance: none;
     accent-color: var(--surface-1);
     border-radius: var(--radius-round);
     block-size: 1rem;
   }
 
-  .color-hint > input::-webkit-slider-thumb {
+  :global(.color-hint > input::-webkit-slider-thumb) {
     --_border-size: 4px;
     
     cursor: grab;
@@ -345,7 +238,7 @@
     box-shadow: var(--shadow-2), var(--inner-shadow-2);
   }
   
-  .color-hint > input:active::-webkit-slider-thumb {
+  :global(.color-hint > input:active::-webkit-slider-thumb) {
     cursor: grabbing;
   }
 
@@ -361,7 +254,7 @@
     transition: opacity .2s var(--ease-3);
   }
 
-  fieldset:not(:hover, :focus-within) .remove {
+  :global(fieldset:not(:hover, :focus-within) .remove) {
     opacity: 0;
   }
 
