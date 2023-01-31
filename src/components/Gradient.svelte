@@ -214,8 +214,12 @@
     gap: var(--size-2);
   }
 
+  .gradient :global(input[type="range"]) {
+    inline-size: 100%;
+  }
+
   :global(.chip) {
-    background: var(--surface-2);
+    background: var(--surface-1);
     border-radius: var(--radius-round);
     display: inline-flex;
     place-items: center;
@@ -273,6 +277,7 @@
     border-radius: var(--radius-round);
     line-height: .75;
     font-size: var(--font-size-0);
+    inline-size: var(--size-5);
     transition: opacity .2s var(--ease-3);
   }
 
