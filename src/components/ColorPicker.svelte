@@ -2,7 +2,8 @@
   import {
     colorspace, 
     labL, labA, labB, labAlpha,
-    hslH, hslS, hslL, hslAlpha
+    hslH, hslS, hslL, hslAlpha,
+    rgbR, rgbG, rgbB, rgbAlpha
   } from '../store/colorpicker.ts'
 
   const gencolor = {
@@ -10,11 +11,14 @@
       `oklab(${$labL}% ${$labA} ${$labB} / ${$labAlpha}%)`,
     'hsl': () => 
       `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`,
+    'srgb': () => 
+      `rgb(${$rgbR} ${$rgbG} ${$rgbB} / ${$rgbAlpha}%)`,
   }
 
   $: user_color = gencolor[$colorspace](
     $labL, $labA, $labB, $labAlpha,
-    $hslH, $hslS, $hslL, $hslAlpha
+    $hslH, $hslS, $hslL, $hslAlpha,
+    $rgbR, $rgbG, $rgbB, $rgbAlpha
   )
 </script>
 
@@ -94,6 +98,32 @@
     </div>
   {/if}
 
+  {#if $colorspace === 'srgb'}
+    <div class="control">
+      <span class="control-channel">R</span>
+      <input class="control-input" type="range" min="0" max="255" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+      <span class="control-value">{$rgbR}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">G</span>
+      <input class="control-input" type="range" min="0" max="255" bind:value={$rgbG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
+      <span class="control-value">{$rgbG}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">B</span>
+      <input class="control-input" type="range" min="0" max="255" bind:value={$rgbB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
+      <span class="control-value">{$rgbB}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hslAlpha}>
+      <span class="control-value">{$hslAlpha}%</span>
+    </div>
+  {/if}
+
 </div>
 
 <style>
@@ -121,7 +151,7 @@
     block-size: var(--size-content-1);
     aspect-ratio: var(--ratio-widescreen);
     background: 
-      linear-gradient(var(--user-color),var(--user-color)),
+      linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);
   }
 
