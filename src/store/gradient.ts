@@ -10,3 +10,16 @@ export const gradient_stops = writable([
   {kind: 'hint', percentage: '80'},
   {kind: 'stop', color: '#00ffff', position1: null, position2: null},
 ]);
+
+// static
+export const gradient_positions = [
+  'center',
+  'top',
+  'top right',
+  'right',
+  'bottom right',
+  'bottom',
+  'bottom left',
+  'left',
+  'top left'
+]

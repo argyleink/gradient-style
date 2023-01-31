@@ -1,5 +1,6 @@
 <script>
-  import {gradient_type, gradient_space, gradient_interpolation,gradient_stops
+  import {gradient_type, gradient_space, gradient_interpolation, 
+          gradient_stops, gradient_positions
   } from '../store/gradient.ts'
   import {linear_named_angle, linear_angle
   } from '../store/linear.ts'
@@ -13,10 +14,9 @@
   import GradientType from './GradientType.svelte'
   import LinearAngle from './LinearAngle.svelte'
   import RadialSize from './RadialSize.svelte'
-
-  const radial_shapes = ['circle', 'ellipse']
-  
-  const radial_named_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
+  import RadialShape from './RadialShape.svelte'
+  import RadialPosition from './RadialPosition.svelte'
+  import ConicAngle from './ConicAngle.svelte'
 
   function isCylindricalSpace(space) {
     return ['hsl','hwb','lch','oklch'].includes(space)
@@ -98,11 +98,6 @@
     $gradient_stops = [...$gradient_stops, {kind: 'stop', color: '#999999', position1: null, position2: null}]
   }
 
-  function removeRadialPositions() {
-    $radial_position.x = null
-    $radial_position.y = null
-  }
-
   function removeConicPositions() {
     $conic_position.x = null
     $conic_position.y = null
@@ -117,7 +112,6 @@
     $radial_shape,
     $radial_size,
     $radial_position,
-    $radial_named_position,
     $conic_angle,
     $conic_position,
     $conic_named_position
@@ -142,61 +136,17 @@
     {/if}
 
     {#if $gradient_type === 'radial'}
-      <!-- <fieldset>
-        <legend>Size</legend>
-        <select name="radial-size" bind:value={$radial_size}>
-          {#each Object.entries(radial_sizes) as [key, val]}
-            <optgroup label={key}>
-              {#each val as entry}
-                <option value={entry}>{entry}</option>  
-              {/each}
-            </optgroup>
-          {/each}
-        </select>
-      </fieldset> -->
       <RadialSize />
-      <fieldset>
-        <legend>Shape</legend>
-        {#each radial_shapes as shape}
-          <div class="radio-pair">
-            <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
-            <label for="radial-{shape}">{shape}</label>
-          </div>
-        {/each}
-      </fieldset>
-      <fieldset>
-        <legend>Position</legend>
-        <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
-          {#each radial_named_positions as pos}
-            <option value={pos}>{pos}</option>  
-          {/each}
-        </select>
-        <div class="stack">
-          <div class="chip radial-position">
-            <input type="range" bind:value={$radial_position.x} min="-100" max="200" step="1" style="accent-color: {$radial_position.x === null ? 'gray' : 'inherit'}" />
-            {#if $radial_position.x != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
-            {/if}
-          </div>
-          <div class="chip radial-position">
-            <input type="range" bind:value={$radial_position.y} min="-100" max="200" step="1" style="accent-color: {$radial_position.y === null ? 'gray' : 'inherit'}" />
-            {#if $radial_position.y != null}
-              <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
-            {/if}
-          </div>
-        </div>
-      </fieldset>
+      <RadialShape />
+      <RadialPosition />
     {/if}
 
     {#if $gradient_type === 'conic'}
-      <fieldset>
-        <legend>Angle</legend>
-        <input type="range" bind:value={$conic_angle} min="0" max="360" step="1" />
-      </fieldset>
+      <ConicAngle />
       <fieldset>
         <legend>Position</legend>
         <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
-          {#each radial_named_positions as pos}
+          {#each gradient_positions as pos}
             <option value={pos}>{pos}</option>  
           {/each}
         </select>
@@ -317,17 +267,11 @@
   }
 
   fieldset, 
-  .color-position, 
-  .radial-position, 
-  .linear-angle, 
-  .conic-position {
+  :global(.chip:has(.remove)) {
     position: relative;
   }
 
-  .color-position > .remove,
-  .radial-position > .remove,
-  .conic-position > .remove,
-  .linear-angle > .remove {
+  :global(.chip > .remove) {
     inset-block-start: -0.75rem;
   }
 
@@ -351,7 +295,7 @@
     gap: var(--size-2);
   }
 
-  .chip {
+  :global(.chip) {
     background: var(--surface-2);
     border-radius: var(--radius-round);
     display: inline-flex;
@@ -409,7 +353,7 @@
     align-self: end;
   }
 
-  .remove {
+  :global(.remove) {
     padding: var(--size-1);
     border-radius: var(--radius-round);
     line-height: .75;
@@ -421,13 +365,13 @@
     opacity: 0;
   }
 
-  .container-absolute {
+  :global(.container-absolute) {
     position: absolute;
     inset-block-start: -1.5rem;
     inset-inline-end: -0.5rem;
   }
 
-  .stack {
+  :global(.stack) {
     display: inline-grid;
     gap: var(--size-2);
   }
