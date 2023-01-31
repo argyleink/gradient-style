@@ -104,10 +104,14 @@
   )
 </script>
 
-<div class="gradient">
+<main class="gradient">
 
   <!-- output -->
-  <input type="text" bind:value={user_gradient} onclick="this.select()" readonly />
+  <div class="layers">
+    <h4>Image Layers</h4>
+    <input type="text" bind:value={user_gradient} onclick="this.select()" 
+    readonly />
+  </div>
   <!-- modern and legacy for copy -->
 
   <div class="preview" style={`background:${user_gradient}`}></div>
@@ -115,6 +119,8 @@
   <!-- todo: multiple gradients -->
 
   <div class="controls" style="accent-color: {$gradient_stops[0].color}">
+    <ColorPicker />
+
     <GradientType />
 
     {#if $gradient_type === 'linear'}
@@ -142,25 +148,37 @@
 
     <button class="add-color" on:click={() => addStop()}>Add a color</button>
 
-    <ColorPicker />
-
   </div>
-</div>
+</main>
 
 <style>
   /* todo @property */
 	.gradient {
+    overflow: hidden;
 		display: grid;
-    gap: var(--size-3);
-    padding-block: var(--size-3);
+    grid-template-columns: var(--size-content-1) 1fr var(--size-content-2);
+    row-gap: var(--size-3);
+    block-size: 100vh;
+    block-size: 100dvh;
 	}
 
+  .layers {
+    display: grid;
+    align-content: start;
+    gap: var(--size-2);
+    padding: var(--size-2);
+    background: var(--surface-2);
+  }
+
   .controls {
-    display: flex;
-    flex-flow: row wrap;
+    display: grid;
     align-items: start;
     gap: var(--size-3);
+    padding-block: var(--size-3);
     padding-inline: var(--size-3);
+    background: var(--surface-2);
+    max-block-size: 100%;
+    overflow-y: auto;
   }
 
   input[readonly] {

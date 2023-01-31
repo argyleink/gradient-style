@@ -5,10 +5,16 @@
 
 <div class="app">
 	<Header />
-
-	<main>
-		<slot />
-	</main>
-
+	<slot />
 	<!-- todo footer -->
 </div>
+
+<style>
+	.app {
+		display: grid;
+		gap: var(--size-1);
+		grid-template-rows: auto 1fr;
+		block-size: 100vh;
+		block-size: 100dvh;
+	}
+</style>

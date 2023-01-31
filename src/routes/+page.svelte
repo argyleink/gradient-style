@@ -8,11 +8,13 @@
 	<meta name="description" content="Color 4 complaint gradient builder." />
 </svelte:head>
 
-<section>
-	<Gradient />
-</section>
+<Gradient />
 
 <style>
+	:global(html,body) {
+		overflow: hidden;
+	}
+
 	body {
 		display: grid;
 	}
