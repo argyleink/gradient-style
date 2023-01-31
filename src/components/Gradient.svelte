@@ -111,6 +111,7 @@
     <h4>Image Layers</h4>
     <input type="text" bind:value={user_gradient} onclick="this.select()" 
     readonly />
+    <button class="add-layer">Add layer</button>
   </div>
   <!-- modern and legacy for copy -->
 
@@ -156,10 +157,8 @@
 	.gradient {
     overflow: hidden;
 		display: grid;
-    grid-template-columns: var(--size-content-1) 1fr var(--size-content-2);
-    row-gap: var(--size-3);
-    block-size: 100vh;
-    block-size: 100dvh;
+    grid-template-columns: var(--size-14) 1fr var(--size-content-2);
+    gap: var(--size-2);
 	}
 
   .layers {
