@@ -23,6 +23,8 @@
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
 
+  import ColorPicker from './ColorPicker.svelte'
+
   const gensyntax = {
     'linear': () => 
       `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, ${stopsToStrings()})`,
@@ -139,6 +141,8 @@
     <GradientStops />
 
     <button class="add-color" on:click={() => addStop()}>Add a color</button>
+
+    <ColorPicker />
 
   </div>
 </div>
