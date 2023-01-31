@@ -3,6 +3,8 @@
     colorspace, 
     oklabL, oklabA, oklabB, oklabAlpha,
     oklchL, oklchC, oklchH, oklchAlpha,
+    labL, labA, labB, labAlpha,
+    lchL, lchC, lchH, lchAlpha,
     hslH, hslS, hslL, hslAlpha,
     hwbH, hwbW, hwbB, hwbAlpha,
     rgbR, rgbG, rgbB, rgbAlpha,
@@ -14,6 +16,10 @@
       `oklab(${$oklabL}% ${$oklabA} ${$oklabB} / ${$oklabAlpha}%)`,
     'oklch': () => 
       `oklch(${$oklchL}% ${$oklchC} ${$oklchH} / ${$oklchAlpha}%)`,
+    'lab': () => 
+      `lab(${$labL}% ${$labA} ${$labB} / ${$labAlpha}%)`,
+    'lch': () => 
+      `lch(${$lchL}% ${$lchC} ${$lchH} / ${$lchAlpha}%)`,
     'hsl': () => 
       `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`,
     'hwb': () => 
@@ -50,6 +56,8 @@
   $: user_color = gencolor[$colorspace](
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
     $oklchL, $oklchC, $oklchH, $oklchAlpha,
+    $labL, $labA, $labB, $labAlpha,
+    $lchL, $lchC, $lchH, $lchAlpha,
     $hslH, $hslS, $hslL, $hslAlpha,
     $hwbH, $hwbW, $hwbB, $hwbAlpha,
     $rgbR, $rgbG, $rgbB, $rgbAlpha,
@@ -64,8 +72,8 @@
     <option>hwb</option>
     <option>srgb</option>
     <option>srgb-linear</option>
-    <option disabled>lch</option> 
-    <option disabled>lab</option>
+    <option>lch</option> 
+    <option>lab</option>
     <option>oklch</option>
     <option>oklab</option>
     <option>display-p3</option>
@@ -130,6 +138,58 @@
       <span class="control-channel">A</span>
       <input class="control-input alpha" type="range" min="0" max="100" bind:value={$oklchAlpha}>
       <span class="control-value">{$oklchAlpha}%</span>
+    </div>
+  {/if}
+
+  {#if $colorspace === 'lab'}
+    <div class="control">
+      <span class="control-channel">L</span>
+      <input class="control-input" type="range" min="0" max="100" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
+      <span class="control-value">{$labL}%</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input" type="range" min="-120" max="120" step=".01" bind:value={$labA} style="background-image: linear-gradient(to right in oklab, lab(85% -100 100), lab(55% 100 100))">
+      <span class="control-value">{$labA}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">B</span>
+      <input class="control-input" type="range" min="-120" max="120" step=".01" bind:value={$labB} style="background-image: linear-gradient(to right in oklab, lab(31% 70 -120), lab(96% 0 120))">
+      <span class="control-value">{$labB}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$labAlpha}>
+      <span class="control-value">{$labAlpha}%</span>
+    </div>
+  {/if}
+
+  {#if $colorspace === 'lch'}
+    <div class="control">
+      <span class="control-channel">L</span>
+      <input class="control-input" type="range" min="0" max="100" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
+      <span class="control-value">{$lchL}%</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">C</span>
+      <input class="control-input" type="range" min="0" max="230" bind:value={$lchC} style={`background-image: linear-gradient(to right in oklab, lch(${$lchL}% 0 ${$lchH}), lch(${$lchL}% 230 ${$lchH}))`}>
+      <span class="control-value">{$lchC}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">H</span>
+      <input class="control-input" type="range" min="0" max="360" bind:value={$lchH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+      <span class="control-value">{$lchH}</span>
+    </div>
+
+    <div class="control">
+      <span class="control-channel">A</span>
+      <input class="control-input alpha" type="range" min="0" max="100" bind:value={$lchAlpha}>
+      <span class="control-value">{$lchAlpha}%</span>
     </div>
   {/if}
 

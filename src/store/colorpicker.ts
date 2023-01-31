@@ -12,6 +12,16 @@ export const oklchC = writable(.32);
 export const oklchH = writable(220);
 export const oklchAlpha = writable(100);
 
+export const labL = writable(100);
+export const labA = writable(-20);
+export const labB = writable(50);
+export const labAlpha = writable(100);
+
+export const lchL = writable(50);
+export const lchC = writable(100);
+export const lchH = writable(220);
+export const lchAlpha = writable(100);
+
 export const hslH = writable(220);
 export const hslS = writable(100);
 export const hslL = writable(50);
