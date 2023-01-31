@@ -1,26 +1,21 @@
 <script>
-  import {
-    gradient_type, 
-    gradient_space, 
-    gradient_interpolation,
-    gradient_stops
-  } from '../store.ts'
-
-  import {linear_named_angle, linear_angle} from '../store/linear.ts'
-  import {radial_shape, radial_position, radial_named_position, radial_size} from '../store/radial.ts'
-  import {conic_angle, conic_position, conic_named_position } from '../store/conic.ts'
+  import {gradient_type, gradient_space, gradient_interpolation,gradient_stops
+  } from '../store/gradient.ts'
+  import {linear_named_angle, linear_angle
+  } from '../store/linear.ts'
+  import {radial_shape, radial_position, radial_named_position, radial_size
+  } from '../store/radial.ts'
+  import {conic_angle, conic_position, conic_named_position
+  } from '../store/conic.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
 
   import GradientType from './GradientType.svelte'
   import LinearAngle from './LinearAngle.svelte'
+  import RadialSize from './RadialSize.svelte'
 
   const radial_shapes = ['circle', 'ellipse']
-  const radial_sizes = {
-    'Spec Default': ['farthest-corner'],
-    'Special Angles': ['closest-side', 'closest-corner', 'farthest-side'],
-    'Lengths': ['250px', '50vw', '25rem'],
-  }
+  
   const radial_named_positions = ['center','top','top right','right','bottom right','bottom','bottom left','left','top left']
 
   function isCylindricalSpace(space) {
@@ -147,7 +142,7 @@
     {/if}
 
     {#if $gradient_type === 'radial'}
-      <fieldset>
+      <!-- <fieldset>
         <legend>Size</legend>
         <select name="radial-size" bind:value={$radial_size}>
           {#each Object.entries(radial_sizes) as [key, val]}
@@ -158,7 +153,8 @@
             </optgroup>
           {/each}
         </select>
-      </fieldset>
+      </fieldset> -->
+      <RadialSize />
       <fieldset>
         <legend>Shape</legend>
         {#each radial_shapes as shape}

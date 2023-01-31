@@ -1,16 +1,16 @@
 <script>
-import {linear_angle, linear_named_angle} from '../store/linear.ts'
+  import {linear_angle, linear_named_angle} from '../store/linear.ts'
 
-const linear_directions = [
-  'to right',
-  'to bottom right',
-  'to bottom',
-  'to bottom left',
-  'to left',
-  'to top left',
-  'to top',
-  'to top right',
-]
+  const linear_directions = [
+    'to right',
+    'to bottom right',
+    'to bottom',
+    'to bottom left',
+    'to left',
+    'to top left',
+    'to top',
+    'to top right',
+  ]
 </script>
 
 <fieldset class="stack">

@@ -1,5 +1,5 @@
 <script>
-import {gradient_type} from '../store'
+import {gradient_type} from '../store/gradient.ts'
 
 const gradient_types = ['linear','radial','conic']  
 </script>
