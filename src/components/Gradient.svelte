@@ -3,30 +3,17 @@
     gradient_type, 
     gradient_space, 
     gradient_interpolation,
-    gradient_stops,
-    linear_named_angle, 
-    linear_angle, 
-    radial_shape, 
-    radial_position, 
-    radial_named_position, 
-    radial_size, 
-    conic_angle, 
-    conic_position,
-    conic_named_position,
+    gradient_stops
   } from '../store.ts'
 
-  const gradient_types = ['linear','radial','conic']
+  import {linear_named_angle, linear_angle} from '../store/linear.ts'
+  import {radial_shape, radial_position, radial_named_position, radial_size} from '../store/radial.ts'
+  import {conic_angle, conic_position, conic_named_position } from '../store/conic.ts'
 
-  const linear_directions = [
-    'to right',
-    'to bottom right',
-    'to bottom',
-    'to bottom left',
-    'to left',
-    'to top left',
-    'to top',
-    'to top right',
-  ]
+  import {linearAngleToString} from '../utils/linear.ts'
+
+  import GradientType from './GradientType.svelte'
+  import LinearAngle from './LinearAngle.svelte'
 
   const radial_shapes = ['circle', 'ellipse']
   const radial_sizes = {
@@ -42,7 +29,7 @@
 
   const gensyntax = {
     'linear': () => 
-      `linear-gradient(${linearAngleToString()} ${spaceToString()}, ${stopsToStrings()})`,
+      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, ${stopsToStrings()})`,
     'radial': () => 
       `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
@@ -100,12 +87,6 @@
     }
   }
 
-  function linearAngleToString() {
-    if ($linear_angle !== null)
-      return $linear_angle + 'deg'
-    return $linear_named_angle
-  }
-
   function removeStopByIndex(pos) {
     $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
   }
@@ -159,31 +140,10 @@
   <!-- todo: multiple gradients -->
 
   <div class="controls" style="accent-color: {$gradient_stops[0].color}">
-    <fieldset>
-      <legend>Type</legend>
-      {#each gradient_types as t}
-        <div class="type-switch">
-          <input type="radio" name="gradient-type" id="{t}-gradient" value={t} bind:group={$gradient_type}>
-          <label for="{t}-gradient">{t}</label>
-        </div>
-      {/each}
-    </fieldset>
+    <GradientType />
 
     {#if $gradient_type === 'linear'}
-      <fieldset class="stack">
-        <legend>Direction</legend>
-        <select name="named-directions" bind:value={$linear_named_angle} disabled={$linear_angle !== null}>
-          {#each linear_directions as dir}
-            <option value={dir}>{dir}</option>  
-          {/each}
-        </select>
-        <div class="chip linear-angle">
-          <input type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'gray' : 'inherit'}" />
-          {#if $linear_angle != null}
-            <button class="remove container-absolute" type="reset" on:click={() => $linear_angle = null}>✕</button>
-          {/if}
-        </div>
-      </fieldset>
+      <LinearAngle />
     {/if}
 
     {#if $gradient_type === 'radial'}
@@ -202,7 +162,7 @@
       <fieldset>
         <legend>Shape</legend>
         {#each radial_shapes as shape}
-          <div class="type-switch">
+          <div class="radio-pair">
             <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
             <label for="radial-{shape}">{shape}</label>
           </div>
@@ -389,7 +349,7 @@
     }
   }
 
-  .type-switch {
+  :global(.radio-pair) {
     display: flex;
     align-items: center;
     gap: var(--size-2);
