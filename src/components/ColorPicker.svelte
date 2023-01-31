@@ -98,13 +98,13 @@
 
     <div class="control">
       <span class="control-channel">A</span>
-      <input class="control-input" type="range" min="-1" max="1" step=".01" bind:value={$oklabA} style="background-image: linear-gradient(to right in oklab, oklab(85% -.25 .25), oklab(65% .25 .15))">
+      <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabA} style="background-image: linear-gradient(to right in oklab, oklab(65% -.5 .5), oklab(65% .5 .5))">
       <span class="control-value">{$oklabA}</span>
     </div>
 
     <div class="control">
       <span class="control-channel">B</span>
-      <input class="control-input" type="range" min="-1" max="1" step=".01" bind:value={$oklabB} style="background-image: linear-gradient(to right in oklab, oklab(47% -.03 -.32), oklab(96% 0 .25))">
+      <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabB} style="background-image: linear-gradient(to right in oklab, oklab(47% -.03 -.32), oklab(96% 0 .25))">
       <span class="control-value">{$oklabB}</span>
     </div>
 
@@ -124,7 +124,7 @@
 
     <div class="control">
       <span class="control-channel">C</span>
-      <input class="control-input" type="range" min="0" max="1" step=".01" bind:value={$oklchC} style={`background-image: linear-gradient(to right in oklab, oklch(${$oklchL}% 0 ${$oklchH}), oklch(${$oklchL}% .5 ${$oklchH}))`}>
+      <input class="control-input" type="range" min="0" max=".5" step=".01" bind:value={$oklchC} style={`background-image: linear-gradient(to right in oklab, oklch(${$oklchL}% 0 ${$oklchH}), oklch(${$oklchL}% .5 ${$oklchH}))`}>
       <span class="control-value">{$oklchC}</span>
     </div>
 
@@ -150,13 +150,13 @@
 
     <div class="control">
       <span class="control-channel">A</span>
-      <input class="control-input" type="range" min="-120" max="120" step=".01" bind:value={$labA} style="background-image: linear-gradient(to right in oklab, lab(85% -100 100), lab(55% 100 100))">
+      <input class="control-input" type="range" min="-160" max="160" bind:value={$labA} style="background-image: linear-gradient(to right in oklab, lab(85% -100 100), lab(55% 100 100))">
       <span class="control-value">{$labA}</span>
     </div>
 
     <div class="control">
       <span class="control-channel">B</span>
-      <input class="control-input" type="range" min="-120" max="120" step=".01" bind:value={$labB} style="background-image: linear-gradient(to right in oklab, lab(31% 70 -120), lab(96% 0 120))">
+      <input class="control-input" type="range" min="-160" max="160" bind:value={$labB} style="background-image: linear-gradient(to right in oklab, lab(31% 70 -120), lab(96% 0 120))">
       <span class="control-value">{$labB}</span>
     </div>
 
