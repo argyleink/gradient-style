@@ -10,7 +10,6 @@
 	.app {
 		display: grid;
 		gap: var(--size-1);
-		grid-template-rows: auto 1fr;
 		block-size: 100vh;
 		block-size: 100dvh;
 	}

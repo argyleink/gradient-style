@@ -169,11 +169,16 @@
 <style>
   /* todo @property */
 	.gradient {
-    overflow: hidden;
 		display: grid;
-    grid-template-columns: var(--size-14) 1fr var(--size-14);
     gap: var(--size-2);
 	}
+
+  @media (min-width: 1024px) {
+    .gradient {
+      overflow: hidden;
+      grid-template-columns: var(--size-14) 1fr var(--size-14);
+    }
+  }
 
   .layers {
     display: grid;
@@ -202,10 +207,15 @@
   .layers, .controls {
     background: var(--surface-2);
     padding-block-end: var(--size-fluid-5);
-    block-size: 100%;
-    max-block-size: 100vh;
-    max-block-size: 100dvh;
-    overflow-y: auto;
+  }
+
+  @media (min-width: 1024px) {
+    .layers, .controls {
+      block-size: 100%;
+      max-block-size: 100vh;
+      max-block-size: 100dvh;
+      overflow-y: auto;
+    }
   }
 
   .layer {
