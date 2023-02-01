@@ -106,50 +106,59 @@
 
 <main class="gradient">
 
-  <!-- output -->
-  <div class="layers">
-    <h4>Image Layers</h4>
-    <input type="text" bind:value={user_gradient} onclick="this.select()" 
-    readonly />
-    <button class="add-layer">Add layer</button>
-  </div>
-  <!-- modern and legacy for copy -->
+  <contain-er style="container: layers-panel / inline-size;">
+    <header class="brand">
+      <h4>HDgradients</h4>
+    </header>
+    <section class="layers">
+      <h4>Image Layers</h4>
+      <span>Layer 1</span>
+      <button class="add-layer">Add layer</button>
+    </section>
+  </contain-er>
+  
+  <contain-er style="container: preview-panel / inline-size;">
+    <section class="preview-panel">
+      <div class="preview" style={`background:${user_gradient}`}></div>
+      <input type="text" bind:value={user_gradient} onclick="this.select()" 
+        readonly />
+      <!-- modern and legacy for copy -->
+    </section>
+  </contain-er>
 
-  <div class="preview" style={`background:${user_gradient}`}></div>
+  <contain-er style="container: control-panel / inline-size;">
+    <section class="controls" style="accent-color: {$gradient_stops[0].color}">
+      <ColorPicker />
 
-  <!-- todo: multiple gradients -->
+      <GradientType />
 
-  <div class="controls" style="accent-color: {$gradient_stops[0].color}">
-    <ColorPicker />
+      {#if $gradient_type === 'linear'}
+        <LinearAngle />
+      {/if}
 
-    <GradientType />
+      {#if $gradient_type === 'radial'}
+        <RadialSize />
+        <RadialShape />
+        <RadialPosition />
+      {/if}
 
-    {#if $gradient_type === 'linear'}
-      <LinearAngle />
-    {/if}
+      {#if $gradient_type === 'conic'}
+        <ConicAngle />
+        <ConicPosition />
+      {/if}
 
-    {#if $gradient_type === 'radial'}
-      <RadialSize />
-      <RadialShape />
-      <RadialPosition />
-    {/if}
+      <GradientColorSpace />
 
-    {#if $gradient_type === 'conic'}
-      <ConicAngle />
-      <ConicPosition />
-    {/if}
+      {#if isCylindricalSpace($gradient_space)}
+        <HueInterpolation />
+      {/if}
 
-    <GradientColorSpace />
+      <GradientStops />
 
-    {#if isCylindricalSpace($gradient_space)}
-      <HueInterpolation />
-    {/if}
+      <button class="add-color" on:click={() => addStop()}>Add a color</button>
 
-    <GradientStops />
-
-    <button class="add-color" on:click={() => addStop()}>Add a color</button>
-
-  </div>
+    </section>
+  </contain-er>
 </main>
 
 <style>
@@ -157,7 +166,7 @@
 	.gradient {
     overflow: hidden;
 		display: grid;
-    grid-template-columns: var(--size-14) 1fr var(--size-content-2);
+    grid-template-columns: var(--size-14) 1fr var(--size-14);
     gap: var(--size-2);
 	}
 
@@ -165,23 +174,54 @@
     display: grid;
     align-content: start;
     gap: var(--size-2);
-    padding: var(--size-2);
-    background: var(--surface-2);
+    padding: var(--size-5);
+  }
+
+  .preview {
+    margin-inline: auto;
+    margin-block-start: var(--size-fluid-4);
+    block-size: 30vh;
+    max-inline-size: 90%;
+    aspect-ratio: var(--ratio-widescreen);
+    animation: var(--animation-fade-out) reverse;
+    resize: both;
+    overflow: hidden;
+    box-shadow: var(--shadow-3);
   }
 
   .controls {
     display: grid;
-    align-items: start;
     gap: var(--size-3);
-    padding-block: var(--size-3);
-    padding-inline: var(--size-3);
+    padding-block-end: var(--size-3);
+  }
+
+  .layers, .controls {
     background: var(--surface-2);
-    max-block-size: 100%;
+    block-size: 100%;
+    max-block-size: 100vh;
+    max-block-size: 100dvh;
     overflow-y: auto;
+  }
+
+  .brand {
+    min-block-size: var(--size-content-1);
+    display: grid;
+    place-content: center;
+    background: var(--surface-3);
+  }
+
+  .preview-panel {
+    display: grid;
+    place-content: center;
+    gap: var(--size-fluid-3);
   }
 
   input[readonly] {
     text-align: center;
+  }
+
+  .controls > :global(fieldset) {
+    margin-inline: var(--size-3);
   }
 
   :global(fieldset), 
@@ -191,14 +231,6 @@
 
   :global(.chip > .remove) {
     inset-block-start: -0.75rem;
-  }
-
-  .preview {
-    block-size: 30vh;
-    max-inline-size: 100vw;
-    animation: var(--animation-fade-out) reverse;
-    resize: both;
-    overflow: hidden;
   }
 
   @media (min-width: 1024px) {

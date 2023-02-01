@@ -1,5 +1,4 @@
 <script>
-	// import Counter from './Counter.svelte';
 	import Gradient from '../components/Gradient.svelte';
 </script>
 
@@ -11,11 +10,7 @@
 <Gradient />
 
 <style>
-	:global(html,body) {
-		overflow: hidden;
-	}
-
-	body {
+	:global(body) {
 		display: grid;
 	}
 </style>
