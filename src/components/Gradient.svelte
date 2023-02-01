@@ -108,12 +108,17 @@
 
   <contain-er style="container: layers-panel / inline-size;">
     <header class="brand">
-      <h4>HDgradients</h4>
+      <h1>HDgradients</h1>
     </header>
     <section class="layers">
-      <h4>Image Layers</h4>
-      <span>Layer 1</span>
-      <button class="add-layer">Add layer</button>
+      <h2>Image Layers</h2>
+      <div class="layer selected">
+        <span>Layer 1</span> 
+        <GradientType />
+      </div>
+      <footer class="end-of-layers">
+        <button class="add-layer">Add layer</button>
+      </footer>
     </section>
   </contain-er>
   
@@ -129,8 +134,6 @@
   <contain-er style="container: control-panel / inline-size;">
     <section class="controls" style="accent-color: {$gradient_stops[0].color}">
       <ColorPicker />
-
-      <GradientType />
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />
@@ -155,7 +158,9 @@
 
       <GradientStops />
 
-      <button class="add-color" on:click={() => addStop()}>Add a color</button>
+      <footer class="end-of-stops">
+        <button class="add-color" on:click={() => addStop()}>Add a color</button>
+      </footer>
 
     </section>
   </contain-er>
@@ -192,15 +197,44 @@
   .controls {
     display: grid;
     gap: var(--size-3);
-    padding-block-end: var(--size-3);
   }
 
   .layers, .controls {
     background: var(--surface-2);
+    padding-block-end: var(--size-fluid-5);
     block-size: 100%;
     max-block-size: 100vh;
     max-block-size: 100dvh;
     overflow-y: auto;
+  }
+
+  .layer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--size-3);
+    position: relative;
+    border-block-end: 1px solid var(--surface-3);
+  }
+
+  .layer:first-of-type {
+    border-block-start: 1px solid var(--surface-3);
+  }
+
+  .layer.selected::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset-inline-start: -1.5ch;
+    height: 1ch;
+    width: 1ch;
+    background: var(--link);
+    border-radius: var(--radius-round);
+  }
+
+  .layers :global(> h2) {
+    font-size: var(--font-size-1);
+    margin-block-end: var(--size-2);
   }
 
   .brand {
@@ -208,6 +242,10 @@
     display: grid;
     place-content: center;
     background: var(--surface-3);
+  }
+
+  .brand :global(> h1) {
+    font-size: var(--font-size-3);
   }
 
   .preview-panel {
@@ -250,7 +288,6 @@
   }
 
   :global(.chip) {
-    background: var(--surface-1);
     border-radius: var(--radius-round);
     display: inline-flex;
     place-items: center;
@@ -264,6 +301,10 @@
     block-size: 2ch;
     border-radius: var(--radius-round);
     padding: 0;
+  }
+
+  :global(.chip:has(input[type="color"])) {
+    background: var(--surface-1);
   }
 
   :global(input[type="color"].round::-webkit-color-swatch-wrapper) {
@@ -325,5 +366,16 @@
   :global(.stack) {
     display: inline-grid;
     gap: var(--size-2);
+  }
+
+  .end-of-layers {
+    margin-block-start: var(--size-fluid-4);
+    text-align: center;
+  }
+
+  .end-of-stops {
+    padding: var(--size-3);
+    margin-block-start: var(--size-fluid-4);
+    text-align: center;
   }
 </style>

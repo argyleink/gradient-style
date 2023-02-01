@@ -67,7 +67,9 @@
 
 <div class="hd-color-picker" style={`accent-color:${user_color}`}>
 
-  <div class="preview" style={`--user-color:${user_color}`}></div>
+  <div class="preview" style={`--user-color:${user_color}`}>
+    <output><code>{user_color}</code></output>
+  </div>
 
   <div class="controls">
     <select class="colorspace" bind:value={$colorspace}> 
@@ -87,8 +89,6 @@
       <option>xyz-d50</option>
       <option>xyz-d65</option>
     </select>
-    <!-- todo: merge these, dropdown in snippet -->
-    <output><code>{user_color}</code></output>
 
     {#if $colorspace === 'oklab'}
       <div class="control">
@@ -323,19 +323,24 @@
   }
 
   .preview {
+    display: flex;
+    align-items: end;
+    justify-content: center;
     block-size: var(--size-content-1);
-    /* aspect-ratio: var(--ratio-widescreen); */
+    padding-block-end: var(--size-3);
     background: 
       linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);
   }
 
-  .controls {
-    padding-inline: var(--size-3);
+  .preview > :global(output > code) {
+    background: hsl(none none none / .2);
   }
 
-  .controls > :global(output > code) {
-    padding-inline-start: 0;
+  .controls {
+    display: grid;
+    gap: var(--size-2);
+    padding-inline: var(--size-3);
   }
 
   .control {
