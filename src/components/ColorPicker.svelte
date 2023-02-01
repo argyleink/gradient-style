@@ -334,7 +334,9 @@
   }
 
   .preview > :global(output > code) {
-    background: hsl(none none none / .2);
+    color: white;
+    background: hsl(none none none / .4);
+    text-shadow: 0 1px 1px hsl(none none 0% / 25%);
   }
 
   .controls {
