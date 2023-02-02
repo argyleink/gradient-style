@@ -27,7 +27,3 @@
     {/if}
   </div>
 </fieldset>
-
-<style>
-
-</style>

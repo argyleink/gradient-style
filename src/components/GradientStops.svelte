@@ -26,12 +26,14 @@
       <div class="stack">
         <div class="chip color-position">
           <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
+          <span class="percentage-value">{stop.position1 || 0}%</span>
           {#if stop.position1 != null}
             <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
           {/if}
         </div>
         <div class="chip color-position">
           <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
+          <span class="percentage-value">{stop.position2 || 0}%</span>
           {#if stop.position2 != null}
             <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
           {/if}
@@ -42,12 +44,13 @@
   {#if stop.kind === 'hint'}
     <fieldset>
       <legend>Easing</legend>
-      <div class="color-hint">
+      <div class="color-hint chip">
         <input 
           type="range" 
           bind:value="{stop.percentage}" 
           style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})"
         />
+        <span class="percentage-value">{stop.percentage || 0}%</span>
       </div>
       <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
     </fieldset>

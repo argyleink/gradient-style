@@ -94,7 +94,8 @@
       <div class="control">
         <span class="control-channel">L</span>
         <input class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
-        <span class="control-value">{$oklabL}%</span>
+        <!-- <span class="control-value">{$oklabL}%</span> -->
+        <input type="text" bind:value={$oklabL}>
       </div>
 
       <div class="control">
@@ -319,7 +320,7 @@
   }
 
   .colorspace {
-    justify-self: start;
+    justify-self: center;
   }
 
   .preview {

@@ -12,18 +12,20 @@
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
 
-  import GradientType from './GradientType.svelte'
   import GradientStops from './GradientStops.svelte'
   import GradientColorSpace from './GradientColorSpace.svelte'
   import HueInterpolation from './HueInterpolation.svelte'
   import LinearAngle from './LinearAngle.svelte'
+
   import RadialSize from './RadialSize.svelte'
   import RadialShape from './RadialShape.svelte'
   import RadialPosition from './RadialPosition.svelte'
+
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
 
   import ColorPicker from './ColorPicker.svelte'
+  import LayersPanel from './LayersPanel.svelte'
 
   const gensyntax = {
     'linear': () => 
@@ -108,18 +110,10 @@
 
   <contain-er style="container: layers-panel / inline-size;">
     <header class="brand">
+      <div class="gradient-logo" style={`background:${user_gradient}`}></div>
       <h1>HDgradients</h1>
     </header>
-    <section class="layers">
-      <h2>Image Layers</h2>
-      <div class="layer selected">
-        <span>Layer 1</span> 
-        <GradientType />
-      </div>
-      <footer class="end-of-layers">
-        <button class="add-layer">Add layer</button>
-      </footer>
-    </section>
+    <LayersPanel />
   </contain-er>
   
   <contain-er style="container: preview-panel / inline-size;">
@@ -167,7 +161,6 @@
 </main>
 
 <style>
-  /* todo @property */
 	.gradient {
 		display: grid;
     gap: var(--size-2);
@@ -178,13 +171,6 @@
       overflow: hidden;
       grid-template-columns: var(--size-14) 1fr var(--size-14);
     }
-  }
-
-  .layers {
-    display: grid;
-    align-content: start;
-    gap: var(--size-2);
-    padding: var(--size-5);
   }
 
   .preview {
@@ -204,13 +190,13 @@
     gap: var(--size-3);
   }
 
-  .layers, .controls {
+  .controls {
     background: var(--surface-2);
     padding-block-end: var(--size-fluid-5);
   }
 
   @media (min-width: 1024px) {
-    .layers, .controls {
+    .controls {
       block-size: 100%;
       max-block-size: 100vh;
       max-block-size: 100dvh;
@@ -218,40 +204,12 @@
     }
   }
 
-  .layer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-block: var(--size-3);
-    position: relative;
-    border-block-end: 1px solid var(--surface-3);
-  }
-
-  .layer:first-of-type {
-    border-block-start: 1px solid var(--surface-3);
-  }
-
-  .layer.selected::before {
-    content: "";
-    display: block;
-    position: absolute;
-    inset-inline-start: -1.5ch;
-    height: 1ch;
-    width: 1ch;
-    background: var(--link);
-    border-radius: var(--radius-round);
-  }
-
-  .layers :global(> h2) {
-    font-size: var(--font-size-1);
-    margin-block-end: var(--size-2);
-  }
-
   .brand {
     min-block-size: var(--size-content-1);
     display: grid;
     place-content: center;
     background: var(--surface-3);
+    gap: var(--size-2);
   }
 
   .brand :global(> h1) {
@@ -270,6 +228,8 @@
 
   .controls > :global(fieldset) {
     margin-inline: var(--size-3);
+    display: grid;
+    gap: var(--size-2);
   }
 
   :global(fieldset), 
@@ -315,6 +275,7 @@
 
   :global(.chip:has(input[type="color"])) {
     background: var(--surface-1);
+    justify-self: start;
   }
 
   :global(input[type="color"].round::-webkit-color-swatch-wrapper) {
@@ -355,6 +316,7 @@
   }
 
   :global(.remove) {
+    aspect-ratio: 1;
     padding: var(--size-1);
     border-radius: var(--radius-round);
     line-height: .75;
@@ -378,14 +340,26 @@
     gap: var(--size-2);
   }
 
-  .end-of-layers {
-    margin-block-start: var(--size-fluid-4);
-    text-align: center;
+  :global(.percentage-value) {
+    min-inline-size: 4ch; 
+    text-align: end;
   }
 
   .end-of-stops {
     padding: var(--size-3);
     margin-block-start: var(--size-fluid-4);
     text-align: center;
+  }
+
+  .gradient-logo {
+    -webkit-mask: url(https://api.iconify.design/game-icons:bookshelf.svg) 
+      center / contain
+      no-repeat;
+    mask: url(https://api.iconify.design/game-icons:bookshelf.svg) 
+      center / contain
+      no-repeat;
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    justify-self: center;
   }
 </style>
