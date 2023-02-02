@@ -1,5 +1,6 @@
 <script>
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
+  import AngleIcon from './AngleIcon.svelte'
 
   const linear_directions = [
     'to right',
@@ -21,7 +22,8 @@
     {/each}
   </select>
   <div class="chip linear-angle">
-    <input type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'gray' : 'inherit'}" />
+    <input type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'inherit'}" />
+    <AngleIcon angle={$linear_angle} />
     {#if $linear_angle != null}
       <button class="remove container-absolute" type="reset" on:click={() => $linear_angle = null}>✕</button>
     {/if}

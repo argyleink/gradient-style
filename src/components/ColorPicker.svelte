@@ -94,26 +94,29 @@
       <div class="control">
         <span class="control-channel">L</span>
         <input class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
-        <!-- <span class="control-value">{$oklabL}%</span> -->
-        <input type="text" bind:value={$oklabL}>
+        <!-- <span class="control-value" contenteditable bind:textContent={$oklabL}></span> -->
+        <input type="number" bind:value={$oklabL} class="slider-percentage">
       </div>
 
       <div class="control">
         <span class="control-channel">A</span>
         <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabA} style="background-image: linear-gradient(to right in oklab, oklab(65% -.5 .5), oklab(65% .5 .5))">
-        <span class="control-value">{$oklabA}</span>
+        <!-- <span class="control-value">{$oklabA}</span> -->
+        <input type="number" min="-.5" max=".5" step=".01" bind:value={$oklabA} class="slider-percentage">
       </div>
 
       <div class="control">
         <span class="control-channel">B</span>
         <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabB} style="background-image: linear-gradient(to right in oklab, oklab(47% -.03 -.32), oklab(96% 0 .25))">
-        <span class="control-value">{$oklabB}</span>
+        <!-- <span class="control-value">{$oklabB}</span> -->
+        <input type="number" min="-.5" max=".5" step=".01" bind:value={$oklabB} class="slider-percentage">
       </div>
 
-      <div class="control">
+      <div class="control percentage">
         <span class="control-channel">A</span>
         <input class="control-input alpha" type="range" min="0" max="100" bind:value={$oklabAlpha}>
-        <span class="control-value">{$oklabAlpha}%</span>
+        <!-- <span class="control-value">{$oklabAlpha}%</span> -->
+        <input type="number" min="0" max="100" bind:value={$oklabAlpha} class="slider-percentage">
       </div>
     {/if}
 
@@ -390,5 +393,21 @@
   
   .control-input:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .slider-percentage {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    max-inline-size: 4ch;
+    padding: 0;
+    background: none;
+    -moz-appearance:textfield;
+  }
+
+  .slider-percentage::-webkit-outer-spin-button,
+  .slider-percentage::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
   }
 </style>

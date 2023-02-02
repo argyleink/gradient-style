@@ -36,6 +36,7 @@
     display: flex;
     border: none;
     padding: 0;
+    gap: var(--size-1);
   }
 
   .switch {
@@ -56,6 +57,7 @@
 
   .switch:has(:checked) {
     color: var(--link);
+    background: var(--surface-1);
   }
 
   .switch > * {
