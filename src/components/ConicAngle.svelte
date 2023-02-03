@@ -5,7 +5,7 @@
 
 <fieldset>
   <legend>Angle</legend>
-  <div class="chip linear-angle">
+  <div class="linear-angle slider-set">
     <input type="range" bind:value={$conic_angle} min="0" max="360" step="1" />
     <AngleIcon angle={$conic_angle} />
     {#if $conic_angle != null}

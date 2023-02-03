@@ -16,7 +16,7 @@
     {/each}
   </select>
   <div class="stack">
-    <div class="chip radial-position">
+    <div class="radial-position slider-set">
       <input 
         type="range"
         bind:value={$radial_position.x} 
@@ -29,7 +29,7 @@
         <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
       {/if}
     </div>
-    <div class="chip radial-position">
+    <div class="radial-position slider-set">
       <input 
         type="range"
         bind:value={$radial_position.y} 

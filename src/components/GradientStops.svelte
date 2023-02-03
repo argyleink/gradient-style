@@ -23,11 +23,11 @@
         <span>{stop.color}</span>
       </div>
       <div class="stack">
-        <div class="color-position">
+        <div class="color-position slider-set">
           <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
-        <div class="color-position">
+        <div class="color-position slider-set">
           <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
@@ -38,7 +38,7 @@
   {#if stop.kind === 'hint'}
     <fieldset>
       <legend>Easing</legend>
-      <div class="color-hint">
+      <div class="color-hint slider-set">
         <input 
           type="range" 
           bind:value="{stop.percentage}" 
@@ -54,13 +54,6 @@
 <style>
   .color-stop {
     padding-inline-end: var(--size-3);
-  }
-
-  .color-hint, .color-position {
-    position: relative;
-    display: inline-flex;
-    place-items: center;
-    gap: var(--size-2);
   }
 
   .color-hint > input[type="range"] {

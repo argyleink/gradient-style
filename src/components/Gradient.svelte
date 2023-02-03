@@ -214,7 +214,7 @@
     animation: var(--animation-fade-out) reverse;
     resize: both;
     overflow: hidden;
-    box-shadow: var(--shadow-3);
+    box-shadow: var(--shadow-6);
   }
 
   .controls {
@@ -346,6 +346,12 @@
     inline-size: 100%;
   }
 
+  :global(.slider-set) {
+    display: inline-flex;
+    place-items: center;
+    gap: var(--size-2);
+  }
+
   :global(.chip) {
     border-radius: var(--radius-round);
     display: inline-flex;
@@ -353,6 +359,8 @@
     gap: var(--size-2);
     padding-block: var(--size-1);
     padding-inline: var(--size-2);
+    box-shadow: var(--shadow-1);
+    border: 1px solid var(--surface-2);
   }
 
   :global(input[type="color"].round) {
@@ -365,6 +373,19 @@
   :global(.chip:has(input[type="color"])) {
     background: var(--surface-1);
     justify-self: start;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :global(.chip:has(input[type="color"])) {
+      background: white;
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    :global(select) {
+      background: white;
+      box-shadow: var(--shadow-3)
+    }
   }
 
   :global(input[type="color"].round::-webkit-color-swatch-wrapper) {
