@@ -173,7 +173,7 @@
       </header>
 
       <h3>Settings</h3>
-      <!-- <ColorPicker /> -->
+      <ColorPicker />
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />
@@ -292,7 +292,10 @@
 
   h3 {
     color: var(--link);
-    padding-inline: var(--size-2);
+    padding-inline: .7rem;
+    max-inline-size: 100%;
+    background: var(--surface-3);
+    padding-block: 0.5rem;
     font-size: var(--font-size-0);
     text-transform: uppercase;
     font-weight: var(--font-weight-6);
