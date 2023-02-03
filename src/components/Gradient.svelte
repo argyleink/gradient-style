@@ -245,6 +245,20 @@
     gap: var(--size-2);
   }
 
+  @media (prefers-color-scheme: light) {
+    .controls {
+      background: white;
+    }
+
+    .gradient {
+      background: var(--surface-2);
+    }
+
+    .brand {
+      background: var(--surface-1);
+    }
+  }
+
   .brand :global(> h1) {
     font-size: var(--font-size-3);
   }
@@ -286,6 +300,12 @@
     text-transform: uppercase;
     font-weight: var(--font-weight-6);
     margin-block-end: var(--size-2);
+  }
+
+  @media (prefers-color-scheme: light) {
+    h3 {
+      background: var(--surface-1);
+    }
   }
 
   h3:not(:first-of-type) {

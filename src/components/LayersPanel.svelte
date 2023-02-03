@@ -32,6 +32,12 @@
     padding-block-end: var(--size-fluid-5);
   }
 
+  @media (prefers-color-scheme: light) {
+    .layers {
+      background: white;
+    }
+  }
+
   @media (min-width: 1024px) {
     .layers {
       block-size: 100%;
