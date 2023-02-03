@@ -316,13 +316,8 @@
     justify-self: start;
   }
 
-  :global(fieldset), 
-  :global(.chip:has(.remove)) {
+  :global(fieldset) {
     position: relative;
-  }
-
-  :global(.chip > .remove) {
-    inset-block-start: -0.75rem;
   }
 
   @media (min-width: 1024px) {
@@ -385,14 +380,14 @@
     transition: opacity .2s var(--ease-3);
   }
 
-  :global(fieldset:not(:hover, :focus-within) .remove) {
+  /* :global(fieldset:not(:hover, :focus-within) .remove) {
     opacity: 0;
-  }
+  } */
 
   :global(.container-absolute) {
     position: absolute;
     inset-block-start: -1.5rem;
-    inset-inline-end: 0;
+    inset-inline-end: .5rem;
   }
 
   :global(.stack) {
