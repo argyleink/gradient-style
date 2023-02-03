@@ -6,6 +6,11 @@
     $radial_position.x = null
     $radial_position.y = null
   }
+
+  function ensureRadialPair() {
+    if ($radial_position.y !== null && $radial_position.x === null)
+      $radial_position.x = 50
+  }
 </script>
 
 <fieldset>
@@ -22,12 +27,9 @@
         bind:value={$radial_position.x} 
         min="-100" max="200" 
         step="1" 
-        style="accent-color: {$radial_position.x === null ? 'gray' : 'inherit'}" 
+        style="accent-color: {$radial_position.x === null ? 'var(--gray-6)' : 'inherit'}" 
       />
       <input type="number" bind:value={$radial_position.x} min="-100" max="200" step="1"  class="slider-percentage">
-      {#if $radial_position.x != null}
-        <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
-      {/if}
     </div>
     <div class="radial-position slider-set">
       <input 
@@ -35,12 +37,13 @@
         bind:value={$radial_position.y} 
         min="-100" max="200" 
         step="1" 
-        style="accent-color: {$radial_position.y === null ? 'gray' : 'inherit'}" 
+        style="accent-color: {$radial_position.y === null ? 'var(--gray-6)' : 'inherit'}" 
+        on:input={ensureRadialPair}
       />
-      <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1"  class="slider-percentage">
-      {#if $radial_position.y != null}
-        <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
-      {/if}
+      <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
     </div>
+    {#if $radial_position.y != null}
+      <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
+    {/if}
   </div>
 </fieldset>

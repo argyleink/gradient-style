@@ -6,6 +6,11 @@
     $conic_position.x = null
     $conic_position.y = null
   }
+
+  function ensurePositionPair() {
+    if ($conic_position.y !== null && $conic_position.x === null)
+      $conic_position.x = 50
+  }
 </script>
 
 <fieldset>
@@ -17,18 +22,15 @@
   </select>
   <div class="stack">
     <div class="conic-position slider-set">
-      <input type="range" bind:value={$conic_position.x} min="-100" max="200" step="1" style="accent-color: {$conic_position.x === null ? 'gray' : 'inherit'}" />
+      <input type="range" bind:value={$conic_position.x} min="-100" max="200" step="1" style="accent-color: {$conic_position.x === null ? 'var(--gray-6)' : 'inherit'}" />
       <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
-      {#if $conic_position.x != null}
-        <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
-      {/if}
     </div>
     <div class="conic-position slider-set">
-      <input type="range" bind:value={$conic_position.y} min="-100" max="200" step="1" style="accent-color: {$conic_position.y === null ? 'gray' : 'inherit'}" />
-      <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1"  class="slider-percentage">
-      {#if $conic_position.y != null}
-        <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
-      {/if}
+      <input type="range" bind:value={$conic_position.y} min="-100" max="200" step="1"  on:input={ensurePositionPair} style="accent-color: {$conic_position.y === null ? 'var(--gray-6)' : 'inherit'}" />
+      <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" on:input={ensurePositionPair}>
     </div>
+    {#if $conic_position.y != null}
+      <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
+    {/if}
   </div>
 </fieldset>

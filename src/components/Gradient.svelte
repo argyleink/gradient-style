@@ -384,7 +384,8 @@
   @media (prefers-color-scheme: light) {
     :global(select) {
       background: white;
-      box-shadow: var(--shadow-3)
+      box-shadow: var(--shadow-3);
+      border: 1px solid var(--surface-2);
     }
   }
 
