@@ -100,6 +100,7 @@
     $radial_shape,
     $radial_size,
     $radial_position,
+    $radial_named_position,
     $conic_angle,
     $conic_position,
     $conic_named_position
