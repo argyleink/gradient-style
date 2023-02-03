@@ -25,6 +25,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"open-props": "^1.5.5"
+		"open-props": "^1.5.5",
+		"prism-themes": "^1.9.0",
+		"prismjs": "^1.29.0"
 	}
 }

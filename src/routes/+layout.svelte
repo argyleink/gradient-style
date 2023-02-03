@@ -1,3 +1,8 @@
+<script>
+	import "prismjs"
+	import "../utils/prism-css.js"
+</script>
+
 <div class="app">
 	<slot />
 </div>
@@ -6,6 +11,7 @@
 	@import 'open-props/style';
 	@import 'open-props/normalize';
 	@import 'open-props/buttons';
+	@import 'prism-themes/themes/prism-dracula.css';
 
 	.app {
 		display: grid;
