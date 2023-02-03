@@ -24,14 +24,14 @@
         <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
       </div>
       <div class="stack">
-        <div class="chip color-position">
+        <div class="color-position">
           <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
           <input type="number" bind:value={stop.position1} class="slider-percentage">
           {#if stop.position1 != null}
             <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
           {/if}
         </div>
-        <div class="chip color-position">
+        <div class="color-position">
           <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
           <input type="number" bind:value={stop.position2} class="slider-percentage">
           {#if stop.position2 != null}
@@ -44,7 +44,7 @@
   {#if stop.kind === 'hint'}
     <fieldset>
       <legend>Easing</legend>
-      <div class="color-hint chip">
+      <div class="color-hint">
         <input 
           type="range" 
           bind:value="{stop.percentage}" 
@@ -60,6 +60,12 @@
 <style>
   .color-stop {
     padding-inline-end: var(--size-3);
+  }
+
+  .color-hint, .color-position {
+    display: inline-flex;
+    place-items: center;
+    gap: var(--size-2);
   }
 
   .color-hint > input[type="range"] {

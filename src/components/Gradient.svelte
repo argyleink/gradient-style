@@ -8,6 +8,7 @@
   } from '../store/radial.ts'
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
+  import {layers} from '../store/layers.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -26,6 +27,7 @@
 
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
+  import Prism from "./PrismJS.svelte";
 
   const gensyntax = {
     'linear': () => 
@@ -34,6 +36,15 @@
       `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, ${stopsToStrings()})`,
     'conic': () => 
       `conic-gradient(from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, ${stopsToStrings()})`
+  }
+
+  const genClassicSyntax = {
+    'linear': () => 
+      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings()})`,
+    'radial': () => 
+      `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()}, ${stopsToStrings()})`,
+    'conic': () => 
+      `conic-gradient(from ${$conic_angle}deg at ${conicPositionToString()}, ${stopsToStrings()})`
   }
 
   function spaceToString() {
@@ -106,6 +117,21 @@
     $conic_position,
     $conic_named_position
   )
+
+  $: classic_gradient = genClassicSyntax[$gradient_type](
+    $gradient_space,
+    $gradient_interpolation,
+    $gradient_stops,
+    $linear_named_angle,
+    $linear_angle,
+    $radial_shape,
+    $radial_size,
+    $radial_position,
+    $radial_named_position,
+    $conic_angle,
+    $conic_position,
+    $conic_named_position
+  )
 </script>
 
 <main class="gradient">
@@ -121,14 +147,31 @@
   <contain-er style="container: preview-panel / inline-size;">
     <section class="preview-panel">
       <div class="preview" style={`background:${user_gradient}`}></div>
-      <input type="text" bind:value={user_gradient} onclick="this.select()" 
-        readonly />
+      <!--<input type="text" bind:value={user_gradient} onclick="this.select()" 
+        readonly />-->
+      <Prism language="css" code={`
+.modern-gradient {
+  background-image: 
+    ${user_gradient}
+  ;
+}
+
+.classic-gradient {
+  background-image: 
+    ${classic_gradient}
+  ;
+}`} />
       <!-- modern and legacy for copy -->
     </section>
   </contain-er>
 
   <contain-er style="container: control-panel / inline-size;">
     <section class="controls" style="accent-color: {$gradient_stops[0].color}">
+      <header>
+        <p>Image Layer</p>
+        <h2>{$layers}</h2>
+      </header>
+
       <h3>Settings</h3>
       <!-- <ColorPicker /> -->
 
@@ -224,10 +267,27 @@
     display: grid;
     place-content: center;
     gap: var(--size-fluid-3);
+
+    max-block-size: 100vh;
+    max-block-size: 100dvh;
+    overflow-y: auto;
   }
 
-  input[readonly] {
-    text-align: center;
+  .controls > header {
+    padding-inline: var(--size-2);
+    display: grid;
+    margin-block: var(--size-4);
+    text-align: end;
+    justify-content: end;
+  }
+
+  .controls > header > h2 {
+    font-size: var(--font-size-2);
+  }
+
+  .controls > header > p {
+    text-transform: uppercase;
+    font-size: var(--font-size-0);
   }
 
   h3 {
@@ -332,7 +392,7 @@
   :global(.container-absolute) {
     position: absolute;
     inset-block-start: -1.5rem;
-    inset-inline-end: -0.5rem;
+    inset-inline-end: 0;
   }
 
   :global(.stack) {

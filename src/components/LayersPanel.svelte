@@ -1,13 +1,22 @@
 <script>
-  import GradientType from './GradientType.svelte'  
+  import GradientType from './GradientType.svelte'
+
+  import {layers} from '../store/layers.ts'
 </script>
 
 <section class="layers">
   <h2>Image Layers</h2>
+  <!-- {#each layers as layer}
+    <div class="layer selected">
+      <span contenteditable>{layer}</span> 
+      <GradientType />
+    </div>
+  {/each} -->
   <div class="layer selected">
-    <span contenteditable>Gradient 1</span> 
+    <span contenteditable bind:textContent={$layers}></span> 
     <GradientType />
   </div>
+  
   <footer class="end-of-layers">
     <button class="add-layer">Add gradient</button>
   </footer>
