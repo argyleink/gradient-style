@@ -45,6 +45,7 @@
   function stopsToStrings() {
     return $gradient_stops
       .filter(s => s?.percentage !== '50')
+      .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
           if (s.position1 != null && s.position2 != null) 
@@ -128,7 +129,8 @@
 
   <contain-er style="container: control-panel / inline-size;">
     <section class="controls" style="accent-color: {$gradient_stops[0].color}">
-      <ColorPicker />
+      <h3>Settings</h3>
+      <!-- <ColorPicker /> -->
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />
@@ -151,6 +153,7 @@
         <HueInterpolation />
       {/if}
 
+      <h3>Color stops</h3>
       <GradientStops />
 
       <footer class="end-of-stops">
@@ -188,12 +191,12 @@
 
   .controls {
     display: grid;
-    gap: var(--size-3);
+    gap: var(--size-1);
   }
 
   .controls {
     background: var(--surface-2);
-    padding-block-end: var(--size-fluid-5);
+    padding-block: var(--size-2) var(--size-fluid-5);
   }
 
   @media (min-width: 1024px) {
@@ -227,10 +230,30 @@
     text-align: center;
   }
 
+  h3 {
+    color: var(--link);
+    padding-inline: var(--size-2);
+    font-size: var(--font-size-0);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-6);
+    margin-block-end: var(--size-2);
+  }
+
+  h3:not(:first-of-type) {
+    margin-block-start: var(--size-4); 
+  }
+
   .controls > :global(fieldset) {
-    margin-inline: var(--size-3);
+    border-inline: none;
+    border-block-end: none;
+    border-color: var(--surface-3);
     display: grid;
     gap: var(--size-2);
+    padding-inline: var(--size-2);
+  }
+
+  :global(fieldset > select) {
+    justify-self: start;
   }
 
   :global(fieldset), 
@@ -288,30 +311,6 @@
     border: none;
   }
 
-  :global(.color-hint > input) {
-    appearance: none;
-    accent-color: var(--surface-1);
-    border-radius: var(--radius-round);
-    block-size: 1rem;
-  }
-
-  :global(.color-hint > input::-webkit-slider-thumb) {
-    --_border-size: 4px;
-    
-    cursor: grab;
-    appearance: none;
-    accent-color: var(--surface-1);
-    border: 4px solid white;
-    height: calc(1rem + (var(--_border-size) * 2));
-    aspect-ratio: 1;
-    border-radius: var(--radius-round);
-    box-shadow: var(--shadow-2), var(--inner-shadow-2);
-  }
-  
-  :global(.color-hint > input:active::-webkit-slider-thumb) {
-    cursor: grabbing;
-  }
-
   .add-color {
     align-self: end;
   }
@@ -344,6 +343,22 @@
   :global(.percentage-value) {
     min-inline-size: 4ch; 
     text-align: end;
+  }
+
+  :global(.slider-percentage) {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    max-inline-size: 4ch;
+    padding: 0;
+    /* background: none; */
+    -moz-appearance:textfield;
+  }
+
+  :global(.slider-percentage::-webkit-outer-spin-button),
+  :global(.slider-percentage::-webkit-inner-spin-button) {
+      -webkit-appearance: none;
+      margin: 0;
   }
 
   .end-of-stops {

@@ -26,14 +26,14 @@
       <div class="stack">
         <div class="chip color-position">
           <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'gray' : stop.color}">
-          <span class="percentage-value">{stop.position1 || 0}%</span>
+          <input type="number" bind:value={stop.position1} class="slider-percentage">
           {#if stop.position1 != null}
             <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 1)}>✕</button>
           {/if}
         </div>
         <div class="chip color-position">
           <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'gray' : 'auto'}">
-          <span class="percentage-value">{stop.position2 || 0}%</span>
+          <input type="number" bind:value={stop.position2} class="slider-percentage">
           {#if stop.position2 != null}
             <button class="remove container-absolute" type="reset" on:click={() => removePositionByIndex(i, 2)}>✕</button>
           {/if}
@@ -50,9 +50,9 @@
           bind:value="{stop.percentage}" 
           style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})"
         />
-        <span class="percentage-value">{stop.percentage || 0}%</span>
+        <input type="number" bind:value={stop.percentage} class="slider-percentage">
       </div>
-      <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
+       <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
     </fieldset>
   {/if}
 {/each}
@@ -60,5 +60,29 @@
 <style>
   .color-stop {
     padding-inline-end: var(--size-3);
+  }
+
+  .color-hint > input[type="range"] {
+    appearance: none;
+    accent-color: var(--surface-1);
+    border-radius: var(--radius-round);
+    block-size: 1rem;
+  }
+
+  .color-hint > input[type="range"]::-webkit-slider-thumb {
+    --_border-size: 4px;
+    
+    cursor: grab;
+    appearance: none;
+    accent-color: var(--surface-1);
+    border: 4px solid white;
+    height: calc(1rem + (var(--_border-size) * 2));
+    aspect-ratio: 1;
+    border-radius: var(--radius-round);
+    box-shadow: var(--shadow-2), var(--inner-shadow-2);
+  }
+  
+  .color-hint > input[type="range"]:active::-webkit-slider-thumb {
+    cursor: grabbing;
   }
 </style>

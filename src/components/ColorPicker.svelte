@@ -101,7 +101,6 @@
       <div class="control">
         <span class="control-channel">A</span>
         <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabA} style="background-image: linear-gradient(to right in oklab, oklab(65% -.5 .5), oklab(65% .5 .5))">
-        <!-- <span class="control-value">{$oklabA}</span> -->
         <input type="number" min="-.5" max=".5" step=".01" bind:value={$oklabA} class="slider-percentage">
       </div>
 
@@ -393,21 +392,5 @@
   
   .control-input:active::-webkit-slider-thumb {
     cursor: grabbing;
-  }
-
-  .slider-percentage {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    text-align: end;
-    max-inline-size: 4ch;
-    padding: 0;
-    background: none;
-    -moz-appearance:textfield;
-  }
-
-  .slider-percentage::-webkit-outer-spin-button,
-  .slider-percentage::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
   }
 </style>

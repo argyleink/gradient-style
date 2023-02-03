@@ -18,14 +18,14 @@
   <div class="stack">
     <div class="chip conic-position">
       <input type="range" bind:value={$conic_position.x} min="-100" max="200" step="1" style="accent-color: {$conic_position.x === null ? 'gray' : 'inherit'}" />
-      <span class="percentage-value">{$conic_position.x || 0}%</span>
+      <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
       {#if $conic_position.x != null}
         <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
       {/if}
     </div>
     <div class="chip conic-position">
       <input type="range" bind:value={$conic_position.y} min="-100" max="200" step="1" style="accent-color: {$conic_position.y === null ? 'gray' : 'inherit'}" />
-      <span class="percentage-value">{$conic_position.y || 0}%</span>
+      <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1"  class="slider-percentage">
       {#if $conic_position.y != null}
         <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
       {/if}

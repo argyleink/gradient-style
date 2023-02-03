@@ -24,7 +24,7 @@
         step="1" 
         style="accent-color: {$radial_position.x === null ? 'gray' : 'inherit'}" 
       />
-      <span class="percentage-value">{$radial_position.x || 0}%</span>
+      <input type="number" bind:value={$radial_position.x} min="-100" max="200" step="1"  class="slider-percentage">
       {#if $radial_position.x != null}
         <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
       {/if}
@@ -37,7 +37,7 @@
         step="1" 
         style="accent-color: {$radial_position.y === null ? 'gray' : 'inherit'}" 
       />
-      <span class="percentage-value">{$radial_position.y || 0}%</span>
+      <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1"  class="slider-percentage">
       {#if $radial_position.y != null}
         <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
       {/if}
