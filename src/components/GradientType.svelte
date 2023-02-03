@@ -60,6 +60,16 @@
     background: var(--surface-1);
   }
 
+  @media (prefers-color-scheme: light) {
+    .switch:hover {
+      background: var(--surface-2);
+    }
+
+    .switch:has(:checked) {
+      background: var(--surface-2);
+    }
+  }
+
   .switch > * {
     grid-area: pile;
   }

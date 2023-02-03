@@ -12,4 +12,10 @@
     aspect-ratio: var(--ratio-square);
     inline-size: 5ch;
   }
+
+  @media (prefers-color-scheme: light) {
+    .angle-icon {
+      background-color: var(--surface-2);
+    }
+  }
 </style>

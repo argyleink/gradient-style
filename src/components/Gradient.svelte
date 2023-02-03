@@ -255,7 +255,7 @@
     }
 
     .brand {
-      background: var(--surface-1);
+      background: white;
     }
   }
 
