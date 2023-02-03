@@ -349,8 +349,8 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     text-align: end;
-    max-inline-size: 4ch;
-    padding: 0;
+    max-inline-size: 5ch;
+    padding-block: 0;
     /* background: none; */
     -moz-appearance:textfield;
   }

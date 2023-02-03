@@ -10,6 +10,6 @@
     background-image: conic-gradient(var(--link), var(--angle), transparent 0%);
     border-radius: var(--radius-round);
     aspect-ratio: var(--ratio-square);
-    inline-size: var(--size-8);
+    inline-size: 5ch;
   }
 </style>
