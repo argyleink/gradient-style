@@ -31,20 +31,37 @@
 
   const gensyntax = {
     'linear': () => 
-      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, ${stopsToStrings()})`,
+      `linear-gradient(
+      ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, 
+      ${stopsToStrings()}
+    )`,
     'radial': () => 
-      `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, ${stopsToStrings()})`,
+      `radial-gradient(
+      ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, 
+      ${stopsToStrings()}
+    )`,
     'conic': () => 
-      `conic-gradient(from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, ${stopsToStrings()})`
+      `conic-gradient(
+      from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, 
+      ${stopsToStrings()}
+    )`
   }
 
   const genClassicSyntax = {
     'linear': () => 
-      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings()})`,
+      `linear-gradient(
+      ${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings()}
+    )`,
     'radial': () => 
-      `radial-gradient(${$radial_size} ${$radial_shape} at ${radialPositionToString()}, ${stopsToStrings()})`,
+      `radial-gradient(
+      ${$radial_size} ${$radial_shape} at ${radialPositionToString()}, 
+      ${stopsToStrings()}
+    )`,
     'conic': () => 
-      `conic-gradient(from ${$conic_angle}deg at ${conicPositionToString()}, ${stopsToStrings()})`
+      `conic-gradient(
+      from ${$conic_angle}deg at ${conicPositionToString()}, 
+      ${stopsToStrings()}
+    )`
   }
 
   function spaceToString() {
@@ -74,7 +91,7 @@
           return s.percentage + '%'
         }
       })
-      .join(', ')
+      .join(',\n      ')
   }
 
   function radialPositionToString() {

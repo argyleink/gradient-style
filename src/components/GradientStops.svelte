@@ -3,6 +3,11 @@
 
   function removeStopByIndex(pos) {
     $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
+    
+    if ($gradient_stops.length === 1) {
+      $gradient_stops[0].position1 = 0
+      $gradient_stops[0].position2 = 0
+    }
   }
 
   function removePositionByIndex(index, pos) {
@@ -32,7 +37,9 @@
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
-      <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
+      {#if $gradient_stops.length > 1}
+        <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
+      {/if}
     </fieldset>
   {/if}
   {#if stop.kind === 'hint'}
