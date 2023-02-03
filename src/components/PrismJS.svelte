@@ -1,19 +1,44 @@
 <script>
 
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate } from 'svelte'
   
-  export let language;
-  export let code;
+  export let modern_gradient
+  export let classic_gradient
   let loaded = false
   
   onMount(() => {
     loaded = true
-    Prism.highlightAll();
-  });
+    Prism.highlightAll()
+  })
+
+  afterUpdate(() => {
+    Prism.highlightAll()
+  })
+
+  function textSelectNode() {
+    const range = document.createRange()
+    const selection = window.getSelection()
+    range.selectNode(document.querySelector('.code-block'))
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+  $: snippet = `
+.modern-gradient {
+  background-image: 
+    ${modern_gradient}
+  ;
+}
+
+.classic-gradient {
+  background-image: 
+    ${classic_gradient}
+  ;
+}`
 </script>
 
-<pre class="code-block" has-loaded={loaded}>
-  <code class="language-{language}">{code}</code>
+<pre class="code-block" has-loaded={loaded} on:click={() => textSelectNode()}>
+  <code class="language-css" contenteditable="false" bind:textContent={snippet}></code>
 </pre>
 
 <style>

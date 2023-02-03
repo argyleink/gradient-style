@@ -147,21 +147,7 @@
   <contain-er style="container: preview-panel / inline-size;">
     <section class="preview-panel">
       <div class="preview" style={`background:${user_gradient}`}></div>
-      <!--<input type="text" bind:value={user_gradient} onclick="this.select()" 
-        readonly />-->
-      <Prism language="css" code={`
-.modern-gradient {
-  background-image: 
-    ${user_gradient}
-  ;
-}
-
-.classic-gradient {
-  background-image: 
-    ${classic_gradient}
-  ;
-}`} />
-      <!-- modern and legacy for copy -->
+      <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
     </section>
   </contain-er>
 
