@@ -173,7 +173,7 @@
       </header>
 
       <h3>Settings</h3>
-      <ColorPicker />
+      <!--<ColorPicker />-->
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />
