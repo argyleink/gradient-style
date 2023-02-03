@@ -208,7 +208,6 @@
 
   .preview {
     margin-inline: auto;
-    margin-block-start: var(--size-fluid-4);
     block-size: 30vh;
     max-inline-size: 90%;
     aspect-ratio: var(--ratio-widescreen);
@@ -265,9 +264,11 @@
 
   .preview-panel {
     display: grid;
-    place-content: center;
-    gap: var(--size-fluid-3);
+    place-content: space-between center;
+    gap: var(--size-fluid-5);
+    padding-block: var(--size-fluid-5);
 
+    min-block-size: 100%;
     max-block-size: 100vh;
     max-block-size: 100dvh;
     overflow-y: auto;
