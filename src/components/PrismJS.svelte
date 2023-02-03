@@ -34,12 +34,10 @@
   background-image: 
     ${classic_gradient}
   ;
-}`
+}`.trim()
 </script>
 
-<pre class="code-block" has-loaded={loaded} on:click={() => textSelectNode()}>
-  <code class="language-css" contenteditable="false" bind:textContent={snippet}></code>
-</pre>
+<pre class="code-block" has-loaded={loaded} on:click={() => textSelectNode()}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
 
 <style>
   .code-block {
