@@ -34,7 +34,7 @@
 
   @media (prefers-color-scheme: light) {
     .layers {
-      background: white;
+      background: var(--surface-1);
     }
   }
 

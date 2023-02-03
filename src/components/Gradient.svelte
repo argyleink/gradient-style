@@ -247,11 +247,11 @@
 
   @media (prefers-color-scheme: light) {
     .controls {
-      background: white;
+      background: var(--surface-1);
     }
 
     .gradient {
-      background: var(--surface-2);
+      background: var(--surface-4);
     }
 
     .brand {
@@ -304,7 +304,7 @@
 
   @media (prefers-color-scheme: light) {
     h3 {
-      background: var(--surface-1);
+      background: var(--surface-2);
     }
   }
 
