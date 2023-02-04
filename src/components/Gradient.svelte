@@ -163,8 +163,8 @@
       <div class="gradient-logo" style={`background:${user_gradient}`}></div>
       <h1>HDgradients</h1>
     </header>
-    <p>{$picker_value}</p>
-    <ColorPicker />
+    <!-- <p>{$picker_value}</p>
+    <ColorPicker /> -->
     <LayersPanel />
   </contain-er>
   
