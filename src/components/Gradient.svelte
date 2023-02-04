@@ -9,6 +9,7 @@
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
   import {layers} from '../store/layers.ts'
+  import {picker_value} from '../store/colorpicker.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -162,6 +163,8 @@
       <div class="gradient-logo" style={`background:${user_gradient}`}></div>
       <h1>HDgradients</h1>
     </header>
+    <p>{$picker_value}</p>
+    <ColorPicker />
     <LayersPanel />
   </contain-er>
   
@@ -180,7 +183,6 @@
       </header>
 
       <h3>Settings</h3>
-      <!--<ColorPicker />-->
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />

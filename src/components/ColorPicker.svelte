@@ -1,6 +1,8 @@
 <script>
+  import {derived} from 'svelte/store'
+
   import {
-    colorspace, 
+    picker_value, colorspace, 
     oklabL, oklabA, oklabB, oklabAlpha,
     oklchL, oklchC, oklchH, oklchAlpha,
     labL, labA, labB, labAlpha,
@@ -11,29 +13,28 @@
     colorR, colorG, colorB, colorAlpha
   } from '../store/colorpicker.ts'
 
-  const gencolor = {
-    'oklab': () => 
-      `oklab(${$oklabL}% ${$oklabA} ${$oklabB} / ${$oklabAlpha}%)`,
-    'oklch': () => 
-      `oklch(${$oklchL}% ${$oklchC} ${$oklchH} / ${$oklchAlpha}%)`,
-    'lab': () => 
-      `lab(${$labL}% ${$labA} ${$labB} / ${$labAlpha}%)`,
-    'lch': () => 
-      `lch(${$lchL}% ${$lchC} ${$lchH} / ${$lchAlpha}%)`,
-    'hsl': () => 
-      `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`,
-    'hwb': () => 
-      `hwb(${$hwbH} ${$hwbW}% ${$hwbB}% / ${$hwbAlpha}%)`,
-    'srgb': () => 
-      `rgb(${$rgbR} ${$rgbG} ${$rgbB} / ${$rgbAlpha}%)`,
-    'srgb-linear': rgbColor,
-    'display-p3': rgbColor,
-    'rec2020': rgbColor,
-    'a98-rgb': rgbColor,
-    'prophoto-rgb': rgbColor,
-    'xyz': rgbColor,
-    'xyz-d50': rgbColor,
-    'xyz-d65': rgbColor,
+  function gencolor(colorspace) {
+    let color
+
+    if (colorspace === 'oklab')
+      color = `oklab(${$oklabL}% ${$oklabA} ${$oklabB} / ${$oklabAlpha}%)`
+    else if (colorspace === 'oklch')
+      color = `oklch(${$oklchL}% ${$oklchC} ${$oklchH} / ${$oklchAlpha}%)`
+    else if (colorspace === 'lab')
+      color = `lab(${$labL}% ${$labA} ${$labB} / ${$labAlpha}%)`
+    else if (colorspace === 'lch')
+      color = `lch(${$lchL}% ${$lchC} ${$lchH} / ${$lchAlpha}%)`
+    else if (colorspace === 'hsl')
+      color = `hsl(${$hslH} ${$hslS}% ${$hslL}% / ${$hslAlpha}%)`
+    else if (colorspace === 'hwb')
+      color = `hwb(${$hwbH} ${$hwbW}% ${$hwbB}% / ${$hwbAlpha}%)`
+    else if (colorspace === 'srgb')
+      color = `rgb(${$rgbR} ${$rgbG} ${$rgbB} / ${$rgbAlpha}%)`
+    else if (isRGBcolor(colorspace))
+      color = rgbColor()
+
+    $picker_value = color
+    return color
   }
 
   function rgbColor() {
@@ -53,7 +54,7 @@
     ].includes(space)
   }
 
-  $: user_color = gencolor[$colorspace](
+  $: user_color = gencolor($colorspace,
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
     $oklchL, $oklchC, $oklchH, $oklchAlpha,
     $labL, $labA, $labB, $labAlpha,
@@ -70,6 +71,8 @@
   <div class="preview" style={`--user-color:${user_color}`}>
     <output><code>{user_color}</code></output>
   </div>
+
+  <!-- <p>{tester}</p> -->
 
   <div class="controls">
     <select class="colorspace" bind:value={$colorspace}> 

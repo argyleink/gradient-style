@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 
+export const picker_value = writable('oklch(75% .3 1080deg)')
 export const colorspace = writable('oklch');
 
 export const oklabL = writable(100);
