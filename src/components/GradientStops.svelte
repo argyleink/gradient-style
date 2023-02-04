@@ -2,12 +2,18 @@
   import {gradient_stops, gradient_space} from '../store/gradient.ts'
 
   function removeStopByIndex(pos) {
-    $gradient_stops = $gradient_stops.filter((item, i) => i !== pos)
+    $gradient_stops.splice(pos, 2)
+
+    if ($gradient_stops.length === pos) {
+      $gradient_stops.pop()
+    }
     
     if ($gradient_stops.length === 1) {
       $gradient_stops[0].position1 = 0
       $gradient_stops[0].position2 = 0
     }
+
+    $gradient_stops = $gradient_stops
   }
 
   function removePositionByIndex(index, pos) {
@@ -53,7 +59,6 @@
         />
         <input type="number" bind:value={stop.percentage} class="slider-percentage">
       </div>
-      <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
     </fieldset>
   {/if}
 {/each}
