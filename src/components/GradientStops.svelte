@@ -35,7 +35,8 @@
     })
 
     document.addEventListener('keyup', e => {
-      unsub()
+      if (e.key === "Escape")
+        unsub()
     })
   }
 </script>

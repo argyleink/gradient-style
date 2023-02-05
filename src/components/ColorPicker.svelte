@@ -104,8 +104,7 @@
         <div class="control">
           <span class="control-channel">L</span>
           <input class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
-          <!-- <span class="control-value" contenteditable bind:textContent={$oklabL}></span> -->
-          <input type="number" bind:value={$oklabL} class="slider-percentage">
+          <input type="number" bind:value={$oklabL} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
@@ -117,14 +116,12 @@
         <div class="control">
           <span class="control-channel">B</span>
           <input class="control-input" type="range" min="-.5" max=".5" step=".01" bind:value={$oklabB} style="background-image: linear-gradient(to right in oklab, oklab(47% -.03 -.32), oklab(96% 0 .25))">
-          <!-- <span class="control-value">{$oklabB}</span> -->
           <input type="number" min="-.5" max=".5" step=".01" bind:value={$oklabB} class="slider-percentage">
         </div>
 
         <div class="control percentage">
           <span class="control-channel">A</span>
           <input class="control-input alpha" type="range" min="0" max="100" bind:value={$oklabAlpha}>
-          <!-- <span class="control-value">{$oklabAlpha}%</span> -->
           <input type="number" min="0" max="100" bind:value={$oklabAlpha} class="slider-percentage">
         </div>
       {/if}
@@ -132,78 +129,78 @@
       {#if $colorspace === 'oklch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" min="0" max="100" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
-          <span class="control-value">{$oklchL}%</span>
+          <input class="control-input" type="range" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
+          <input type="number" bind:value={$oklchL} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">C</span>
           <input class="control-input" type="range" min="0" max=".5" step=".01" bind:value={$oklchC} style={`background-image: linear-gradient(to right in oklab, oklch(${$oklchL}% 0 ${$oklchH}), oklch(${$oklchL}% .5 ${$oklchH}))`}>
-          <span class="control-value">{$oklchC}</span>
+          <input type="number" bind:value={$oklchC} min="0" max=".5" step=".01" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">H</span>
           <input class="control-input" type="range" min="0" max="360" bind:value={$oklchH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
-          <span class="control-value">{$oklchH}</span>
+          <input type="number" bind:value={$oklchH} min="0" max="360" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
-          <input class="control-input alpha" type="range" min="0" max="100" bind:value={$oklchAlpha}>
-          <span class="control-value">{$oklchAlpha}%</span>
+          <input class="control-input alpha" type="range" bind:value={$oklchAlpha}>
+          <input type="number" bind:value={$oklchAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
       {#if $colorspace === 'lab'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" min="0" max="100" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
-          <span class="control-value">{$labL}%</span>
+          <input class="control-input" type="range" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input type="number" bind:value={$labL} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
           <input class="control-input" type="range" min="-160" max="160" bind:value={$labA} style="background-image: linear-gradient(to right in oklab, lab(85% -100 100), lab(55% 100 100))">
-          <span class="control-value">{$labA}</span>
+          <input type="number" bind:value={$labA} min="-160" max="160" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">B</span>
           <input class="control-input" type="range" min="-160" max="160" bind:value={$labB} style="background-image: linear-gradient(to right in oklab, lab(31% 70 -120), lab(96% 0 120))">
-          <span class="control-value">{$labB}</span>
+          <input type="number" bind:value={$labB} min="-160" max="160" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
-          <input class="control-input alpha" type="range" min="0" max="100" bind:value={$labAlpha}>
-          <span class="control-value">{$labAlpha}%</span>
+          <input class="control-input alpha" type="range" bind:value={$labAlpha}>
+          <input type="number" bind:value={$labAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
       {#if $colorspace === 'lch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" min="0" max="100" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
-          <span class="control-value">{$lchL}%</span>
+          <input class="control-input" type="range" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input type="number" bind:value={$lchL} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">C</span>
           <input class="control-input" type="range" min="0" max="230" bind:value={$lchC} style={`background-image: linear-gradient(to right in oklab, lch(${$lchL}% 0 ${$lchH}), lch(${$lchL}% 230 ${$lchH}))`}>
-          <span class="control-value">{$lchC}</span>
+          <input type="number" bind:value={$lchC} min="0" max="230" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">H</span>
           <input class="control-input" type="range" min="0" max="360" bind:value={$lchH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
-          <span class="control-value">{$lchH}</span>
+          <input type="number" bind:value={$lchH} min="0" max="360" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
-          <input class="control-input alpha" type="range" min="0" max="100" bind:value={$lchAlpha}>
-          <span class="control-value">{$lchAlpha}%</span>
+          <input class="control-input alpha" type="range" bind:value={$lchAlpha}>
+          <input type="number" bind:value={$lchAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
@@ -211,25 +208,25 @@
         <div class="control">
           <span class="control-channel">H</span>
           <input class="control-input" type="range" min="0" max="360" bind:value={$hslH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
-          <span class="control-value">{$hslH}</span>
+          <input type="number" bind:value={$hslH} min="0" max="360" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">S</span>
           <input class="control-input" type="range" bind:value={$hslS} style={`background-image: linear-gradient(to right in oklab, hsl(${$hslH} 0% ${$hslL}%), hsl(${$hslH} 100% ${$hslL}%)`}>
-          <span class="control-value">{$hslS}</span>
+          <input type="number" bind:value={$hslS} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">L</span>
           <input class="control-input" type="range" bind:value={$hslL} style={`background-image: linear-gradient(to right in oklab, hsl(${$hslH} ${$hslS}% 0%), hsl(${$hslH} ${$hslS}% 100%)`}>
-          <span class="control-value">{$hslL}</span>
+          <input type="number" bind:value={$hslL} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
           <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hslAlpha}>
-          <span class="control-value">{$hslAlpha}%</span>
+          <input type="number" bind:value={$hslAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
@@ -237,25 +234,25 @@
         <div class="control">
           <span class="control-channel">H</span>
           <input class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
-          <span class="control-value">{$hwbH}</span>
+          <input type="number" bind:value={$hwbH} min="0" max="360" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">W</span>
           <input class="control-input" type="range" bind:value={$hwbW} style={`background-image: linear-gradient(to right in oklab, #fff0, #fff); background-color: black`}>
-          <span class="control-value">{$hwbW}</span>
+          <input type="number" bind:value={$hwbW} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">B</span>
           <input class="control-input" type="range" bind:value={$hwbB} style={`background-image: linear-gradient(to right in oklab, #0000, #000); background-color: white`}>
-          <span class="control-value">{$hwbB}</span>
+          <input type="number" bind:value={$hwbB} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
-          <input class="control-input alpha" type="range" min="0" max="100" bind:value={$hwbAlpha}>
-          <span class="control-value">{$hwbAlpha}%</span>
+          <input class="control-input alpha" type="range" bind:value={$hwbAlpha}>
+          <input type="number" bind:value={$hwbAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
@@ -263,25 +260,25 @@
         <div class="control">
           <span class="control-channel">R</span>
           <input class="control-input" type="range" min="0" max="255" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
-          <span class="control-value">{$rgbR}</span>
+          <input type="number" bind:value={$rgbR} min="0" max="255" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">G</span>
           <input class="control-input" type="range" min="0" max="255" bind:value={$rgbG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
-          <span class="control-value">{$rgbG}</span>
+          <input type="number" bind:value={$rgbG} min="0" max="255" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">B</span>
           <input class="control-input" type="range" min="0" max="255" bind:value={$rgbB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
-          <span class="control-value">{$rgbB}</span>
+          <input type="number" bind:value={$rgbB} min="0" max="255" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
           <input class="control-input alpha" type="range" min="0" max="100" bind:value={$rgbAlpha}>
-          <span class="control-value">{$rgbAlpha}%</span>
+          <input type="number" bind:value={$rgbAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
 
@@ -289,25 +286,25 @@
         <div class="control">
           <span class="control-channel">R</span>
           <input class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
-          <span class="control-value">{$colorR}</span>
+          <input type="number" bind:value={$colorR} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">G</span>
           <input class="control-input" type="range" bind:value={$colorG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
-          <span class="control-value">{$colorG}</span>
+          <input type="number" bind:value={$colorG} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">B</span>
           <input class="control-input" type="range" bind:value={$colorB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
-          <span class="control-value">{$colorB}</span>
+          <input type="number" bind:value={$colorB} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">A</span>
           <input class="control-input alpha" type="range" min="0" max="100" bind:value={$colorAlpha}>
-          <span class="control-value">{$colorAlpha}%</span>
+          <input type="number" bind:value={$colorAlpha} min="0" max="100" class="slider-percentage">
         </div>
       {/if}
     </div>
