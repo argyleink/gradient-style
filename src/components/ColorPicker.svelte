@@ -74,14 +74,7 @@
 
 <dialog id="color-picker">
   <div class="hd-color-picker" style={`accent-color:${user_color}`}>
-
     <div class="preview" style={`--user-color:${user_color}`}>
-      <output><code>{user_color}</code></output>
-    </div>
-
-    <!-- <p>{tester}</p> -->
-
-    <div class="controls">
       <select class="colorspace" bind:value={$colorspace}> 
         <option>hsl</option>
         <option>hwb</option>
@@ -99,7 +92,10 @@
         <option>xyz-d50</option>
         <option>xyz-d65</option>
       </select>
+      <output><code>{user_color}</code></output>
+    </div>
 
+    <div class="controls">
       {#if $colorspace === 'oklab'}
         <div class="control">
           <span class="control-channel">L</span>
@@ -313,6 +309,10 @@
 </dialog>
 
 <style>
+  dialog {
+    padding: 0;
+  }
+
   dialog::backdrop {
     backdrop-filter: none;
   }
@@ -326,24 +326,22 @@
 
   .hd-color-picker {
     display: grid;
-    gap: var(--size-2);
-    background: var(--surface-2);
+    gap: 0;
     border-radius: var(--radius-3);
-    /* padding: var(--size-3);
-    box-shadow: var(--shadow-6); */
   }
 
   .colorspace {
-    justify-self: center;
+    justify-self: end;
+    background: hsl(none none none / .4);
   }
 
   .preview {
     aspect-ratio: var(--ratio-widescreen);
-    display: flex;
-    align-items: end;
-    justify-content: center;
+    display: grid;
+    align-content: space-between;
+    justify-items: center;
     block-size: var(--size-content-1);
-    padding-block-end: var(--size-3);
+    padding: var(--size-3);
     background: 
       linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);
@@ -358,6 +356,8 @@
   .controls {
     display: grid;
     gap: var(--size-2);
+    padding: var(--size-3);
+    background-color: var(--surface-2);
   }
 
   .control {
@@ -367,7 +367,8 @@
   }
 
   .control-channel {
-    min-inline-size: 2ch;
+    font-family: var(--font-mono);
+    cursor: default;
   }
 
   .control-input {
