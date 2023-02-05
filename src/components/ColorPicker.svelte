@@ -1,5 +1,5 @@
 <script>
-  import {derived} from 'svelte/store'
+  import { onMount } from 'svelte'
 
   import {
     picker_value, colorspace, 
@@ -12,6 +12,37 @@
     rgbR, rgbG, rgbB, rgbAlpha,
     colorR, colorG, colorB, colorAlpha
   } from '../store/colorpicker.ts'
+
+  let dialog
+
+  const dialogClosingEvent = new Event('closing')
+  const dialogClosedEvent  = new Event('closed')
+
+  onMount(() => {
+    dialog = document.querySelector('#color-picker')
+
+    dialog.addEventListener('close', dialogClose)
+    dialog.addEventListener('click', lightDismiss)
+  })
+
+  const dialogClose = async ({target:dialog}) => {
+    dialog.setAttribute('inert', '')
+    dialog.dispatchEvent(dialogClosingEvent)
+
+    await animationsComplete(dialog)
+
+    dialog.dispatchEvent(dialogClosedEvent)
+  }
+
+  const animationsComplete = element =>
+    Promise.allSettled(
+      element.getAnimations().map(animation => 
+        animation.finished))
+
+  const lightDismiss = ({target:dialog}) => {
+    if (dialog.nodeName === 'DIALOG')
+      dialog.close('dismiss')
+  }
 
   function gencolor(colorspace) {
     let color
@@ -333,6 +364,8 @@
   .colorspace {
     justify-self: end;
     background: hsl(none none none / .4);
+    color: white;
+    border: none;
   }
 
   .preview {
@@ -358,6 +391,12 @@
     gap: var(--size-2);
     padding: var(--size-3);
     background-color: var(--surface-2);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .controls {
+      background-color: white;
+    }
   }
 
   .control {

@@ -27,6 +27,9 @@
 
   function pickColor(stop) {
     const picker = document.getElementById('color-picker')
+
+    // picker.set color
+    picker.removeAttribute('inert')
     picker.showModal()
 
     const unsub = picker_value.subscribe(value => {
@@ -34,9 +37,8 @@
       $gradient_stops = [...$gradient_stops]
     })
 
-    document.addEventListener('keyup', e => {
-      if (e.key === "Escape")
-        unsub()
+    picker.addEventListener('closing', () => {
+      unsub()
     })
   }
 </script>
