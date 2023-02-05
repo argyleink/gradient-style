@@ -56,7 +56,7 @@
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
-          <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'var(--gray-6)' : 'auto'}">
+          <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'var(--gray-6)' : stop.color}">
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
