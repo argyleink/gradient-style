@@ -9,7 +9,6 @@
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
   import {layers} from '../store/layers.ts'
-  import {picker_value} from '../store/colorpicker.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -163,8 +162,7 @@
       <div class="gradient-logo" style={`background:${user_gradient}`}></div>
       <h1>HDgradients</h1>
     </header>
-    <!-- <p>{$picker_value}</p>
-    <ColorPicker /> -->
+    <ColorPicker />
     <LayersPanel />
   </contain-er>
   
@@ -373,35 +371,6 @@
     display: inline-flex;
     place-items: center;
     gap: var(--size-2);
-  }
-
-  :global(.chip) {
-    border-radius: var(--radius-round);
-    display: inline-flex;
-    place-items: center;
-    gap: var(--size-2);
-    padding-block: var(--size-1);
-    padding-inline: var(--size-2);
-    box-shadow: var(--shadow-1);
-    border: 1px solid var(--surface-2);
-  }
-
-  :global(input[type="color"].round) {
-    inline-size: 2ch;
-    block-size: 2ch;
-    border-radius: var(--radius-round);
-    padding: 0;
-  }
-
-  :global(.chip:has(input[type="color"])) {
-    background: var(--surface-1);
-    justify-self: start;
-  }
-
-  @media (prefers-color-scheme: light) {
-    :global(.chip:has(input[type="color"])) {
-      background: white;
-    }
   }
 
   @media (prefers-color-scheme: light) {

@@ -1,5 +1,6 @@
 <script>
   import {gradient_stops, gradient_space} from '../store/gradient.ts'
+  import {picker_value} from '../store/colorpicker.ts'
 
   function removeStopByIndex(pos) {
     $gradient_stops.splice(pos, 2)
@@ -23,6 +24,20 @@
     if (pos === 1 && $gradient_stops[index].position2 !== null)
       $gradient_stops[index]['position2'] = null      
   }
+
+  function pickColor(stop) {
+    const picker = document.getElementById('color-picker')
+    picker.showModal()
+
+    const unsub = picker_value.subscribe(value => {
+      stop.color = value
+      $gradient_stops = [...$gradient_stops]
+    })
+
+    document.addEventListener('keyup', e => {
+      unsub()
+    })
+  }
 </script>
 
 {#each $gradient_stops as stop, i}
@@ -30,8 +45,9 @@
     <fieldset style="accent-color: {stop.color}">
       <legend>Color</legend>
       <div class="chip color-stop">
-        <input class="round" type="color" bind:value="{stop.color}">
-        <span>{stop.color}</span>
+        <!-- <input class="round" type="color" bind:value="{stop.color}"> -->
+        <span class="round" style="background-color: {stop.color}" on:click={() => pickColor(stop)}></span>
+        <span class="color-string">{stop.color}</span>
       </div>
       <div class="stack">
         <div class="color-position slider-set">
@@ -90,5 +106,39 @@
   
   .color-hint > input[type="range"]:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .chip {
+    border-radius: var(--radius-round);
+    display: inline-flex;
+    place-items: center;
+    gap: var(--size-2);
+    padding-block: var(--size-1);
+    padding-inline: var(--size-2);
+    box-shadow: var(--shadow-1);
+    border: 1px solid var(--surface-2);
+    background: var(--surface-1);
+    justify-self: start;
+    max-inline-size: 100%;
+    overflow-x: auto;
+  }
+
+  .round {
+    inline-size: 2ch;
+    block-size: 2ch;
+    border-radius: var(--radius-round);
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .color-string {
+    min-inline-size: max-content;
+    padding-inline-end: var(--size-1);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .chip {
+      background: white;
+    }
   }
 </style>
