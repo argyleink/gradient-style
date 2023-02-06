@@ -427,7 +427,7 @@
 
   :global(html) {
     --gradient-checkerboard: repeating-conic-gradient(
-      var(--surface-4) 0% 25%, 
+      var(--surface-3) 0% 25%, 
       transparent 0% 50%) 
       50% / 1rem 1rem;
   }

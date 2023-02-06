@@ -172,7 +172,9 @@
   
   <contain-er style="container: preview-panel / inline-size;">
     <section class="preview-panel">
-      <div class="preview" style={`background:${user_gradient}`}></div>
+      <div class="preview">
+        <div style={`background:${user_gradient}`}></div>  
+      </div>
       <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
     </section>
   </contain-er>
@@ -232,6 +234,7 @@
   }
 
   .preview {
+    display: grid;
     margin-inline: auto;
     block-size: 30vh;
     max-inline-size: 90%;
@@ -239,6 +242,7 @@
     animation: var(--animation-fade-out) reverse;
     resize: both;
     overflow: hidden;
+    background: var(--gradient-checkerboard);
     box-shadow: var(--shadow-6);
   }
 
