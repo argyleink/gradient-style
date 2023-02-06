@@ -28,7 +28,8 @@
   function pickColor(stop) {
     const picker = document.getElementById('color-picker')
 
-    // picker.set color
+    // picker.set color & position
+    picker.setColor(stop.color)
     picker.removeAttribute('inert')
     picker.showModal()
 
@@ -49,6 +50,7 @@
       <legend>Color</legend>
       <div class="chip color-stop">
         <!-- <input class="round" type="color" bind:value="{stop.color}"> -->
+        <!-- todo: use button -->
         <span class="round" style="background-color: {stop.color}" on:click={() => pickColor(stop)}></span>
         <span class="color-string">{stop.color}</span>
       </div>
@@ -127,6 +129,7 @@
   }
 
   .round {
+    cursor: pointer;
     inline-size: 2ch;
     block-size: 2ch;
     border-radius: var(--radius-round);

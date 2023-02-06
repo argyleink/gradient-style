@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte'
+  import Color from 'colorjs.io'
 
   import {
     picker_value, colorspace, 
@@ -23,7 +24,77 @@
 
     dialog.addEventListener('close', dialogClose)
     dialog.addEventListener('click', lightDismiss)
+
+    dialog.setColor = setColor
+    dialog.setAnchor = setAnchor
   })
+
+  function setColor(color) {
+    const parsedColor = new Color(color)
+    $colorspace = parsedColor.space.id
+    
+    if ($colorspace === 'oklab') {
+      const [l,a,b] = parsedColor.coords
+      $oklabL = l * 100
+      $oklabA = a.toString()
+      $oklabB = b.toString()
+      $oklabAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'oklch') {
+      const [l,c,h] = parsedColor.coords
+      $oklchL = l * 100
+      $oklchC = c.toString()
+      $oklchH = h.toString()
+      $oklchAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'lab') {
+      const [l,a,b] = parsedColor.coords
+      $labL = l
+      $labA = a.toString()
+      $labB = b.toString()
+      $labAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'lch') {
+      const [l,c,h] = parsedColor.coords
+      $lchL = l
+      $lchC = c.toString()
+      $lchH = h.toString()
+      $lchAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'hsl') {
+      const [h,s,l] = parsedColor.coords
+      $hslL = l
+      $hslS = s.toString()
+      $hslH = h.toString()
+      $hslAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'hwb') {
+      const [h,w,b] = parsedColor.coords
+      $hwbH = h.toString()
+      $hwbW = w
+      $hwbB = b
+      $hwbAlpha = parsedColor.alpha * 100
+    }
+    else if ($colorspace === 'srgb' || colorspace === 'rgb') {
+      const [r,g,b] = parsedColor.coords
+      $rgbR = r * 100
+      $rgbG = g * 100
+      $rgbB = b * 100
+      $rgbAlpha = parsedColor.alpha * 100
+    }
+    else if (isRGBcolor($colorspace)) {
+      const [r,g,b] = parsedColor.coords
+      $colorR = r * 100
+      $colorG = g * 100
+      $colorB = b * 100
+      $colorAlpha = parsedColor.alpha * 100
+    }
+  }
+
+  function setAnchor(target) {
+    // parse
+    // set
+  }
 
   const dialogClose = async ({target:dialog}) => {
     dialog.setAttribute('inert', '')
@@ -60,7 +131,7 @@
     else if (colorspace === 'hwb')
       color = `hwb(${$hwbH} ${$hwbW}% ${$hwbB}%${alphaToString($hwbAlpha)})`
     else if (colorspace === 'srgb')
-      color = `rgb(${$rgbR} ${$rgbG} ${$rgbB}${alphaToString($rgbAlpha)})`
+      color = `rgb(${$rgbR}% ${$rgbG}% ${$rgbB}%${alphaToString($rgbAlpha)})`
     else if (isRGBcolor(colorspace))
       color = rgbColor()
 
@@ -286,20 +357,20 @@
       {#if $colorspace === 'srgb'}
         <div class="control">
           <span class="control-channel">R</span>
-          <input class="control-input" type="range" min="0" max="255" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
-          <input type="number" bind:value={$rgbR} min="0" max="255" class="slider-percentage">
+          <input class="control-input" type="range" min="0" max="100" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+          <input type="number" bind:value={$rgbR} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">G</span>
-          <input class="control-input" type="range" min="0" max="255" bind:value={$rgbG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
-          <input type="number" bind:value={$rgbG} min="0" max="255" class="slider-percentage">
+          <input class="control-input" type="range" min="0" max="100" bind:value={$rgbG} style={`background-image: linear-gradient(to right in oklab, #0f00, #0f0); background-color: black;`}>
+          <input type="number" bind:value={$rgbG} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
           <span class="control-channel">B</span>
-          <input class="control-input" type="range" min="0" max="255" bind:value={$rgbB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
-          <input type="number" bind:value={$rgbB} min="0" max="255" class="slider-percentage">
+          <input class="control-input" type="range" min="0" max="100" bind:value={$rgbB} style={`background-image: linear-gradient(to right in oklab, #00f0, #00f); background-color: black;`}>
+          <input type="number" bind:value={$rgbB} min="0" max="100" class="slider-percentage">
         </div>
 
         <div class="control">
@@ -345,6 +416,7 @@
   }
 
   dialog::backdrop {
+    background: #0000;
     backdrop-filter: none;
   }
 

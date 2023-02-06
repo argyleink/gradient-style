@@ -15,7 +15,7 @@ export const oklchAlpha = writable(100);
 
 export const labL = writable(100);
 export const labA = writable(-20);
-export const labB = writable(50);
+export const labB = writable(160);
 export const labAlpha = writable(100);
 
 export const lchL = writable(50);
@@ -28,14 +28,14 @@ export const hslS = writable(100);
 export const hslL = writable(50);
 export const hslAlpha = writable(100);
 
-export const hwbH = writable(220);
-export const hwbW = writable(100);
-export const hwbB = writable(50);
+export const hwbH = writable(323);
+export const hwbW = writable(0);
+export const hwbB = writable(0);
 export const hwbAlpha = writable(100);
 
 export const rgbR = writable(0);
-export const rgbG = writable(255);
-export const rgbB = writable(255);
+export const rgbG = writable(100);
+export const rgbB = writable(100);
 export const rgbAlpha = writable(100);
 
 export const colorR = writable(0);
