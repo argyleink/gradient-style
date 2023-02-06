@@ -92,8 +92,14 @@
   }
 
   function setAnchor(target) {
-    // parse
-    // set
+    const rect = target.getBoundingClientRect()
+    dialog.style.setProperty('--x', rect.x + 'px')
+    dialog.style.setProperty('--y', rect.y + 'px')
+
+    if (rect.y > window.innerHeight / 2)
+      dialog.style.transform = 'translateX(-98%) translateY(-95%)'
+    else
+      dialog.style.transform = 'translateX(-98%) translateY(-5%)'
   }
 
   const dialogClose = async ({target:dialog}) => {
@@ -413,6 +419,8 @@
 <style>
   dialog {
     padding: 0;
+    margin-inline-start: var(--x, auto);
+    margin-block-start: var(--y, auto);
   }
 
   dialog::backdrop {

@@ -25,10 +25,10 @@
       $gradient_stops[index]['position2'] = null      
   }
 
-  function pickColor(stop) {
+  function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
-    // picker.set color & position
+    picker.setAnchor(e.target)
     picker.setColor(stop.color)
     picker.removeAttribute('inert')
     picker.showModal()
@@ -51,7 +51,7 @@
       <div class="chip color-stop">
         <!-- <input class="round" type="color" bind:value="{stop.color}"> -->
         <!-- todo: use button -->
-        <span class="round" style="background-color: {stop.color}" on:click={() => pickColor(stop)}></span>
+        <span class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></span>
         <span class="color-string">{stop.color}</span>
       </div>
       <div class="stack">
