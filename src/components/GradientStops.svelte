@@ -30,7 +30,6 @@
 
     picker.setAnchor(e.target)
     picker.setColor(stop.color)
-    picker.removeAttribute('inert')
     picker.showModal()
 
     const unsub = picker_value.subscribe(value => {
@@ -49,9 +48,7 @@
     <fieldset style="accent-color: {stop.color}">
       <legend>Color</legend>
       <div class="chip color-stop">
-        <!-- <input class="round" type="color" bind:value="{stop.color}"> -->
-        <!-- todo: use button -->
-        <span class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></span>
+        <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
         <span class="color-string">{stop.color}</span>
       </div>
       <div class="stack">
@@ -129,12 +126,13 @@
   }
 
   .round {
-    cursor: pointer;
     inline-size: 2ch;
     block-size: 2ch;
     border-radius: var(--radius-round);
     padding: 0;
     flex-shrink: 0;
+    border: none;
+    box-shadow: var(--inner-shadow-0);
   }
 
   .color-string {

@@ -100,7 +100,6 @@
   }
 
   const dialogClose = async ({target:dialog}) => {
-    dialog.setAttribute('inert', '')
     dialog.dispatchEvent(dialogClosingEvent)
 
     await animationsComplete(dialog)
