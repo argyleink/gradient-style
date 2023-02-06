@@ -116,11 +116,15 @@
     }
   }
 
+  function randomNumber(min, max) {
+    return Math.trunc(Math.random() * (max - min) + min)
+  }
+
   function addStop() {
     $gradient_stops = [
       ...$gradient_stops,
       {kind: 'hint', percentage: null},
-      {kind: 'stop', color: `oklch(80% .3 ${Math.trunc(Math.random()*10)}rad)`, position1: null, position2: null},
+      {kind: 'stop', color: `oklch(80% 0.3 ${randomNumber(0,360)})`, position1: null, position2: null},
     ]
   }
 
