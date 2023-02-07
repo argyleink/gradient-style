@@ -139,6 +139,7 @@
   .color-string {
     min-inline-size: max-content;
     padding-inline-end: var(--size-1);
+    line-height: 1;
   }
 
   @media (prefers-color-scheme: light) {

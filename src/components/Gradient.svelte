@@ -352,7 +352,7 @@
   }
 
   :global(fieldset > select) {
-    justify-self: start;
+    place-self: start;
   }
 
   :global(fieldset) {
@@ -383,8 +383,6 @@
 
   @media (prefers-color-scheme: light) {
     :global(select) {
-      background: white;
-      box-shadow: var(--shadow-3);
       border: 1px solid var(--surface-2);
     }
   }
@@ -465,5 +463,45 @@
     inline-size: var(--size-10);
     aspect-ratio: var(--ratio-square);
     justify-self: center;
+  }
+
+  :global(select) {
+    --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color=%23adb5bd);
+    --icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color=%23adb5bd);
+    --_bg-light: #fff;
+    --_bg-dark: var(--surface-3);
+    --_bg: var(--_bg-light);
+    background-color: var(--_bg);
+    
+    appearance: none;
+    background-image: var(--icon-arrow-down);
+    background-position: calc(100% - 1ch) center;
+    background-size: 3ex;
+    background-repeat: no-repeat;
+    padding-block: 0.75ch;
+    padding-inline: 1.75ch 3ch;
+    line-height: 1.5;
+  }
+    
+  :global(select):is(:hover,:focus) {
+    background-color: var(--_bg);
+  }
+
+  :global(select:not([disabled])) {
+    box-shadow: var(--shadow-3), 0 1px var(--surface-3);
+  }
+  
+  :global(select:not([disabled])):is(:hover, :focus) {
+    background-image: var(--icon-arrow-up);
+  }
+
+  :global(select[disabled]) {
+    cursor: not-allowed;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :global(select) {
+      --_bg: var(--_bg-dark);
+    }
   }
 </style>
