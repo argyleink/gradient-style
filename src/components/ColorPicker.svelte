@@ -420,6 +420,12 @@
     transform: translateY(var(--anchor));
   }
 
+  @media (max-width: 1024px) {
+    dialog {
+      margin-inline: var(--size-3) auto;
+    }
+  }
+
   dialog::backdrop {
     background: #0000;
     backdrop-filter: none;
