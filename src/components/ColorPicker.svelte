@@ -474,7 +474,7 @@
   @supports (background: hsl(from red h s l)) {
     .colorspace ,
     .preview > :global(output > code) {
-      background: oklch(from color-contrast(var(--user-color) vs black, white) l c h / .4);
+      background: oklch(from color-contrast(color-contrast(var(--user-color) vs black, white) vs black,white) l c h / .4);
     }
   }
 
