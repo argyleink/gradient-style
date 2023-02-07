@@ -435,9 +435,10 @@
   :global(.slider-percentage) {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    text-align: end;
-    max-inline-size: 5ch;
+    direction: rtl;
+    max-inline-size: 4.8ch;
     padding-block: 0;
+    padding-inline-end: 0;
     /* background: none; */
     -moz-appearance:textfield;
   }
