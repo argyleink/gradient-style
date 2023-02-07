@@ -179,7 +179,7 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style={`accent-color:${user_color}`}>
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" bind:value={$colorspace}> 
+      <select class="colorspace" bind:value={$colorspace} style={`--bg:${user_color}`}> 
         <option>hsl</option>
         <option>hwb</option>
         <option>srgb</option>
@@ -448,6 +448,7 @@
     justify-self: end;
     background: hsl(none none none / .4);
     color: white;
+    color: color-contrast(var(--bg) vs black, white);
     border: none;
   }
 
