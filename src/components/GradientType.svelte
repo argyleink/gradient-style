@@ -6,7 +6,7 @@
 
 <fieldset class="switch-group">
   {#each gradient_types as t}
-    <div class="switch">
+    <div class="switch" title={t}>
       <input type="radio" name="gradient-type" id="{t}-gradient" value={t} bind:group={$gradient_type}>
       <label for="{t}-gradient">{t}</label>
       {#if t === 'linear'}
