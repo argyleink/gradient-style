@@ -68,7 +68,7 @@
   {/if}
   {#if stop.kind === 'hint'}
     <fieldset>
-      <legend>Easing</legend>
+      <legend>Transition</legend>
       <div class="color-hint slider-set">
         <input 
           type="range" 
