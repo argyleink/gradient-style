@@ -15,6 +15,7 @@
   } from '../store/colorpicker.ts'
 
   let dialog
+  let dialogWidth
 
   const dialogClosingEvent = new Event('closing')
   const dialogClosedEvent  = new Event('closed')
@@ -27,6 +28,11 @@
 
     dialog.setColor = setColor
     dialog.setAnchor = setAnchor
+
+    dialog.show()
+    dialogWidth = dialog.clientWidth
+    dialog.close()
+    console.log(dialogWidth)
   })
 
   function setColor(color) {
@@ -91,9 +97,13 @@
     }
   }
 
-  function setAnchor(target) {
+  function setAnchor(target, panel) {
     const rect = target.getBoundingClientRect()
     dialog.style.setProperty('--y', rect.y + 'px')
+    if (panel === 'right-panel')
+      dialog.style.setProperty('--x', `calc(100% - ${dialogWidth}px - 1rem)`)
+    else
+      dialog.style.setProperty('--x', rect.x + 12 - (dialogWidth / 2) + 'px')
     dialog.style.setProperty('--anchor', rect.y > window.innerHeight / 2
       ? '-105%'
       : '10%')
@@ -417,6 +427,7 @@
     padding: 0;
     margin-inline: auto var(--size-3);
     margin-block-start: var(--y, auto);
+    margin-inline-start: var(--x, auto);
     transform: translateY(var(--anchor));
   }
 

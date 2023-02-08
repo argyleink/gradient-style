@@ -28,7 +28,7 @@
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
-    picker.setAnchor(e.target)
+    picker.setAnchor(e.target, 'right-panel')
     picker.setColor(stop.color)
     picker.showModal()
 
