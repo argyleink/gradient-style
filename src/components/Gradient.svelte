@@ -502,7 +502,7 @@
   }
 
   :global(select:not([disabled])) {
-    box-shadow: var(--shadow-3), 0 1px var(--surface-3);
+    box-shadow: var(--shadow-3);
   }
   
   :global(select:not([disabled])):is(:hover, :focus) {

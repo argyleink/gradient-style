@@ -26,7 +26,7 @@
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
         <div class="stop">
-          <button style="background-color: {stop.color}" on:click={e => pickColor({color: stop.color},e)}></button>
+          <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
         </div>
       {/if}
       {#if stop.kind === 'hint'}
