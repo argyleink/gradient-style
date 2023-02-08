@@ -446,7 +446,8 @@
 
   .colorspace {
     justify-self: end;
-    background: hsl(none none none / .4);
+    background-color: hsl(none none none / .4);
+    background-repeat: no-repeat;
     color: white;
     color: color-contrast(var(--user-color) vs black, white);
     border: none;

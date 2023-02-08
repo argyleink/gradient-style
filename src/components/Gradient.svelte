@@ -16,7 +16,9 @@
   import GradientStops from './GradientStops.svelte'
   import GradientColorSpace from './GradientColorSpace.svelte'
   import HueInterpolation from './HueInterpolation.svelte'
+
   import LinearAngle from './LinearAngle.svelte'
+  import LinearOverlay from './LinearOverlay.svelte'
 
   import RadialSize from './RadialSize.svelte'
   import RadialShape from './RadialShape.svelte'
@@ -161,7 +163,7 @@
 
 <main class="gradient">
 
-  <contain-er style="container: layers-panel / inline-size;">
+  <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <header class="brand">
       <div class="gradient-logo" style={`background:${user_gradient}`}></div>
       <h1>HDgradients</h1>
@@ -173,13 +175,16 @@
   <contain-er style="container: preview-panel / inline-size;">
     <section class="preview-panel">
       <div class="preview">
-        <div style={`background:${user_gradient}`}></div>  
+        <div class="resizer" style={`background:${user_gradient}`}></div>  
+        {#if $gradient_type === 'linear'}
+          <LinearOverlay />
+        {/if}
       </div>
       <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
     </section>
   </contain-er>
 
-  <contain-er style="container: control-panel / inline-size;">
+  <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls" style="accent-color: {$gradient_stops[0].color}">
       <header>
         <p>Image Layer</p>
@@ -236,14 +241,29 @@
   .preview {
     display: grid;
     margin-inline: auto;
-    block-size: 30vh;
     max-inline-size: 90%;
-    aspect-ratio: var(--ratio-widescreen);
+    max-inline-size: 90cqi;
     animation: var(--animation-fade-out) reverse;
-    resize: both;
-    overflow: hidden;
     background: var(--gradient-checkerboard);
     box-shadow: var(--shadow-6);
+  }
+
+  .preview > div {
+    grid-area: 1/1;
+  }
+
+  .resizer {
+    resize: both;
+    overflow: hidden;
+    block-size: 30vh;
+    max-inline-size: 100%;
+    aspect-ratio: var(--ratio-widescreen);
+  }
+
+  @media (min-width: 1024px) {
+    .resizer {
+      block-size: 50vh;
+    }
   }
 
   .controls {
@@ -357,12 +377,6 @@
 
   :global(fieldset) {
     position: relative;
-  }
-
-  @media (min-width: 1024px) {
-    .preview {
-      block-size: 50vh;
-    }
   }
 
   :global(.radio-pair) {
