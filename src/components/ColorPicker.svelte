@@ -37,7 +37,9 @@
 
   function setColor(color) {
     const parsedColor = new Color(color)
-    $colorspace = parsedColor.space.id
+    $colorspace = parsedColor.space.id === 'p3'
+      ? 'display-p3'
+      : parsedColor.space.id
     
     if ($colorspace === 'oklab') {
       const [l,a,b] = parsedColor.coords
@@ -90,9 +92,9 @@
     }
     else if (isRGBcolor($colorspace)) {
       const [r,g,b] = parsedColor.coords
-      $colorR = r * 100
-      $colorG = g * 100
-      $colorB = b * 100
+      $colorR = r.valueOf() * 100
+      $colorG = g.valueOf() * 100
+      $colorB = b.valueOf() * 100
       $colorAlpha = parsedColor.alpha * 100
     }
   }
