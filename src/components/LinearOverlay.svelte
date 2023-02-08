@@ -76,6 +76,7 @@
     inline-size: var(--size-5);
     border-radius: var(--radius-round);
     box-shadow: var(--shadow-2);
+    border: .5px solid hsl(0 0% 0% / 15%);
   }
 
   .stop:is(:hover,:focus-visible) {
@@ -86,11 +87,13 @@
     inline-size: var(--size-5);
     align-self: end;
     translate: 0 5px;
-    filter: drop-shadow(0px 1px 1px #0002);
+    filter: drop-shadow(0px 2px 2px hsl(0 0% 0% / 10%));
   }
 
   .hint > svg {
     fill: white;
+    stroke-width: 0.5px;
+    stroke: hsl(0 0% 0% / 15%);
   }
 
   :is(.hint, .stop) {
