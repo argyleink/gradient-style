@@ -94,7 +94,7 @@
     flex-shrink: 0;
     border: none;
     box-shadow: var(--inner-shadow-0);
-    outline-offset: 4px;
+    outline-offset: 8px;
   }
 
   .hint {
