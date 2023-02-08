@@ -341,6 +341,8 @@
   }
 
   h3 {
+    display: flex;
+    align-items: center;
     color: var(--link);
     padding-inline: .7rem;
     max-inline-size: 100%;
