@@ -269,9 +269,7 @@
   .controls {
     display: grid;
     gap: var(--size-1);
-  }
-
-  .controls {
+    align-content: start;
     background: var(--surface-2);
     padding-block: var(--size-2) var(--size-fluid-5);
   }
@@ -371,6 +369,15 @@
     display: grid;
     gap: var(--size-2);
     padding-inline: var(--size-2);
+    padding-block: var(--size-3);
+  }
+
+  .controls > :global(fieldset:focus-within) {
+    border-color: var(--link);
+  }
+
+  .controls > :global(fieldset:focus-within legend) {
+    color: var(--link);
   }
 
   :global(fieldset > select) {
