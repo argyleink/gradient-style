@@ -31,6 +31,7 @@
       {/if}
       {#if stop.kind === 'hint'}
         <div class="hint">
+          <div class="value-tip">{stop.percentage}%</div>
           <svg viewBox="0 0 24 15">
             <path d="M.99 9.415 9.649.955c.309-.303.676-.543 1.08-.707a3.396 3.396 0 0 1 2.552 0c.404.164.771.404 1.08.707l8.657 8.46C25.123 11.473 23.62 15 20.644 15H3.331C.356 15-1.115 11.473.99 9.415Z"/>
           </svg>
@@ -98,25 +99,37 @@
   }
 
   .hint {
-    inline-size: var(--size-5);
+    display: grid;
+    place-content: center;
+    place-items: center;
+    gap: var(--size-2);
     align-self: end;
-    translate: 0 5px;
+    translate: 0 -5px;
     filter: drop-shadow(0px 2px 2px hsl(0 0% 0% / 10%));
   }
 
   .hint > svg {
+    max-inline-size: var(--size-5);
     fill: white;
     stroke-width: 0.5px;
     stroke: hsl(0 0% 0% / 15%);
   }
 
-  :is(.hint, .stop) {
+  :is(.hint > svg, .stop) {
     pointer-events: auto;
     touch-action: manipulation;
     cursor: grab;
   }
 
-  :is(.hint, .stop):active {
+  :is(.hint > svg, .stop):active {
     cursor: grabbing;
+  }
+
+  .value-tip {
+    visibility: hidden;
+    background: var(--surface-1);
+    color: var(--text-1);
+    padding-inline: .25lh;
+    border-radius: var(--radius-2);
   }
 </style>

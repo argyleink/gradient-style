@@ -32,7 +32,6 @@
     dialog.show()
     dialogWidth = dialog.clientWidth
     dialog.close()
-    console.log(dialogWidth)
   })
 
   function setColor(color) {

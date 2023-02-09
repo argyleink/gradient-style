@@ -74,7 +74,8 @@
 
   function stopsToStrings() {
     return $gradient_stops
-      .filter(s => s?.percentage !== '50')
+      // filter out hints with default values
+      .filter(s => !s?.auto || s?.percentage != s?.auto)
       .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
@@ -319,6 +320,7 @@
     max-block-size: 100vh;
     max-block-size: 100dvh;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .controls > header {
@@ -365,6 +367,7 @@
   .controls > :global(fieldset) {
     border-inline: none;
     border-block-end: none;
+    border-radius: 0;
     border-color: var(--surface-3);
     display: grid;
     gap: var(--size-2);

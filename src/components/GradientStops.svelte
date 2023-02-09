@@ -73,9 +73,9 @@
         <input 
           type="range" 
           bind:value="{stop.percentage}" 
-          style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})"
         />
-        <input type="number" bind:value={stop.percentage} class="slider-percentage">
+        <!-- style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})" -->
+        <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
       </div>
     </fieldset>
   {/if}
@@ -86,7 +86,7 @@
     padding-inline-end: var(--size-3);
   }
 
-  .color-hint > input[type="range"] {
+  /* .color-hint > input[type="range"] {
     appearance: none;
     accent-color: var(--surface-1);
     border-radius: var(--radius-round);
@@ -108,7 +108,7 @@
   
   .color-hint > input[type="range"]:active::-webkit-slider-thumb {
     cursor: grabbing;
-  }
+  } */
 
   .chip {
     border-radius: var(--radius-round);
