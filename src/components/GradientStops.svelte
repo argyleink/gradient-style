@@ -1,5 +1,5 @@
 <script>
-  import {gradient_stops, gradient_space} from '../store/gradient.ts'
+  import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
 
   function removeStopByIndex(pos) {
@@ -41,11 +41,19 @@
       unsub()
     })
   }
+
+  function fieldsetInteractingStart(stop) {
+    $active_stop_index = $gradient_stops.indexOf(stop)
+  }
+
+  function fieldsetInteractingEnd(stop) {
+    $active_stop_index = null
+  }
 </script>
 
 {#each $gradient_stops as stop, i}
   {#if stop.kind === 'stop'}
-    <fieldset style="accent-color: {stop.color}">
+    <fieldset style="accent-color: {stop.color}"  on:mouseenter={() => fieldsetInteractingStart(stop)} on:focusin={() => fieldsetInteractingStart(stop)} on:mouseleave={() => fieldsetInteractingEnd()} on:focusout={() => fieldsetInteractingEnd()}>
       <legend>Color</legend>
       <div class="chip color-stop">
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
@@ -67,7 +75,7 @@
     </fieldset>
   {/if}
   {#if stop.kind === 'hint'}
-    <fieldset>
+    <fieldset on:mouseenter={() => fieldsetInteractingStart(stop)} on:focusin={() => fieldsetInteractingStart(stop)} on:mouseleave={() => fieldsetInteractingEnd()} on:focusout={() => fieldsetInteractingEnd()}>
       <legend>Transition</legend>
       <div class="color-hint slider-set">
         <input 
