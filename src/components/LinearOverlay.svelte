@@ -25,14 +25,14 @@
   function dragMe(node, stop) {
     let moving = false
     let preview = document.querySelector('.preview-panel > .preview')
-    let left = node.parentElement.computedStyleMap().get('inset-inline-start').value
+    let left = parseInt(stop.kind === 'stop' ? stop.position1 : stop.percentage)
 
-    node.addEventListener('mousedown', () => {
+    node.addEventListener('pointerdown', () => {
       moving = true
       $active_stop_index = $gradient_stops.indexOf(stop)
     })
 
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('pointermove', (e) => {
       if (moving && e.movementX) {
         let apercent = preview.clientWidth / 100
         left += e.movementX / apercent
@@ -46,7 +46,7 @@
       }
     })
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('pointerup', () => {
       moving = false
       $active_stop_index = null
     })
