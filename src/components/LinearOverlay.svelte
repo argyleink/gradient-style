@@ -4,11 +4,19 @@
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
+  import {linear_keywords} from'../utils/linear.ts'
+  import {degToRad, radToDeg} from '../utils/radial.ts'
 
   let gradientBox
 
   onMount(()=>{
     gradientBox = document.querySelector('.preview-panel > .preview')
+  })
+
+  linear_named_angle.subscribe(value => {
+    if (value === '--') return
+    let ng = linear_keywords[value](gradientBox)
+    $linear_angle = radToDeg(ng)
   })
 
   function pickColor(stop, e) {
@@ -57,10 +65,6 @@
     })
   }
 
-  function degToRad(degrees) {
-    return degrees * (Math.PI/180)
-  }
-
   function gradientLineLength(a) {
     if (!gradientBox) return null
     let {clientHeight:h, clientWidth:w} = gradientBox
@@ -68,8 +72,13 @@
     let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
     return l + 'px'
   }
+
+  function gradientAngle(ng) {
+    return ng - 90
+  }
 </script>
-<div class="linear-overlay" style="rotate: calc({$linear_angle}deg - 90deg)">
+
+<div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
   <div class="line" style="width: {gradientLineLength($linear_angle)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
