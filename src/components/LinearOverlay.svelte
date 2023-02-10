@@ -160,6 +160,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
+    transition: inset .1s ease;
   }
 
   .hint {
