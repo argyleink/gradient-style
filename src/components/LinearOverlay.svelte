@@ -57,15 +57,20 @@
     })
   }
 
+  function degToRad(degrees) {
+    return degrees * (Math.PI/180)
+  }
+
   function gradientLineLength(a) {
     if (!gradientBox) return null
     let {clientHeight:h, clientWidth:w} = gradientBox
-    return Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)) + 'px'
+    a = degToRad(a)
+    let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
+    return l + 'px'
   }
 </script>
-<!--  style="width: {gradientLineLength($linear_angle)}" -->
 <div class="linear-overlay" style="rotate: calc({$linear_angle}deg - 90deg)">
-  <div class="line">
+  <div class="line" style="width: {gradientLineLength($linear_angle)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%">
@@ -89,18 +94,16 @@
 
 <style>
   .linear-overlay {
-    display: grid;
     position: relative;
     grid-area: 1/1;
-    align-content: center;
-    inline-size: 100%;
-    inset-inline-start: calc(var(--size-5) / 2 * -1);
-    justify-self: center;
     pointer-events: none;
   }
 
   .line {
-    position: relative;
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: calc(50% - calc(var(--size-5) / 2));
+    transform: translate(-50%, -50%);
     display: grid;
     grid-auto-flow: column;
     place-items: center;
