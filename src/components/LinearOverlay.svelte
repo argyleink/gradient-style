@@ -1,9 +1,15 @@
 <script>
-  import { fade } from 'svelte/transition'
+  import { onMount } from 'svelte'
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
+
+  let gradientBox
+
+  onMount(()=>{
+    gradientBox = document.querySelector('.preview-panel > .preview')
+  })
 
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
@@ -24,7 +30,6 @@
 
   function dragMe(node, stop) {
     let moving = false
-    let preview = document.querySelector('.preview-panel > .preview')
     let left = parseInt(stop.kind === 'stop' ? stop.position1 : stop.percentage)
 
     node.addEventListener('pointerdown', () => {
@@ -34,7 +39,7 @@
 
     window.addEventListener('pointermove', (e) => {
       if (moving && e.movementX) {
-        let apercent = preview.clientWidth / 100
+        let apercent = gradientBox.clientWidth / 100
         left += e.movementX / apercent
 
         if (stop.kind === 'stop')
@@ -51,8 +56,14 @@
       $active_stop_index = null
     })
   }
-</script>
 
+  function gradientLineLength(a) {
+    if (!gradientBox) return null
+    let {clientHeight:h, clientWidth:w} = gradientBox
+    return Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)) + 'px'
+  }
+</script>
+<!--  style="width: {gradientLineLength($linear_angle)}" -->
 <div class="linear-overlay" style="rotate: calc({$linear_angle}deg - 90deg)">
   <div class="line">
     {#each $gradient_stops as stop, i}
