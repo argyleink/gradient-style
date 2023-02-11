@@ -472,6 +472,7 @@
     justify-items: center;
     block-size: var(--size-content-1);
     padding: var(--size-3);
+    box-shadow: var(--inner-shadow-0);
     background: 
       linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);

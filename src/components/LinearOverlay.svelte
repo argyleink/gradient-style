@@ -66,6 +66,7 @@
     })
 
     node.addEventListener('pointerleave', () => {
+      if (moving) return
       $active_stop_index = null
     })
   }
