@@ -49,6 +49,7 @@
     window.addEventListener('pointermove', (e) => {
       if (moving && e.movementX) {
         let apercent = gradientBox.clientWidth / 100
+        apercent = $linear_angle >= 180 ? -apercent : apercent
         left += e.movementX / apercent
 
         if (stop.kind === 'stop')
@@ -112,6 +113,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
+    transition: rotate 30ms ease-out;
   }
 
   .line {
@@ -175,7 +177,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
-    transition: inset .1s ease;
+    transition: inset 30ms ease-out;
   }
 
   .hint {
