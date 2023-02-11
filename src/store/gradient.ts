@@ -4,11 +4,11 @@ export const gradient_type = writable('linear');
 export const gradient_space = writable('oklab');
 export const gradient_interpolation = writable('shorter');
 export const gradient_stops = writable([
-  {kind: 'stop', color: 'rgb(100% 0% 100%)', position1: '0', position2: null}, 
+  {kind: 'stop', color: 'oklch(70% 0.5 340)', position1: '0', position2: null}, 
   {kind: 'hint', auto: '25', percentage: '25'},
-  {kind: 'stop', color: 'rgb(100% 100% 0%)', position1: '50', position2: null},
+  {kind: 'stop', color: 'oklch(90% 0.5 110)', position1: '50', position2: null},
   {kind: 'hint', auto: '75', percentage: '80'},
-  {kind: 'stop', color: 'rgb(0% 100% 100%)', position1: '100', position2: null},
+  {kind: 'stop', color: 'oklch(90% 0.5 200)', position1: '100', position2: null},
 ]);
 
 export const active_stop_index = writable(null)

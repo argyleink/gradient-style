@@ -40,10 +40,11 @@
     let moving = false
     let left = parseInt(stop.kind === 'stop' ? stop.position1 : stop.percentage)
 
-    node.addEventListener('pointerdown', () => {
-      moving = true
-      $active_stop_index = $gradient_stops.indexOf(stop)
-    })
+    node.addEventListener('pointerdown', () => 
+      moving = true)
+
+    node.addEventListener('pointerenter', () =>
+      $active_stop_index = $gradient_stops.indexOf(stop))
 
     window.addEventListener('pointermove', (e) => {
       if (moving && e.movementX) {
@@ -61,6 +62,10 @@
 
     window.addEventListener('pointerup', () => {
       moving = false
+      $active_stop_index = null
+    })
+
+    node.addEventListener('pointerleave', () => {
       $active_stop_index = null
     })
   }

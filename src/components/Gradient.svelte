@@ -1,4 +1,6 @@
 <script>
+  import Color from 'colorjs.io'
+
   import {gradient_type, gradient_space, gradient_interpolation, 
           gradient_stops, gradient_positions
   } from '../store/gradient.ts'
@@ -51,18 +53,16 @@
 
   const genClassicSyntax = {
     'linear': () => 
-      `linear-gradient(
-      ${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings()}
-    )`,
+      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
     'radial': () => 
       `radial-gradient(
       ${$radial_size} ${$radial_shape} at ${radialPositionToString()}, 
-      ${stopsToStrings()}
+      ${stopsToStrings({convert_colors: true, new_lines: false})}
     )`,
     'conic': () => 
       `conic-gradient(
       from ${$conic_angle}deg at ${conicPositionToString()}, 
-      ${stopsToStrings()}
+      ${stopsToStrings({convert_colors: true, new_lines: false})}
     )`
   }
 
@@ -72,29 +72,37 @@
       : `in ${$gradient_space}`
   }
 
-  function stopsToStrings() {
+  function maybeConvertColor(color, convert_colors) {
+    if (convert_colors) {
+      return new Color(color).to('srgb').toString({ format: 'hex' })
+    }
+    else {
+      return color
+    }
+  }
+
+  function stopsToStrings({convert_colors, new_lines} = {convert_colors: false, new_lines: true}) {
     return $gradient_stops
-      // filter out hints with default values
       .filter(s => !s?.auto || s?.percentage != s?.auto)
       .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
           if (s.position1 != null && s.position2 != null) 
-            return s.color + ' ' + s.position1 + '% ' + s.position2 + '%'
+            return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
             s.position1 = 50
-            return s.color + ' ' + s.position1 + '% ' + s.position2 + '%'
+            return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           }
           else 
             return s.position1 != null
-              ? s.color + ' ' + s.position1 + '%'
-              : s.color
+              ? maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '%'
+              : maybeConvertColor(s.color, convert_colors)
         }
         else if (s.kind === 'hint') {
           return s.percentage + '%'
         }
       })
-      .join(',\n      ')
+      .join(new_lines == true ? ',\n      ' : ', ')
   }
 
   function radialPositionToString() {
@@ -186,7 +194,7 @@
   </contain-er>
 
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
-    <section class="controls" style="accent-color: {$gradient_stops[0].color}">
+    <section class="controls">
       <header>
         <p>Image Layer</p>
         <h2>{$layers}</h2>
@@ -273,6 +281,7 @@
     align-content: start;
     background: var(--surface-2);
     padding-block: var(--size-2) var(--size-fluid-5);
+    accent-color: var(--surface-3);
   }
 
   @media (min-width: 1024px) {
