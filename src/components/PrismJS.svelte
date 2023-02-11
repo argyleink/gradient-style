@@ -14,15 +14,17 @@
     Prism.highlightAll()
   })
 
-  function textSelectNode() {
+  function textSelectNode(node) {
     const range = document.createRange()
     const selection = window.getSelection()
-    range.selectNode(document.querySelector('.code-block'))
+    range.selectNode(node)
     selection.removeAllRanges()
     selection.addRange(range)
   }
 
-  $: snippet = `
+  function makeSnippet() {
+    if (modern_gradient && classic_gradient) {
+      return `
 .modern-gradient {
   background-image: 
     ${modern_gradient}
@@ -34,9 +36,29 @@
     ${classic_gradient}
   ;
 }`.trim()
+    }
+    else if (modern_gradient) {
+      return `
+.modern-gradient {
+  background-image: 
+    ${modern_gradient}
+  ;
+}`.trim()
+    }
+    else if (classic_gradient) {
+      return `
+.classic-gradient {
+  background-image: 
+    ${classic_gradient}
+  ;
+}`.trim()
+    }
+  }
+
+  $: snippet = makeSnippet()
 </script>
 
-<pre class="code-block" has-loaded={loaded} on:click={() => textSelectNode()} on:focus={() => textSelectNode()}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
+<pre class="code-block" has-loaded={loaded} on:click={e => textSelectNode(e.target)} on:focus={() => textSelectNode()}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
 
 <style>
   .code-block {

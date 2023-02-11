@@ -189,7 +189,8 @@
           <LinearOverlay />
         {/if}
       </div>
-      <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
+      <Prism modern_gradient={user_gradient} />
+      <Prism classic_gradient={classic_gradient} />
     </section>
   </contain-er>
 
