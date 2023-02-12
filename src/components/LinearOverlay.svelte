@@ -85,6 +85,10 @@
   }
 </script>
 
+<div class="pie">
+  <div class="visual-vert"></div>
+  <div class="visual" style="--ng: {$linear_angle}deg"></div>
+</div>
 <div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
   <div class="line" style="width: {gradientLineLength($linear_angle)}">
     {#each $gradient_stops as stop, i}
@@ -110,6 +114,9 @@
 
 <style>
   .linear-overlay {
+    --line-1: hsl(0 0% 100% / 50%);
+    --line-2: hsl(0 0% 100% / 10%);
+
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
@@ -127,14 +134,14 @@
     place-content: center space-between;
     block-size: 2px;
     inline-size: 100%;
-    background: hsl(0 0% 100% / 50%);
+    background: var(--line-1);
   }
 
   .line::after {
     content: "";
     block-size: 2px;
     position: absolute;
-    background: hsl(0 0% 100% / 10%);
+    background: var(--line-2);
     inline-size: 150cqmax;
     z-index: -1;
   }
@@ -214,5 +221,42 @@
     padding-inline: .25lh;
     border-radius: var(--radius-2);
     box-shadow: var(--shadow-2);
+  }
+
+  .pie {
+    --line-1: hsl(0 0% 100% / 50%);
+    --line-2: hsl(0 0% 100% / 10%);
+
+    position: relative;
+    grid-area: 1/1;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .visual {
+    --ng: 0; 
+    --thickness: 3px;
+    --_inner: calc(70% - var(--thickness));
+    --_outer: calc(var(--_inner) + 1px); 
+    
+    mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
+    -webkit-mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
+    background-image: conic-gradient(var(--line-1), var(--line-1) var(--ng), #0000 0);
+
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .visual-vert {
+    block-size: var(--size-10);
+    inline-size: 3px;
+    background-image: linear-gradient(to bottom, var(--line-1) 50%, #0000 0);
   }
 </style>
