@@ -44,6 +44,7 @@
       max-block-size: 100vh;
       max-block-size: 100dvh;
       overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 
