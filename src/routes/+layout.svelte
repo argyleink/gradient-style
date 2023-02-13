@@ -11,7 +11,7 @@
 	@import 'open-props/style';
 	@import 'open-props/normalize';
 	@import 'open-props/buttons';
-	@import 'prism-themes/themes/prism-dracula.css';
+	@import 'prism-themes/themes/prism-nord.css';
 
 	.app {
 		display: grid;

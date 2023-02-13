@@ -55,7 +55,7 @@
     }
   }
 
-  $: snippet = makeSnippet()
+  $: snippet = makeSnippet(modern_gradient, classic_gradient)
 </script>
 
 <pre class="code-block" has-loaded={loaded} on:click={e => textSelectNode(e.target)} on:focus={() => textSelectNode()}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>

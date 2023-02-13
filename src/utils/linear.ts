@@ -1,7 +1,8 @@
 export function linearAngleToString(angle:string, namedAngle:string):String {
-  if (angle !== null)
-    return angle + 'deg'
-  return namedAngle
+  if (namedAngle !== null)
+    return namedAngle
+  else if (angle !== null)
+    return angle + 'deg'  
 }
 
 export const linear_keywords = {
