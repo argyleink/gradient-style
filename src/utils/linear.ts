@@ -1,5 +1,5 @@
 export function linearAngleToString(angle:string, namedAngle:string):String {
-  if (namedAngle !== null)
+  if (namedAngle !== '--')
     return namedAngle
   else if (angle !== null)
     return angle + 'deg'  
