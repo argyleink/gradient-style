@@ -3,12 +3,13 @@ export function updateStops(stops) {
 
   let updated = stops.map((stop, i) => {
     let autoVal = autoStops[i]
+    stop.auto = autoVal
+    
     if (stop.kind == 'stop') {
       stop.position1 = autoVal
       stop.position2 = null
     }
     else {
-      stop.auto = autoVal
       stop.percentage = autoVal
       // let oldValAuto = stop.auto == stop.percentage
       // stop.auto = autoVal
@@ -32,10 +33,14 @@ function genStopMap(stops) {
 
   let genStops = []
   for (let i = 0; i <= hints.length; i++) {
-    let stop = colors[i]
-    let hint = hints[i]
-    genStops.unshift(start + (increment * i))
-    hint && genStops.unshift(hintStart + (increment * i))
+    let stopPos = start + (increment * i)
+    let hintPos = hintStart + (increment * i)
+
+    if (stopPos === 99)
+      stopPos = 100
+
+    genStops.unshift(stopPos)
+    hints[i] && genStops.unshift(hintPos)
   }
 
   return genStops.reverse()

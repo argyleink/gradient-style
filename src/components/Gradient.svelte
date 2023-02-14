@@ -91,11 +91,11 @@
           if (s.position1 != null && s.position2 != null) 
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
-            s.position1 = 50
+            s.position1 = s.auto
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           }
           else 
-            return s.position1 != null
+            return s.position1 != null && s.position1 != s.auto
               ? maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '%'
               : maybeConvertColor(s.color, convert_colors)
         }
