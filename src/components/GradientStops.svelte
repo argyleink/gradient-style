@@ -1,6 +1,7 @@
 <script>
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
+  import {updateStops} from '../utils/stops.ts'
 
   function removeStopByIndex(pos) {
     $gradient_stops.splice(pos, 2)
@@ -14,7 +15,7 @@
       $gradient_stops[0].position2 = 0
     }
 
-    $gradient_stops = $gradient_stops
+    $gradient_stops = updateStops($gradient_stops)
   }
 
   function removePositionByIndex(index, pos) {

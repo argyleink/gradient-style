@@ -14,6 +14,7 @@
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
+  import {updateStops} from '../utils/stops.ts'
 
   import GradientStops from './GradientStops.svelte'
   import GradientColorSpace from './GradientColorSpace.svelte'
@@ -132,11 +133,12 @@
   }
 
   function addStop() {
-    $gradient_stops = [
+    const newList = [
       ...$gradient_stops,
       {kind: 'hint', percentage: null},
       {kind: 'stop', color: `oklch(80% 0.3 ${randomNumber(0,360)})`, position1: null, position2: null},
     ]
+    $gradient_stops = updateStops(newList)
   }
 
   $: user_gradient = gensyntax[$gradient_type](
