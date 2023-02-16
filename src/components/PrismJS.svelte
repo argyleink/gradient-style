@@ -63,8 +63,7 @@
 <style>
   .code-block {
     opacity: 0;
-    max-inline-size: var(--size-content-3);
-    justify-self: center;
+    max-inline-size: min(var(--size-content-3), 100cqi);
     background-color: var(--gray-10);
   }
 

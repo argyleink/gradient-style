@@ -185,16 +185,23 @@
   </contain-er>
   
   <contain-er style="container: preview-panel / inline-size;">
-    <section class="preview-panel">
-      <div class="preview">
-        <div class="resizer" style={`background:${user_gradient}`}></div>  
-        {#if $gradient_type === 'linear'}
-          <LinearOverlay />
-        {/if}
-      </div>
-      <Prism modern_gradient={user_gradient} />
-      <Prism classic_gradient={classic_gradient} />
-    </section>
+    <div class="inline-snap-panels">
+      <section class="preview-panel">
+        <div class="preview">
+          <div class="resizer" style={`background:${user_gradient}`}></div>  
+          {#if $gradient_type === 'linear'}
+            <LinearOverlay />
+          {/if}
+        </div>
+      </section>
+      <section class="code-preview-panel">
+        <h4>Modern HD gradient snippet</h4>
+        <Prism modern_gradient={user_gradient} />
+        <br>
+        <h4>Classic gradient snippet</h4>
+        <Prism classic_gradient={classic_gradient} />
+      </section>
+    </div>
   </contain-er>
 
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
@@ -325,15 +332,32 @@
 
   .preview-panel {
     display: grid;
-    place-content: space-between center;
-    gap: var(--size-fluid-5);
-    padding-block: var(--size-fluid-5);
+    place-content: center;
+    inline-size: 100cqi;
+    block-size: 100cqb;
+    overflow: hidden;
+  }
 
+  .code-preview-panel {
+    display: grid;
+    gap: var(--size-2);
+    align-content: center;
+    justify-items: flex-start;
+    justify-content: center;
+  }
+
+  .inline-snap-panels {
+    display: grid;
+    grid-template-columns: 100cqi 100cqi;
     min-block-size: 100%;
     max-block-size: 100vh;
     max-block-size: 100dvh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .inline-snap-panels > section {
+    scroll-snap-align: center;
   }
 
   .controls > header {

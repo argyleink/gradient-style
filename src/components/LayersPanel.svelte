@@ -18,7 +18,7 @@
   </div>
   
   <footer class="end-of-layers">
-    <button class="add-layer">Add gradient</button>
+    <button disabled class="add-layer">Add gradient</button>
   </footer>
 </section>
 
