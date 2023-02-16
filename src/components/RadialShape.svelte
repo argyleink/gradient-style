@@ -3,7 +3,7 @@
   const radial_shapes = ['circle', 'ellipse']
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Shape</legend>
   <div class="inline-radios">
     {#each radial_shapes as shape}

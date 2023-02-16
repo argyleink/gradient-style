@@ -2,7 +2,7 @@
   import {gradient_space} from '../store/gradient.ts'
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Color Space</legend>
   <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
     <optgroup label="Default colorspace">

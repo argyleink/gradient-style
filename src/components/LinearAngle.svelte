@@ -19,7 +19,7 @@
   }
 </script>
 
-<fieldset class="stack">
+<fieldset class="stack control-set">
   <legend>Angle</legend>
   <select name="named-directions" bind:value={$linear_named_angle}>
     {#each linear_directions as dir}

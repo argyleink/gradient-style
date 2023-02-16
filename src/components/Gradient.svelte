@@ -91,7 +91,8 @@
           if (s.position1 != null && s.position2 != null) 
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
-            s.position1 = s.auto
+            s.position1 = '0'
+            s.position2 = '0'
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           }
           else 
@@ -376,7 +377,7 @@
     margin-block-start: var(--size-4); 
   }
 
-  .controls > :global(fieldset) {
+  :global(.control-set) {
     border-inline: none;
     border-block-end: none;
     border-radius: 0;
@@ -387,19 +388,19 @@
     padding-block: var(--size-3);
   }
 
-  .controls > :global(fieldset:focus-within) {
+  :global(.control-set:focus-within) {
     border-color: var(--link);
   }
 
-  .controls > :global(fieldset:focus-within legend) {
+  :global(.control-set:focus-within legend) {
     color: var(--link);
   }
 
-  :global(fieldset > select) {
+  :global(.control-set > select) {
     place-self: start;
   }
 
-  :global(fieldset) {
+  :global(.control-set) {
     position: relative;
   }
 

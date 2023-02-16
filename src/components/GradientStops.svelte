@@ -1,4 +1,7 @@
 <script>
+  import {flip} from 'svelte/animate'
+  import {fade} from 'svelte/transition'
+
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
   import {updateStops} from '../utils/stops.ts'
@@ -52,9 +55,17 @@
   }
 </script>
 
-{#each $gradient_stops as stop, i}
+{#each $gradient_stops as stop, i (stop)}
+  <div in:fade="{{duration: 250}}" animate:flip="{{duration: 180}}">
   {#if stop.kind === 'stop'}
-    <fieldset style="accent-color: {stop.color}"  on:mouseenter={() => fieldsetInteractingStart(stop)} on:focusin={() => fieldsetInteractingStart(stop)} on:mouseleave={() => fieldsetInteractingEnd()} on:focusout={() => fieldsetInteractingEnd()}>
+    <fieldset 
+      style="accent-color: {stop.color}" 
+      class="control-set"
+      on:mouseenter={() => fieldsetInteractingStart(stop)} 
+      on:focusin={() => fieldsetInteractingStart(stop)} 
+      on:mouseleave={() => fieldsetInteractingEnd()} 
+      on:focusout={() => fieldsetInteractingEnd()}
+    >
       <legend>Color</legend>
       <div class="chip color-stop">
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
@@ -76,7 +87,13 @@
     </fieldset>
   {/if}
   {#if stop.kind === 'hint'}
-    <fieldset on:mouseenter={() => fieldsetInteractingStart(stop)} on:focusin={() => fieldsetInteractingStart(stop)} on:mouseleave={() => fieldsetInteractingEnd()} on:focusout={() => fieldsetInteractingEnd()}>
+    <fieldset
+      class="control-set" 
+      on:mouseenter={() => fieldsetInteractingStart(stop)} 
+      on:focusin={() => fieldsetInteractingStart(stop)} 
+      on:mouseleave={() => fieldsetInteractingEnd()} 
+      on:focusout={() => fieldsetInteractingEnd()}
+    >
       <legend>Transition</legend>
       <div class="color-hint slider-set">
         <input 
@@ -88,6 +105,7 @@
       </div>
     </fieldset>
   {/if}
+  </div>
 {/each}
 
 <style>

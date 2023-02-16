@@ -13,7 +13,7 @@
   }
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Position</legend>
   <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
     {#each gradient_positions as pos}

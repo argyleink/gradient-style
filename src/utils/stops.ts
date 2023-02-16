@@ -6,8 +6,14 @@ export function updateStops(stops) {
     stop.auto = autoVal
     
     if (stop.kind == 'stop') {
-      stop.position1 = autoVal
-      stop.position2 = null
+      if (stops.length === 1) {
+        stop.position1 = 0
+        stop.position2 = 0 
+      }
+      else {
+        stop.position1 = autoVal
+        stop.position2 = null  
+      }
     }
     else {
       stop.percentage = autoVal

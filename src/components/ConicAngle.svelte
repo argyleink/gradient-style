@@ -3,7 +3,7 @@
   import AngleIcon from './AngleIcon.svelte'
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Angle</legend>
   <div class="linear-angle slider-set">
     <input type="range" bind:value={$conic_angle} min="0" max="360" step="1" />

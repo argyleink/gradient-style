@@ -13,7 +13,7 @@
   }
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Position</legend>
   <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
     {#each gradient_positions as pos}

@@ -8,7 +8,7 @@
   }
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Size</legend>
   <select name="radial-size" bind:value={$radial_size}>
     {#each Object.entries(radial_sizes) as [key, val]}
