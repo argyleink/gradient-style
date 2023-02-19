@@ -248,7 +248,6 @@
 <style>
 	.gradient {
 		display: grid;
-    gap: var(--size-2);
 	}
 
   @media (min-width: 1024px) {
