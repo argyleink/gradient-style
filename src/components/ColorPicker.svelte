@@ -175,6 +175,16 @@
     ].includes(space)
   }
 
+  function contrast_color(bg) {
+    const color = new Color(user_color)
+    const whContrast = color.contrastLstar('white')
+    const blContrast = color.contrastLstar('black')
+
+    return text_overlay = whContrast > blContrast ? 'white' : 'black'
+  }
+
+  $: text_overlay = contrast_color(user_color)
+
   $: user_color = gencolor($colorspace,
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
     $oklchL, $oklchC, $oklchH, $oklchAlpha,
@@ -188,7 +198,7 @@
 </script>
 
 <dialog id="color-picker">
-  <div class="hd-color-picker" style={`accent-color:${user_color}`}>
+  <div class="hd-color-picker" style={`accent-color:${user_color}; --contrast-color:${text_overlay}`}>
     <div class="preview" style={`--user-color:${user_color}`}>
       <select class="colorspace" bind:value={$colorspace}> 
         <option>hsl</option>
@@ -460,7 +470,7 @@
     justify-self: end;
     background-color: hsl(none none none / .4);
     background-repeat: no-repeat;
-    color: white;
+    color: var(--contrast-color);
     color: color-contrast(var(--user-color) vs black, white);
     border: none;
   }
@@ -479,7 +489,7 @@
   }
 
   .preview > :global(output > code) {
-    color: white;
+    color: var(--contrast-color);
     color: color-contrast(var(--user-color) vs black, white);
     background: hsl(none none none / .4);
     text-shadow: 0 1px 1px hsl(none none 0% / 25%);
