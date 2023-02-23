@@ -1,21 +1,16 @@
 <script>
-  import { onMount } from 'svelte'
-
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
 
-  let gradientBox
-
-  onMount(()=>{
-    gradientBox = document.querySelector('.preview-panel > .preview')
-  })
+  export let w = null
+  export let h = null
 
   linear_named_angle.subscribe(value => {
     if (value === '--') return
-    let ng = linear_keywords[value](gradientBox)
+    let ng = linear_keywords[value](w,h)
     $linear_angle = radToDeg(ng)
   })
 
@@ -48,7 +43,7 @@
 
     window.addEventListener('pointermove', (e) => {
       if (moving && e.movementX) {
-        let apercent = gradientBox.clientWidth / 100
+        let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
         left += e.movementX / apercent
 
@@ -73,8 +68,7 @@
   }
 
   function gradientLineLength(a) {
-    if (!gradientBox) return null
-    let {clientHeight:h, clientWidth:w} = gradientBox
+    if (!w && !h) return null
     a = degToRad(a)
     let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
     return l + 'px'
@@ -90,7 +84,7 @@
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
 </div>
 <div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
-  <div class="line" style="width: {gradientLineLength($linear_angle)}">
+  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%">

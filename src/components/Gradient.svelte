@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from 'svelte'
+
   import Color from 'colorjs.io'
 
   import {gradient_type, gradient_space, gradient_interpolation, 
@@ -32,7 +34,21 @@
 
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
-  import Prism from "./PrismJS.svelte";
+  import Prism from './PrismJS.svelte'
+
+  let preview_resizer
+  let box_width
+  let box_height
+
+  onMount(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      const entry = entries.at(0)
+      box_width = entry.contentBoxSize[0].inlineSize
+      box_height = entry.contentBoxSize[0].blockSize
+    })
+
+    resizeObserver.observe(preview_resizer)
+  })
 
   const gensyntax = {
     'linear': () => 
@@ -188,9 +204,9 @@
     <div class="inline-snap-panels">
       <section class="preview-panel">
         <div class="preview">
-          <div class="resizer" style={`background:${user_gradient}`}></div>  
+          <div bind:this={preview_resizer} class="resizer" style="background: {user_gradient}"></div>  
           {#if $gradient_type === 'linear'}
-            <LinearOverlay />
+            <LinearOverlay w={box_width} h={box_height} />
           {/if}
         </div>
       </section>
