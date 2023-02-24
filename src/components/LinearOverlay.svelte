@@ -4,6 +4,7 @@
   import {picker_value} from '../store/colorpicker.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
+  import {contrast_color_prefer_white} from '../utils/color.ts'
 
   export let w = null
   export let h = null
@@ -87,7 +88,7 @@
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
-        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%">
+        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
           <div class="stop" use:dragMe={stop}>
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
@@ -108,8 +109,8 @@
 
 <style>
   .linear-overlay {
-    --line-1: hsl(0 0% 100% / 50%);
-    --line-2: hsl(0 0% 100% / 10%);
+    --line-1: hsl(0 0% 100% / 90%);
+    --line-2: hsl(0 0% 100% / 50%);
 
     position: relative;
     grid-area: 1/1;
@@ -135,7 +136,7 @@
     content: "";
     block-size: 2px;
     position: absolute;
-    background: var(--line-2);
+    background: repeating-linear-gradient(to right, #0000 0 5px, var(--line-2) 0 10px);
     inline-size: 150cqmax;
     z-index: -1;
   }
@@ -148,16 +149,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: var(--contrast-fill, white);
     aspect-ratio: 1;
     inline-size: var(--size-5);
     border-radius: var(--radius-round);
     box-shadow: var(--shadow-2);
     border: .5px solid hsl(0 0% 0% / 15%);
-  }
-
-  .stop:is(:hover,:focus-visible) {
-    background: white;
   }
 
   .stop > button {

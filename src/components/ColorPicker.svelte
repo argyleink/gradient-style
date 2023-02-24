@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import Color from 'colorjs.io'
+  import {contrast_color, contrast_color_with_alpha} from '../utils/color.ts'
 
   import {
     picker_value, colorspace, 
@@ -175,15 +176,8 @@
     ].includes(space)
   }
 
-  function contrast_color(bg) {
-    const color = new Color(user_color)
-    const whContrast = color.contrastLstar('white')
-    const blContrast = color.contrastLstar('black')
-
-    return text_overlay = whContrast > blContrast ? 'white' : 'black'
-  }
-
-  $: text_overlay = contrast_color(user_color)
+  $: text_overlay = contrast_color_with_alpha(user_color)
+  $: bg_overlay = contrast_color(text_overlay)
 
   $: user_color = gencolor($colorspace,
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
@@ -198,7 +192,7 @@
 </script>
 
 <dialog id="color-picker">
-  <div class="hd-color-picker" style={`accent-color:${user_color}; --contrast-color:${text_overlay}`}>
+  <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
       <select class="colorspace" bind:value={$colorspace}> 
         <option>hsl</option>
@@ -468,10 +462,9 @@
 
   .colorspace {
     justify-self: end;
-    background-color: hsl(none none none / .4);
-    background-repeat: no-repeat;
     color: var(--contrast-color);
-    color: color-contrast(var(--user-color) vs black, white);
+    background-color: var(--counter-contrast-color);
+    background-repeat: no-repeat;
     border: none;
   }
 
@@ -490,17 +483,16 @@
 
   .preview > :global(output > code) {
     color: var(--contrast-color);
-    color: color-contrast(var(--user-color) vs black, white);
-    background: hsl(none none none / .4);
+    background-color: var(--counter-contrast-color);
     text-shadow: 0 1px 1px hsl(none none 0% / 25%);
   }
 
-  @supports (background: hsl(from red h s l)) {
+  /* @supports (background: hsl(from red h s l)) {
     .colorspace ,
     .preview > :global(output > code) {
       background: oklch(from color-contrast(color-contrast(var(--user-color) vs black, white) vs black,white) l c h / .4);
     }
-  }
+  } */
 
   .controls {
     display: grid;
