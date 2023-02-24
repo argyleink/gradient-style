@@ -158,6 +158,12 @@
     $gradient_stops = updateStops(newList)
   }
 
+  function showCodePane() {
+    document.querySelector('.code-preview-panel').scrollIntoView({
+      behavior: 'smooth'
+    })
+  }
+
   $: user_gradient = gensyntax[$gradient_type](
     $gradient_space,
     $gradient_interpolation,
@@ -203,6 +209,9 @@
   <contain-er style="container: preview-panel / inline-size;">
     <div class="inline-snap-panels">
       <section class="preview-panel">
+        <div class="gradient-actions">
+          <button on:click={e => showCodePane()}>Get Code</button>
+        </div>
         <div class="preview">
           <div bind:this={preview_resizer} class="resizer" style="background: {user_gradient}"></div>  
           {#if $gradient_type === 'linear'}
@@ -351,6 +360,7 @@
     inline-size: 100cqi;
     block-size: 100cqb;
     overflow: hidden;
+    position: relative;
   }
 
   .code-preview-panel {
@@ -373,6 +383,12 @@
 
   .inline-snap-panels > section {
     scroll-snap-align: center;
+  }
+
+  .gradient-actions {
+    position: absolute;
+    inset-block-start: var(--size-3);
+    inset-inline-end: var(--size-3);
   }
 
   .controls > header {

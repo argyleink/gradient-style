@@ -63,7 +63,7 @@
 <style>
   .code-block {
     opacity: 0;
-    max-inline-size: min(var(--size-content-3), 100cqi);
+    max-inline-size: 90cqi;
     background-color: var(--gray-10);
   }
 
