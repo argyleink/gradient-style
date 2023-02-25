@@ -5,7 +5,7 @@
 <fieldset class="control-set">
   <legend>Color Space</legend>
   <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
-    <optgroup label="Default colorspace">
+    <optgroup label="Default">
       <option selected>oklab</option>
     </optgroup>
     <optgroup label="Cylinderical">

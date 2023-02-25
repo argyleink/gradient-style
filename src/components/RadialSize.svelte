@@ -2,7 +2,7 @@
   import {radial_size} from '../store/radial.ts'
 
   const radial_sizes = {
-    'Spec Default': ['farthest-corner'],
+    'Default': ['farthest-corner'],
     'Special Angles': ['closest-side', 'closest-corner', 'farthest-side'],
     'Lengths': ['250px', '50vw', '25rem'],
   }
