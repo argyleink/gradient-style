@@ -199,8 +199,8 @@
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <header class="brand">
-      <div class="gradient-logo" style={`background:${user_gradient}`}></div>
-      <h1>HDgradients</h1>
+      <div class="gradient-logo" style="background:{user_gradient}"></div>
+      <h1>gRADiants</h1>
     </header>
     <ColorPicker />
     <LayersPanel />
@@ -232,11 +232,10 @@
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <header>
-        <p>Image Layer</p>
         <h2>{$layers}</h2>
       </header>
 
-      <h3>Settings</h3>
+      <h3>{$gradient_type} Gradient Settings</h3>
 
       {#if $gradient_type === 'linear'}
         <LinearAngle />
@@ -392,11 +391,9 @@
   }
 
   .controls > header {
-    padding-inline: var(--size-2);
+    padding-inline: var(--size-5);
     display: grid;
     margin-block: var(--size-4);
-    text-align: end;
-    justify-content: end;
   }
 
   .controls > header > h2 {
@@ -412,10 +409,8 @@
     display: flex;
     align-items: center;
     color: var(--link);
-    padding-inline: .7rem;
+    padding-inline: var(--size-5);
     max-inline-size: 100%;
-    background: var(--surface-3);
-    padding-block: 0.5rem;
     font-size: var(--font-size-0);
     text-transform: uppercase;
     font-weight: var(--font-weight-6);
@@ -439,7 +434,7 @@
     border-color: var(--surface-3);
     display: grid;
     gap: var(--size-2);
-    padding-inline: var(--size-2);
+    padding-inline: var(--size-5);
     padding-block: var(--size-3);
   }
 
