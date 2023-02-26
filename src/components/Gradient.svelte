@@ -417,12 +417,6 @@
     margin-block-end: var(--size-2);
   }
 
-  @media (prefers-color-scheme: light) {
-    h3 {
-      background: var(--surface-2);
-    }
-  }
-
   h3:not(:first-of-type) {
     margin-block-start: var(--size-4); 
   }
