@@ -30,12 +30,6 @@
     padding-block: var(--size-5);
   }
 
-  @media (prefers-color-scheme: light) {
-    .layers {
-      background: var(--surface-1);
-    }
-  }
-
   @media (min-width: 1024px) {
     .layers {
       max-block-size: calc(100cqb - var(--size-content-1));
@@ -68,5 +62,15 @@
   .end-of-layers {
     margin-block-start: var(--size-fluid-4);
     text-align: center;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .layers {
+      background: var(--surface-1);
+    }
+
+    .layer {
+      background: white;
+    }
   }
 </style>

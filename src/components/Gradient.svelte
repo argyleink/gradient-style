@@ -359,10 +359,6 @@
       background: var(--surface-1);
     }
 
-    .gradient-builder {
-      background: var(--surface-4);
-    }
-
     .brand {
       background: white;
     }
@@ -398,6 +394,12 @@
     overflow: auto;
     scroll-snap-type: x mandatory;
     background-color: var(--surface-1);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .inline-snap-panels {
+      background: var(--surface-4);
+    }
   }
 
   .inline-snap-panels > section {
@@ -628,6 +630,12 @@
     block-size: 100%;
     align-content: start;
     grid-template-rows: auto [layers] 1fr [footer-links] auto;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .primary-sidebar {
+      background: var(--surface-1);
+    }
   }
 
   .brand-name:hover > b {
