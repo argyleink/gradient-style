@@ -3,8 +3,8 @@
 </script>
 
 <svelte:head>
-	<title>Modern Gradient Generator</title>
-	<meta name="description" content="Color 4 complaint gradient builder." />
+	<title>CSS HD Gradients</title>
+	<meta name="description" content="Color 4 complaint CSS gradient builder." />
 </svelte:head>
 
 <Gradient />
