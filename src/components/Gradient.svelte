@@ -195,7 +195,8 @@
   )
 </script>
 
-<main class="gradient">
+<div class="color-wrap" style="background: {user_gradient}">
+<main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <header class="brand">
@@ -210,7 +211,12 @@
     <div class="inline-snap-panels">
       <section class="preview-panel">
         <div class="gradient-actions">
-          <button on:click={e => showCodePane()}>Get Code</button>
+          <button on:click={e => showCodePane()} title="Get the CSS code">
+            <span class="sr-only">Get the CSS code</span>
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M16.7 17.3q-.275.275-.688.275t-.712-.3q-.3-.3-.3-.712t.3-.713l3.875-3.875l-3.9-3.9Q15 7.8 15.012 7.388T15.3 6.7q.275-.275.7-.275t.7.275l4.6 4.6q.3.3.3.7t-.3.7l-4.6 4.6Zm-9.4 0l-4.6-4.6q-.3-.3-.3-.7t.3-.7l4.6-4.6q.275-.275.7-.287t.725.287q.3.3.3.713t-.3.712l-3.9 3.9l3.9 3.9q.275.275.263.688T8.7 17.3q-.275.275-.7.275t-.7-.275Z"/>
+            </svg>
+          </button>
         </div>
         <div class="preview">
           <div bind:this={preview_resizer} class="resizer" style="background: {user_gradient}"></div>  
@@ -268,16 +274,23 @@
     </section>
   </contain-er>
 </main>
+</div>
 
 <style>
-	.gradient {
+  .color-wrap {
+    padding: var(--size-3);
+  }
+
+	.gradient-builder {
 		display: grid;
+    border-radius: var(--radius-3);
+    overflow: hidden;
 	}
 
   @media (min-width: 1024px) {
-    .gradient {
-      overflow: hidden;
+    .gradient-builder {
       grid-template-columns: var(--size-14) 1fr var(--size-14);
+      grid-template-rows: calc(100vh - (var(--size-3) * 2));
     }
   }
 
@@ -340,7 +353,7 @@
       background: var(--surface-1);
     }
 
-    .gradient {
+    .gradient-builder {
       background: var(--surface-4);
     }
 
@@ -357,14 +370,20 @@
     display: grid;
     place-content: center;
     inline-size: 100cqi;
-    block-size: 100cqb;
     overflow: hidden;
     position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .preview-panel {
+      block-size: 100cqb;
+    }
   }
 
   .code-preview-panel {
     display: grid;
     gap: var(--size-2);
+    padding-block: var(--size-6);
     align-content: center;
     justify-items: flex-start;
     justify-content: center;
@@ -378,6 +397,7 @@
     max-block-size: 100dvh;
     overflow: auto;
     scroll-snap-type: x mandatory;
+    background-color: var(--surface-1);
   }
 
   .inline-snap-panels > section {
@@ -454,7 +474,7 @@
     gap: var(--size-2);
   }
 
-  .gradient :global(input[type="range"]) {
+  .gradient-builder :global(input[type="range"]) {
     inline-size: 100%;
   }
 
@@ -580,6 +600,15 @@
 
   :global(select[disabled]) {
     cursor: not-allowed;
+  }
+
+  :global(.sr-only) {
+    inline-size: 0;
+    block-size: 0;
+    overflow: hidden;
+    visibility: hidden;
+    white-space: nowrap;
+    position: absolute;
   }
   
   @media (prefers-color-scheme: dark) {

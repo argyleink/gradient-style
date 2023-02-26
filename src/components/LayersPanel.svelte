@@ -27,9 +27,8 @@
     display: grid;
     align-content: start;
     gap: var(--size-2);
-    padding: var(--size-5);
+    padding-block: var(--size-5);
     background: var(--surface-2);
-    padding-block-end: var(--size-fluid-5);
   }
 
   @media (prefers-color-scheme: light) {
@@ -55,27 +54,18 @@
     align-items: center;
     justify-content: space-between;
     padding-block: var(--size-2);
-    border-block-end: 1px solid var(--surface-3);
-  }
-
-  .layer:first-of-type {
-    border-block-start: 1px solid var(--surface-3);
-  }
-
-  .layer.selected::after {
-    content: "";
-    display: block;
-    position: absolute;
-    inset-inline-end: calc(var(--size-5) * -1 - 1ch);
-    height: 2ch;
-    width: 2ch;
-    background: var(--surface-1);
-    transform: rotateZ(45deg);
+    padding-inline: var(--size-5);
+    background: var(--surface-3);
+    box-shadow: var(--shadow-2);
   }
 
   .layers > h2 {
-    font-size: var(--font-size-1);
+    color: var(--link);
+    font-size: var(--font-size-0);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-6);
     margin-block-end: var(--size-2);
+    margin-inline: var(--size-5);
   }
 
   .end-of-layers {

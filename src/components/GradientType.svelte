@@ -57,7 +57,7 @@
 
   .switch:has(:checked) {
     color: var(--link);
-    background: var(--surface-1);
+    background: var(--surface-2);
   }
 
   @media (prefers-color-scheme: light) {
