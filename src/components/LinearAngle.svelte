@@ -5,13 +5,13 @@
   const linear_directions = [
     '--',
     'to right',
+    'to left',
     'to bottom right',
     'to bottom',
     'to bottom left',
-    'to left',
-    'to top left',
-    'to top',
     'to top right',
+    'to top',
+    'to top left',
   ]
 
   function blurNamedAngle() {

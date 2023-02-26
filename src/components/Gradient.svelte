@@ -201,7 +201,7 @@
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <header class="brand">
       <div class="gradient-logo" style="background:{user_gradient}"></div>
-      <h1>gRADiants</h1>
+      <h1 class="brand-name">HD G<b>rad</b>ients</h1>
     </header>
     <ColorPicker />
     <LayersPanel />
@@ -557,14 +557,13 @@
   }
 
   .gradient-logo {
-    -webkit-mask: url(https://api.iconify.design/game-icons:bookshelf.svg) 
-      center / contain
-      no-repeat;
-    mask: url(https://api.iconify.design/game-icons:bookshelf.svg) 
-      center / contain
-      no-repeat;
+    --retro-stripes: linear-gradient(to top, #000 1%, 0%, #0000 8%, 0%, #000 10%, 0%, #0000 16%, 0%, #000 19%, 0%, #0000 24%, 0%, #000 28%, 0%, #0000 32%, 0%, #000 37%, 0%, #0000 40%, 0%, #000 46%, 0%, #0000 48%, 0%, #000 55%, 0%, #0000 56%, 0%, #000 57%);
+    mask: var(--retro-stripes);
+    -webkit-mask: var(--retro-stripes);
     inline-size: var(--size-10);
+    inline-size: 35cqi;
     aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
     justify-self: center;
   }
 
@@ -615,5 +614,10 @@
     :global(select) {
       --_bg: var(--_bg-dark);
     }
+  }
+
+  .brand-name:hover > b {
+    color: yellow;
+    color: color(display-p3 0 1 1);
   }
 </style>
