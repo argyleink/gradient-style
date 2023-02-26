@@ -28,7 +28,6 @@
     align-content: start;
     gap: var(--size-2);
     padding-block: var(--size-5);
-    background: var(--surface-2);
   }
 
   @media (prefers-color-scheme: light) {
@@ -39,9 +38,7 @@
 
   @media (min-width: 1024px) {
     .layers {
-      block-size: 100%;
-      max-block-size: 100vh;
-      max-block-size: 100dvh;
+      max-block-size: calc(100cqb - var(--size-content-1));
       overflow-y: auto;
       overflow-x: hidden;
     }
