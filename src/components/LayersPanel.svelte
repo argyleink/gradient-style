@@ -16,10 +16,10 @@
     <span contenteditable bind:textContent={$layers}></span> 
     <GradientType />
   </div>
-  
-  <footer class="end-of-layers">
+
+  <div class="end-of-layers">
     <button disabled class="add-layer">Add gradient</button>
-  </footer>
+  </div>
 </section>
 
 <style>
