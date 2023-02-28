@@ -3,25 +3,24 @@ export function updateStops(stops) {
 
   let updated = stops.map((stop, i) => {
     let autoVal = autoStops[i]
-    stop.auto = autoVal
     
     if (stop.kind == 'stop') {
       if (stops.length === 1) {
         stop.position1 = 0
         stop.position2 = 0 
       }
-      else {
+      else if (!stop.position1 || stop.position1 === stop.auto) {
         stop.position1 = autoVal
-        stop.position2 = null  
+        stop.position2 = null
       }
     }
+    // is a hint
     else {
-      stop.percentage = autoVal
-      // let oldValAuto = stop.auto == stop.percentage
-      // stop.auto = autoVal
-      // if (oldValAuto)
-      //   stop.percentage = autoVal
+      if (!stop.percentage || stop.percentage === stop.auto)
+        stop.percentage = autoVal
     }
+
+    stop.auto = autoVal
     return stop
   })
 
