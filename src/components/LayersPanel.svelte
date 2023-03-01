@@ -49,10 +49,10 @@
   {/if}
 
   <div class="end-of-layers">
-    <button disabled class="add-layer">
-      New layer
+    <button class="add-layer" title="Add a layer">
+      <span class="sr-only">New layer</span>
       <svg viewBox="0 0 24 24">
-        <path fill="currentColor" d="M13 14h2v-3h3V9h-3V6h-2v3h-3v2h3v3Zm-5 4q-.825 0-1.413-.588T6 16V4q0-.825.588-1.413T8 2h12q.825 0 1.413.588T22 4v12q0 .825-.588 1.413T20 18H8Zm-4 4q-.825 0-1.413-.588T2 20V6h2v14h14v2H4Z"/>
+        <path fill="currentColor" d="M11 19v-6H5v-2h6V5h2v6h6v2h-6v6h-2Z"/>
       </svg>
     </button>
   </div>
@@ -61,9 +61,10 @@
 <style>
   .layers {
     display: grid;
+    grid-template-rows: auto auto auto 1fr;
     align-content: start;
     gap: var(--size-2);
-    padding-block: 1px var(--size-5);
+    padding-block: 1px;
   }
 
   @media (min-width: 1024px) {
@@ -98,8 +99,16 @@
   }
 
   .end-of-layers {
-    margin-block-start: var(--size-fluid-4);
-    text-align: center;
+    place-self: end;
+  }
+
+  .add-layer {
+    margin: var(--size-3);
+    border-radius: var(--radius-round);
+    aspect-ratio: var(--ratio-square);
+    
+    --_bg: var(--surface-3);
+    --_icon-size: var(--size-6);
   }
 
   @media (prefers-color-scheme: light) {

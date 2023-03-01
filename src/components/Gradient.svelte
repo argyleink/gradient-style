@@ -626,6 +626,7 @@
   }
 
   .footer-links {
+    background: var(--surface-3);
     padding: var(--size-3);
   }
 
@@ -633,6 +634,6 @@
     border-radius: var(--radius-round);
     aspect-ratio: var(--ratio-square);
     padding: var(--size-2);
-    --_bg: none;
+    --_bg: var(--surface-1);
   }
 </style>
