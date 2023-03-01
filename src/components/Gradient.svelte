@@ -261,12 +261,20 @@
 
 <style>
   .color-wrap {
+    background: Canvas;
     padding: var(--size-3);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .color-wrap {
+      background: #ddd;
+    }
   }
 
 	.gradient-builder {
 		display: grid;
     border-radius: var(--radius-3);
+    box-shadow: var(--shadow-3);
     overflow: hidden;
 	}
 
