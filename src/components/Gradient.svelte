@@ -148,9 +148,11 @@
   }
 
   function showCodePane() {
-    document.querySelector('.code-preview-panel').scrollIntoView({
-      behavior: 'smooth'
-    })
+    document.querySelector('.code-preview-panel .panel-actions button').focus()
+  }
+
+  function showEditorPane() {
+    document.querySelector('.preview-panel .panel-actions button').focus()
   }
 
   $: user_gradient = gensyntax[$gradient_type](
@@ -206,7 +208,7 @@
   <contain-er style="container: preview-panel / inline-size;">
     <div class="inline-snap-panels">
       <section class="preview-panel">
-        <div class="gradient-actions">
+        <div class="panel-actions">
           <button on:click={e => showCodePane()} title="Get the CSS code">
             <span class="sr-only">Get the CSS code</span>
             <svg width="24" height="24" viewBox="0 0 24 24">
@@ -222,6 +224,14 @@
         </div>
       </section>
       <section class="code-preview-panel">
+        <div class="panel-actions">
+          <button on:click={e => showEditorPane()} title="Back to the editor">
+            <span class="sr-only">Back to editor</span>
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="m10.875 19.3l-6.6-6.6q-.15-.15-.213-.325T4 12q0-.2.063-.375t.212-.325l6.6-6.6q.275-.275.688-.287t.712.287q.3.275.313.688T12.3 6.1L7.4 11h11.175q.425 0 .713.288t.287.712q0 .425-.287.713t-.713.287H7.4l4.9 4.9q.275.275.288.7t-.288.7q-.275.3-.7.3t-.725-.3Z"/>
+            </svg>
+          </button>
+        </div>
         <h4>Modern HD gradient snippet</h4>
         <Prism modern_gradient={user_gradient} />
         <br>
@@ -349,6 +359,11 @@
     align-content: center;
     justify-items: flex-start;
     justify-content: center;
+    position: relative;
+  }
+
+  .code-preview-panel .panel-actions {
+    inset-inline: var(--size-3) auto;
   }
 
   .inline-snap-panels {
@@ -360,6 +375,7 @@
     overflow: auto;
     scroll-snap-type: x mandatory;
     background-color: var(--surface-1);
+    scroll-behavior: smooth;
   }
 
   @media (prefers-color-scheme: light) {
@@ -372,13 +388,13 @@
     scroll-snap-align: center;
   }
 
-  .gradient-actions {
+  .panel-actions {
     position: absolute;
     inset-block-start: var(--size-3);
     inset-inline-end: var(--size-3);
   }
 
-  .gradient-actions > button {
+  .panel-actions > button {
     padding: var(--size-2);
     border-radius: var(--radius-round);
     --_bg: var(--surface-1);
