@@ -27,8 +27,8 @@
     {/each}
   </select>
   <div class="linear-angle slider-set">
-    <input on:input={blurNamedAngle} type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'inherit'}" />
     <AngleIcon angle={$linear_angle} />
+    <input on:input={blurNamedAngle} type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'inherit'}" />
     <input type="number" bind:value={$linear_angle} min="0" max="360" step="1"  class="slider-percentage">
   </div>
 </fieldset>

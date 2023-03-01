@@ -49,7 +49,7 @@
   {/if}
 
   <div class="end-of-layers">
-    <button class="add-layer" title="Add a layer">
+    <button class="add-layer" title="Add a layer! CSS backgrounds can have multiple gradients layered on top of each other. You can manage them all here.">
       <span class="sr-only">New layer</span>
       <svg viewBox="0 0 24 24">
         <path fill="currentColor" d="M11 19v-6H5v-2h6V5h2v6h6v2h-6v6h-2Z"/>
@@ -103,10 +103,11 @@
   }
 
   .add-layer {
+    padding: var(--size-2);
     margin: var(--size-3);
     border-radius: var(--radius-round);
     aspect-ratio: var(--ratio-square);
-    
+
     --_bg: var(--surface-3);
     --_icon-size: var(--size-6);
   }

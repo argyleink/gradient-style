@@ -247,9 +247,9 @@
 
       <footer class="end-of-stops">
         <button class="add-color" on:click={() => addStop()}>
-          Add a color
+          Add a random color
           <svg viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Z"/>
+            <path fill="currentColor" d="m17 3l5.25 4.5L17 12l5.25 4.5L17 21v-3h-2.74l-2.82-2.82l2.12-2.12L15.5 15H17V9h-1.5l-9 9H2v-3h3.26l9-9H17V3M2 6h4.5l2.82 2.82l-2.12 2.12L5.26 9H2V6Z"/>
           </svg>
         </button>
       </footer>
@@ -320,6 +320,10 @@
       max-block-size: 100dvh;
       overflow-y: auto;
     }
+  }
+
+  .controls {
+    counter-reset: count 0;
   }
 
   .brand {
@@ -432,8 +436,7 @@
   }
 
   :global(.control-set) {
-    border-inline: none;
-    border-block-end: none;
+    border: none;
     border-radius: 0;
     border-color: var(--surface-3);
     display: grid;

@@ -60,7 +60,7 @@
   {#if stop.kind === 'stop'}
     <fieldset 
       style="accent-color: {stop.color}" 
-      class="control-set"
+      class="stop control-set"
       on:mouseenter={() => fieldsetInteractingStart(stop)} 
       on:focusin={() => fieldsetInteractingStart(stop)} 
       on:mouseleave={() => fieldsetInteractingEnd()} 
@@ -88,7 +88,7 @@
   {/if}
   {#if stop.kind === 'hint'}
     <fieldset
-      class="control-set" 
+      class="hint control-set" 
       on:mouseenter={() => fieldsetInteractingStart(stop)} 
       on:focusin={() => fieldsetInteractingStart(stop)} 
       on:mouseleave={() => fieldsetInteractingEnd()} 
@@ -136,6 +136,18 @@
   .color-hint > input[type="range"]:active::-webkit-slider-thumb {
     cursor: grabbing;
   } */
+
+  .control-set > legend {
+    font-weight: 700;
+  }
+
+  .stop > legend {
+    counter-increment: count 1;
+  }
+
+  .stop > legend::after {
+    content: ' ' counter(count, decimal);
+  }
 
   .chip {
     border-radius: var(--radius-round);
