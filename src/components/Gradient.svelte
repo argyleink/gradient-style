@@ -404,37 +404,6 @@
     --_bg: var(--surface-1);
   }
 
-  .controls > header {
-    padding-inline: var(--size-5);
-    display: grid;
-    margin-block: var(--size-4);
-  }
-
-  .controls > header > h2 {
-    font-size: var(--font-size-2);
-  }
-
-  .controls > header > p {
-    text-transform: uppercase;
-    font-size: var(--font-size-0);
-  }
-
-  h3 {
-    display: flex;
-    align-items: center;
-    color: var(--link);
-    padding-inline: var(--size-5);
-    max-inline-size: 100%;
-    font-size: var(--font-size-0);
-    text-transform: uppercase;
-    font-weight: var(--font-weight-6);
-    margin-block-end: var(--size-2);
-  }
-
-  h3:not(:first-of-type) {
-    margin-block-start: var(--size-4); 
-  }
-
   :global(.control-set) {
     border: none;
     border-radius: 0;
@@ -513,7 +482,7 @@
   :global(.container-absolute) {
     position: absolute;
     inset-block-start: -1.5rem;
-    inset-inline-end: .5rem;
+    inset-inline-end: 1.5rem;
   }
 
   :global(.stack) {

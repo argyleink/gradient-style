@@ -23,7 +23,7 @@
     </div>
   {/each} -->
   <div class="layer selected">
-    <span contenteditable bind:textContent={$layers}></span> 
+    <span contenteditable bind:textContent={$layers} class="layer-name"></span> 
     <GradientType />
   </div>
 
@@ -89,13 +89,8 @@
     box-shadow: var(--shadow-2);
   }
 
-  .layers > h2 {
-    color: var(--link);
-    font-size: var(--font-size-0);
-    text-transform: uppercase;
-    font-weight: var(--font-weight-6);
-    margin-block-end: var(--size-2);
-    margin-inline: var(--size-5);
+  .layer-name {
+    font-weight: 700;
   }
 
   .end-of-layers {
