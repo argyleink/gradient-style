@@ -19,19 +19,8 @@
   import {updateStops} from '../utils/stops.ts'
 
   import GradientStops from './GradientStops.svelte'
-  import GradientColorSpace from './GradientColorSpace.svelte'
-  import HueInterpolation from './HueInterpolation.svelte'
 
-  import LinearAngle from './LinearAngle.svelte'
   import LinearOverlay from './LinearOverlay.svelte'
-
-  import RadialSize from './RadialSize.svelte'
-  import RadialShape from './RadialShape.svelte'
-  import RadialPosition from './RadialPosition.svelte'
-
-  import ConicAngle from './ConicAngle.svelte'
-  import ConicPosition from './ConicPosition.svelte'
-
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Prism from './PrismJS.svelte'
@@ -244,38 +233,15 @@
 
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
-      <header>
-        <h2>{$layers}</h2>
-      </header>
-
-      <h3>{$gradient_type} Gradient Settings</h3>
-
-      {#if $gradient_type === 'linear'}
-        <LinearAngle />
-      {/if}
-
-      {#if $gradient_type === 'radial'}
-        <RadialSize />
-        <RadialShape />
-        <RadialPosition />
-      {/if}
-
-      {#if $gradient_type === 'conic'}
-        <ConicAngle />
-        <ConicPosition />
-      {/if}
-
-      <GradientColorSpace />
-
-      {#if isCylindricalSpace($gradient_space)}
-        <HueInterpolation />
-      {/if}
-
-      <h3>Color stops</h3>
       <GradientStops />
 
       <footer class="end-of-stops">
-        <button class="add-color" on:click={() => addStop()}>Add a color</button>
+        <button class="add-color" on:click={() => addStop()}>
+          Add a color
+          <svg viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Z"/>
+          </svg>
+        </button>
       </footer>
 
     </section>
@@ -333,7 +299,7 @@
     gap: var(--size-1);
     align-content: start;
     background: var(--surface-2);
-    padding-block: var(--size-2) var(--size-fluid-5);
+    padding-block: var(--size-fluid-2) var(--size-fluid-5);
     accent-color: var(--surface-3);
   }
 

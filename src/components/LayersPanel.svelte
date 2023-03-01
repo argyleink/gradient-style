@@ -1,11 +1,21 @@
 <script>
-  import GradientType from './GradientType.svelte'
+  import {isCylindricalSpace} from '../utils/colorspace.ts'
 
+  import {gradient_type, gradient_space} from '../store/gradient.ts'
   import {layers} from '../store/layers.ts'
+
+  import GradientType from './GradientType.svelte'
+  import LinearAngle from './LinearAngle.svelte'
+  import RadialSize from './RadialSize.svelte'
+  import RadialShape from './RadialShape.svelte'
+  import RadialPosition from './RadialPosition.svelte'
+  import ConicAngle from './ConicAngle.svelte'
+  import ConicPosition from './ConicPosition.svelte'
+  import HueInterpolation from './HueInterpolation.svelte'
+  import GradientColorSpace from './GradientColorSpace.svelte'
 </script>
 
 <section class="layers">
-  <h2>Image Layers</h2>
   <!-- {#each layers as layer}
     <div class="layer selected">
       <span contenteditable>{layer}</span> 
@@ -17,8 +27,34 @@
     <GradientType />
   </div>
 
+  {#if $gradient_type === 'linear'}
+    <LinearAngle />
+  {/if}
+
+  {#if $gradient_type === 'radial'}
+    <RadialSize />
+    <RadialShape />
+    <RadialPosition />
+  {/if}
+
+  {#if $gradient_type === 'conic'}
+    <ConicAngle />
+    <ConicPosition />
+  {/if}
+
+  <GradientColorSpace />
+
+  {#if isCylindricalSpace($gradient_space)}
+    <HueInterpolation />
+  {/if}
+
   <div class="end-of-layers">
-    <button disabled class="add-layer">Add gradient</button>
+    <button disabled class="add-layer">
+      New layer
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor" d="M13 14h2v-3h3V9h-3V6h-2v3h-3v2h3v3Zm-5 4q-.825 0-1.413-.588T6 16V4q0-.825.588-1.413T8 2h12q.825 0 1.413.588T22 4v12q0 .825-.588 1.413T20 18H8Zm-4 4q-.825 0-1.413-.588T2 20V6h2v14h14v2H4Z"/>
+      </svg>
+    </button>
   </div>
 </section>
 
@@ -27,7 +63,7 @@
     display: grid;
     align-content: start;
     gap: var(--size-2);
-    padding-block: var(--size-5);
+    padding-block: 1px var(--size-5);
   }
 
   @media (min-width: 1024px) {
@@ -40,7 +76,9 @@
 
   .layer {
     cursor: pointer;
-    position: relative;
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
