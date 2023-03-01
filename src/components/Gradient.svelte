@@ -319,6 +319,7 @@
       max-block-size: 100vh;
       max-block-size: 100dvh;
       overflow-y: auto;
+      overscroll-behavior: contain;
     }
   }
 
@@ -377,6 +378,7 @@
     max-block-size: 100vh;
     max-block-size: 100dvh;
     overflow: auto;
+    overscroll-behavior: contain;
     scroll-snap-type: x mandatory;
     background-color: var(--surface-1);
     scroll-behavior: smooth;

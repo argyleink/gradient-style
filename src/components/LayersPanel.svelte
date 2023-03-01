@@ -72,6 +72,7 @@
       max-block-size: calc(100cqb - var(--size-content-1));
       overflow-y: auto;
       overflow-x: hidden;
+      overscroll-behavior: contain;
     }
   }
 
@@ -95,6 +96,8 @@
 
   .end-of-layers {
     place-self: end;
+    position: sticky;
+    inset-block-end: 0;
   }
 
   .add-layer {
