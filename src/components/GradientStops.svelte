@@ -100,7 +100,7 @@
       on:mouseleave={() => fieldsetInteractingEnd()} 
       on:focusout={() => fieldsetInteractingEnd()}
     >
-      <legend>Color</legend>
+      <h4>Color</h4>
       <div class="chip color-stop">
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
         <span class="color-string">{stop.color}</span>
@@ -140,7 +140,7 @@
       on:mouseleave={() => fieldsetInteractingEnd()} 
       on:focusout={() => fieldsetInteractingEnd()}
     >
-      <legend>Transition</legend>
+      <h4>Transition</h4>
       <div class="color-hint slider-set">
         <input 
           type="range" 
@@ -159,9 +159,10 @@
     padding-inline-end: var(--size-3);
   }
 
-  .control-set > legend {
+  .control-set > h4 {
     block-size: 0;
-    overflow: hidden;
+    position: absolute;
+    overflow: clip;
     visibility: hidden;
   }
 
@@ -171,6 +172,13 @@
     margin-inline: var(--size-3);
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-2);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .stop {
+      background: white;
+      border: 1px solid var(--surface-2);
+    }
   }
 
   .stop-actions {

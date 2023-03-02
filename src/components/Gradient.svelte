@@ -508,8 +508,13 @@
     max-inline-size: 4.8ch;
     padding-block: 0;
     padding-inline-end: 0;
-    background: var(--surface-1);
     -moz-appearance:textfield;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(.slider-percentage) {
+      background: var(--surface-1);
+    }
   }
 
   :global(.slider-percentage::-webkit-outer-spin-button),
