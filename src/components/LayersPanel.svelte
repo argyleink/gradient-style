@@ -76,6 +76,10 @@
     }
   }
 
+  .layers > :global(.control-set) {
+    gap: var(--size-4);
+  }
+
   .layer {
     cursor: pointer;
     position: sticky;

@@ -489,11 +489,7 @@
     opacity: 0;
   } */
 
-  :global(.container-absolute) {
-    position: absolute;
-    inset-block-start: -1.5rem;
-    inset-inline-end: 1.5rem;
-  }
+  
 
   :global(.stack) {
     display: inline-grid;

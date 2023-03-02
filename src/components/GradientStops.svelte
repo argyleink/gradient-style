@@ -6,7 +6,24 @@
   import {picker_value} from '../store/colorpicker.ts'
   import {updateStops} from '../utils/stops.ts'
 
-  function removeStopByIndex(pos) {
+  function colorAction(event, position) {
+    switch (event.target.value) {
+      case 'Remove':
+        removeStop(position)
+        break
+      case 'Reset':
+        // resetStop(position)
+        break
+      case 'Duplicate':
+        dupeStop(position)
+        break
+      case 'Copy CSS color':
+        // copyStopColor(position)
+        break
+    }
+  }
+
+  function removeStop(pos) {
     $gradient_stops.splice(pos, 2)
 
     if ($gradient_stops.length === pos) {
@@ -19,6 +36,20 @@
     }
 
     $gradient_stops = updateStops($gradient_stops)
+  }
+
+  function dupeStop(pos) {
+    const newList = [
+      ...$gradient_stops,
+      {kind: 'hint', percentage: null},
+      {
+        kind: 'stop', 
+        color: $gradient_stops[pos].color, 
+        position1: $gradient_stops[pos].position1, 
+        position2: $gradient_stops[pos].position2,
+      },
+    ]
+    $gradient_stops = updateStops(newList)
   }
 
   function removePositionByIndex(index, pos) {
@@ -82,7 +113,19 @@
         </div>
       </div>
       {#if $gradient_stops.length > 1}
-        <button class="remove container-absolute" type="reset" on:click={() => removeStopByIndex(i)}>✕</button>
+        <button class="stop-actions">
+          <select on:change={(e) => colorAction(e,i)}>
+            <option>Color Actions</option>
+            <option disabled>--</option>
+            <option>Duplicate</option>
+            <option disabled>Pick new color</option>
+            <option disabled>Copy CSS color</option>
+            <option disabled>Random color</option>
+            <option disabled>--</option>
+            <option disabled>Reset</option>
+            <option>Remove</option>
+          </select>
+        </button>
       {/if}
     </fieldset>
   {/if}
@@ -113,52 +156,40 @@
     padding-inline-end: var(--size-3);
   }
 
-  /* .color-hint > input[type="range"] {
-    appearance: none;
-    accent-color: var(--surface-1);
-    border-radius: var(--radius-round);
-    block-size: 1rem;
-  }
-
-  .color-hint > input[type="range"]::-webkit-slider-thumb {
-    --_border-size: 4px;
-    
-    cursor: grab;
-    appearance: none;
-    accent-color: var(--surface-1);
-    border: 4px solid white;
-    height: calc(1rem + (var(--_border-size) * 2));
-    aspect-ratio: 1;
-    border-radius: var(--radius-round);
-    box-shadow: var(--shadow-2), var(--inner-shadow-2);
-  }
-  
-  .color-hint > input[type="range"]:active::-webkit-slider-thumb {
-    cursor: grabbing;
-  } */
-
   .control-set > legend {
-    font-weight: 700;
+    block-size: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 
-  .stop > legend {
-    counter-increment: count 1;
+  .stop {
+    background: var(--surface-3);
+    padding-inline: var(--size-3);
+    margin-inline: var(--size-3);
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow-2);
   }
 
-  .stop > legend::after {
-    content: ' ' counter(count, decimal);
+  .stop-actions {
+    position: absolute;
+    inset-inline-end: var(--size-1);
+    inset-block-start: var(--size-1);
+    inline-size: var(--size-5);
+    overflow: hidden;
+    border-radius: var(--radius-round);
+    padding-inline: 0;
+    aspect-ratio: 1;
+  }
+
+  .stop-actions > select {
+    position: absolute;
+    inset-inline-end: -1.25ch;
   }
 
   .chip {
-    border-radius: var(--radius-round);
     display: inline-flex;
     place-items: center;
     gap: var(--size-2);
-    padding-block: var(--size-1);
-    padding-inline: var(--size-2);
-    box-shadow: var(--shadow-1);
-    border: 1px solid var(--surface-2);
-    background: var(--surface-1);
     justify-self: start;
     max-inline-size: 100%;
     overflow-x: auto;
