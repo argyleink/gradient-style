@@ -508,7 +508,7 @@
     max-inline-size: 4.8ch;
     padding-block: 0;
     padding-inline-end: 0;
-    /* background: none; */
+    background: var(--surface-1);
     -moz-appearance:textfield;
   }
 
