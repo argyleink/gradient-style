@@ -21,6 +21,9 @@
         // copyStopColor(position)
         break
     }
+
+    // reset
+    event.target.selectedIndex = 0
   }
 
   function removeStop(pos) {
@@ -39,17 +42,17 @@
   }
 
   function dupeStop(pos) {
-    const newList = [
-      ...$gradient_stops,
-      {kind: 'hint', percentage: null},
-      {
-        kind: 'stop', 
-        color: $gradient_stops[pos].color, 
-        position1: $gradient_stops[pos].position1, 
-        position2: $gradient_stops[pos].position2,
-      },
-    ]
-    $gradient_stops = updateStops(newList)
+    const clone = {
+      kind: 'stop', 
+      color: $gradient_stops[pos].color, 
+      position1: $gradient_stops[pos].position1, 
+      position2: $gradient_stops[pos].position2,
+    }
+
+    $gradient_stops.splice(pos, 0, {kind: 'hint', percentage: null})
+    $gradient_stops.splice(pos, 0, clone)
+
+    $gradient_stops = updateStops($gradient_stops)
   }
 
   function removePositionByIndex(index, pos) {
