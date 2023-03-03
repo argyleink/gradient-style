@@ -243,6 +243,16 @@
 
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
+      <div class="menu-bar">
+        <!-- <select>
+          <option checked>Actions</option>
+          <option disabled>Copy 2023+ CSS</option>
+          <option disabled>Copy Classic CSS</option>
+          <option disabled>Pick a preset</option>
+          <option disabled>Reset all</option>
+        </select> -->
+      </div>
+
       <GradientStops />
 
       <footer class="end-of-stops">
@@ -312,12 +322,34 @@
     }
   }
 
+  .menu-bar {
+    display: flex;
+    justify-content: end;
+    gap: var(--size-3);
+    position: sticky;
+    z-index: 1;
+    inset-block-start: 0;
+    background: var(--surface-3);
+    margin-block-end: var(--size-5);
+    block-size: var(--size-8);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .menu-bar {
+      background: white;
+    }
+  }
+
+  .menu-bar > select {
+    box-shadow: none;
+  }
+
   .controls {
     display: grid;
     gap: var(--size-1);
     align-content: start;
     background: var(--surface-2);
-    padding-block: var(--size-fluid-2) var(--size-fluid-5);
+    padding-block: 0 var(--size-fluid-5);
     accent-color: var(--surface-3);
   }
 
