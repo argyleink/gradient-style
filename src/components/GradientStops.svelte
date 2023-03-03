@@ -5,6 +5,7 @@
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
   import {updateStops} from '../utils/stops.ts'
+  import {copyToClipboard} from '../utils/clipboard.ts'
 
   function colorAction(event, position) {
     switch (event.target.value) {
@@ -18,7 +19,7 @@
         dupeStop(position)
         break
       case 'Copy CSS color':
-        // copyStopColor(position)
+        copyToClipboard($gradient_stops[position].color)
         break
     }
 
@@ -122,7 +123,7 @@
             <option disabled>--</option>
             <option>Duplicate</option>
             <option disabled>Pick new color</option>
-            <option disabled>Copy CSS color</option>
+            <option>Copy CSS color</option>
             <option disabled>Random color</option>
             <option disabled>--</option>
             <option disabled>Reset</option>
