@@ -11,7 +11,7 @@ export function updateStops(stops) {
       }
       else if (!stop.position1 || stop.position1 === stop.auto) {
         stop.position1 = autoVal
-        stop.position2 = null
+        stop.position2 = autoVal
       }
     }
     // is a hint

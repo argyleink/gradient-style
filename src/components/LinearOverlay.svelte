@@ -94,6 +94,14 @@
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
+        {#if stop.position2 !== null}
+          <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
+            <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
+            <div class="stop" use:dragMe={stop}>
+              <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
+            </div>
+          </div>
+        {/if}
       {/if}
       {#if stop.kind === 'hint'}
         <div class="hint" style="inset-inline-start: {stop.percentage}%">
@@ -143,6 +151,14 @@
 
   .stop-wrap {
     translate: 0 calc(var(--size-3) * -1);
+  }
+
+  .stop-wrap:has(+ .stop-wrap) .stop {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .stop-wrap + .stop-wrap .stop {
+    clip-path: inset(0 0 0 50%);
   }
 
   .stop {

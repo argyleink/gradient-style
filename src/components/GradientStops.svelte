@@ -118,7 +118,7 @@
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
-          <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position2 === null ? 'var(--gray-6)' : stop.color}">
+          <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color}">
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
@@ -151,6 +151,7 @@
         <input 
           type="range" 
           bind:value="{stop.percentage}" 
+          style="accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"
         />
         <!-- style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})" -->
         <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
