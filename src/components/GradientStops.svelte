@@ -199,6 +199,12 @@
     aspect-ratio: 1;
   }
 
+  @media (prefers-color-scheme: dark) {
+    .stop-actions {
+      box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    }
+  }
+
   .stop-actions > select {
     position: absolute;
     inset-inline-end: -1.25ch;
