@@ -6,6 +6,7 @@
   import {picker_value} from '../store/colorpicker.ts'
   import {updateStops} from '../utils/stops.ts'
   import {copyToClipboard} from '../utils/clipboard.ts'
+  import {randomNumber} from '../utils/numbers.ts'
 
   function colorAction(event, position) {
     switch (event.target.value) {
@@ -13,13 +14,18 @@
         removeStop(position)
         break
       case 'Reset':
-        // resetStop(position)
+        $gradient_stops[position].position1 = null
+        $gradient_stops[position].position2 = null
+        updateStops($gradient_stops)
         break
       case 'Duplicate':
         dupeStop(position)
         break
       case 'Copy CSS color':
         copyToClipboard($gradient_stops[position].color)
+        break
+      case 'Random color':
+        $gradient_stops[position].color = `oklch(80% 0.3 ${randomNumber(0,360)})`
         break
     }
 
@@ -122,11 +128,10 @@
             <option>Color Actions</option>
             <option disabled>--</option>
             <option>Duplicate</option>
-            <option disabled>Pick new color</option>
             <option>Copy CSS color</option>
-            <option disabled>Random color</option>
+            <option>Random color</option>
             <option disabled>--</option>
-            <option disabled>Reset</option>
+            <option>Reset</option>
             <option>Remove</option>
           </select>
         </button>

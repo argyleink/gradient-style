@@ -17,6 +17,7 @@
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
   import {updateStops} from '../utils/stops.ts'
+  import {randomNumber} from '../utils/numbers.ts'
 
   import GradientStops from './GradientStops.svelte'
 
@@ -134,10 +135,6 @@
     }
   }
 
-  function randomNumber(min, max) {
-    return Math.trunc(Math.random() * (max - min) + min)
-  }
-
   function addStop() {
     const newList = [
       ...$gradient_stops,
@@ -245,7 +242,8 @@
     <section class="controls">
       <div class="menu-bar">
         <!-- <select>
-          <option checked>Actions</option>
+          <option>Actions</option>
+          <option disabled>--</option>
           <option disabled>Copy 2023+ CSS</option>
           <option disabled>Copy Classic CSS</option>
           <option disabled>Pick a preset</option>
