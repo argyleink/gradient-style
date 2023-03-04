@@ -34,7 +34,14 @@
 
   function dragMe(node, stop) {
     let moving = false
-    let left = parseInt(stop.kind === 'stop' ? stop.position1 : stop.percentage)
+    let left = null
+
+    if (stop.kind === 'hint')
+      left = parseInt(stop.percentage)
+    else
+      left = parseInt(node.dataset.position === "1" 
+        ? stop.position1 
+        : stop.position2)
 
     node.addEventListener('pointerdown', () => 
       moving = true)
@@ -48,8 +55,12 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         left += e.movementX / apercent
 
-        if (stop.kind === 'stop')
-          stop.position1 = Math.round(left)
+        if (stop.kind === 'stop') {
+          if (node.dataset.position === "1")
+            stop.position1 = Math.round(left)
+          else
+            stop.position2 = Math.round(left)
+        }
         else
           stop.percentage = Math.round(left)
 
@@ -90,14 +101,14 @@
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
-          <div class="stop" use:dragMe={stop}>
+          <div class="stop" use:dragMe={stop} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
         {#if stop.position2 !== null}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
-            <div class="stop" use:dragMe={stop}>
+            <div class="stop" use:dragMe={stop} data-position="2">
               <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
             </div>
           </div>

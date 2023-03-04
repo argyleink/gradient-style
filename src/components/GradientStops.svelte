@@ -94,6 +94,13 @@
   function fieldsetInteractingEnd(stop) {
     $active_stop_index = null
   }
+
+  function fixIfEmptied(stop) {
+    if (stop.percentage === null) {
+      stop.percentage = stop.auto
+      $gradient_stops = [...$gradient_stops]
+    }
+  }
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
@@ -145,6 +152,7 @@
       on:focusin={() => fieldsetInteractingStart(stop)} 
       on:mouseleave={() => fieldsetInteractingEnd()} 
       on:focusout={() => fieldsetInteractingEnd()}
+      on:input={() => fixIfEmptied(stop)}
     >
       <h4>Transition</h4>
       <div class="color-hint slider-set">
