@@ -2,9 +2,12 @@
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
+
+  import {updateStops} from '../utils/stops.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
   import {contrast_color_prefer_white} from '../utils/color.ts'
+  import {randomNumber} from '../utils/numbers.ts'
 
   export let w = null
   export let h = null
@@ -89,6 +92,33 @@
   function gradientAngle(ng) {
     return ng - 90
   }
+
+  function addStop(e) {
+    const bounds = e.target.getBoundingClientRect()
+    const distance = e.clientX - bounds.x
+    const percent = (distance / bounds.width * 100).toFixed()
+    
+    const upperLimit = $gradient_stops.findIndex(stop => 
+      stop.position1 > percent)
+
+    const newStop = {
+      kind: 'stop', 
+      color: `oklch(80% 0.3 ${randomNumber(0,360)})`, 
+      position1: percent, 
+      position2: percent,
+    }
+
+    if (upperLimit > 1) {
+      $gradient_stops.splice(upperLimit, 0, {kind: 'hint', percentage: null})
+      $gradient_stops.splice(upperLimit, 0, newStop)
+    }
+    else {
+      $gradient_stops.splice(upperLimit, 0, newStop)
+      $gradient_stops.splice(upperLimit, 0, {kind: 'hint', percentage: null})
+    }
+
+    $gradient_stops = updateStops($gradient_stops)
+  }
 </script>
 
 <div class="pie">
@@ -96,6 +126,7 @@
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
 </div>
 <div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
+  <div class="invisible-track" on:click={e => addStop(e)}></div>
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
@@ -160,6 +191,17 @@
     z-index: -1;
   }
 
+  .invisible-track {
+    cursor: copy;
+    pointer-events: auto;
+    position: absolute;
+    block-size: 1rem;
+    inline-size: 100%;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    transform: translateY(-50%);
+  }
+
   .stop-wrap {
     translate: 0 calc(var(--size-3) * -1);
   }
@@ -180,7 +222,6 @@
     aspect-ratio: 1;
     inline-size: var(--size-5);
     border-radius: var(--radius-round);
-    box-shadow: var(--shadow-2);
     border: .5px solid hsl(0 0% 0% / 15%);
   }
 
@@ -214,7 +255,6 @@
     fill: white;
     stroke-width: 0.5px;
     stroke: hsl(0 0% 0% / 15%);
-    filter: drop-shadow(0px 2px 2px hsl(0 0% 0% / 10%));
   }
 
   :is(.hint > svg, .stop) {
