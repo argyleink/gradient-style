@@ -59,6 +59,9 @@
         left += e.movementX / apercent
 
         if (stop.kind === 'stop') {
+          if (stop.position1 === stop.position2)
+            stop.position2 = Math.round(left)
+
           if (node.dataset.position === "1")
             stop.position1 = Math.round(left)
           else
@@ -136,7 +139,7 @@
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
-        {#if stop.position2 !== null}
+        {#if stop.position2 !== null && stop.position2 !== stop.auto}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" use:dragMe={stop} data-position="2">

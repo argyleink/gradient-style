@@ -94,7 +94,7 @@
       .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
-          if (s.position1 != null && s.position2 != null) 
+          if (s.position1 != null && s.position2 != null && s.position1 != s.position2) 
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
             s.position1 = '0'

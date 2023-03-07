@@ -101,6 +101,11 @@
       $gradient_stops = [...$gradient_stops]
     }
   }
+
+  function slidingPosition(stop) {
+    if (stop.position1 == stop.position2)
+      stop.position2 = stop.position1
+  }
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
@@ -121,7 +126,7 @@
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <input type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}">
+          <input on:input={() => slidingPosition(stop)} type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}">
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
