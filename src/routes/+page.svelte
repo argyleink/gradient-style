@@ -12,5 +12,6 @@
 <style>
 	:global(body) {
 		display: grid;
+		overscroll-behavior: none;
 	}
 </style>
