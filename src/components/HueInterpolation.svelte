@@ -2,7 +2,7 @@
   import {gradient_interpolation} from '../store/gradient.ts'
 </script>
 
-<fieldset>
+<fieldset class="control-set">
   <legend>Hue Interpolation</legend>
   <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation}> 
     <optgroup label="Default interpolation">
