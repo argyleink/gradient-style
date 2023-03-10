@@ -12,6 +12,10 @@
 <style>
 	:global(body) {
 		display: grid;
+	}
+
+	:global(html) {
+		overflow: hidden;
 		overscroll-behavior: none;
 	}
 </style>

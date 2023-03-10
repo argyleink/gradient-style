@@ -16,7 +16,5 @@
 	.app {
 		display: grid;
 		gap: var(--size-1);
-		block-size: 100vh;
-		block-size: 100dvh;
 	}
 </style>

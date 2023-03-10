@@ -301,6 +301,7 @@
     .gradient-builder {
       grid-template-columns: var(--size-14) 1fr var(--size-14);
       grid-template-rows: calc(100vh - (var(--size-3) * 2));
+      grid-template-rows: calc(100dvh - (var(--size-3) * 2));
     }
   }
 
