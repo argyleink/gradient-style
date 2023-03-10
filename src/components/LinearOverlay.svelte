@@ -151,8 +151,8 @@
       {#if stop.kind === 'hint'}
         <div class="hint" style="inset-inline-start: {stop.percentage}%">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
-          <svg use:dragMe={stop} viewBox="0 0 24 15">
-            <path d="M.99 9.415 9.649.955c.309-.303.676-.543 1.08-.707a3.396 3.396 0 0 1 2.552 0c.404.164.771.404 1.08.707l8.657 8.46C25.123 11.473 23.62 15 20.644 15H3.331C.356 15-1.115 11.473.99 9.415Z"/>
+          <svg use:dragMe={stop} viewBox="0 0 256 256">
+            <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
           </svg>
         </div>
       {/if}

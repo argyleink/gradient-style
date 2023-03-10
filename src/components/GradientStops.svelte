@@ -103,8 +103,8 @@
   }
 
   function slidingPosition(stop) {
-    if (stop.position1 == stop.position2)
-      stop.position2 = stop.position1
+    // if (stop.position1 == stop.position2)
+    //   flagged for matching
   }
 </script>
 
@@ -192,6 +192,7 @@
     margin-inline: var(--size-3);
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-2);
+    gap: var(--size-3);
   }
 
   @media (prefers-color-scheme: light) {
@@ -203,13 +204,15 @@
 
   .stop-actions {
     position: absolute;
-    inset-inline-end: var(--size-1);
-    inset-block-start: var(--size-1);
+    inset-inline-end: var(--size-3);
+    inset-block-start: var(--size-3);
     inline-size: var(--size-5);
     overflow: hidden;
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
+    border: none;
+    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -219,8 +222,10 @@
   }
 
   .stop-actions > select {
+    --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     position: absolute;
-    inset-inline-end: -1.25ch;
+    inset-inline-end: -1.1ch;
   }
 
   .chip {
@@ -228,8 +233,6 @@
     place-items: center;
     gap: var(--size-2);
     justify-self: start;
-    max-inline-size: 100%;
-    overflow-x: auto;
   }
 
   .round {
@@ -239,13 +242,15 @@
     padding: 0;
     flex-shrink: 0;
     border: none;
-    box-shadow: var(--inner-shadow-0);
+    box-shadow: var(--inner-shadow-0), 0 0 0 var(--_highlight-size) var(--_highlight);
     outline-offset: 4px;
   }
 
   .color-string {
-    min-inline-size: max-content;
-    padding-inline-end: var(--size-1);
+    max-inline-size: 20ch;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   @media (prefers-color-scheme: light) {

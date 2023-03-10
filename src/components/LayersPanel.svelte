@@ -49,7 +49,7 @@
   {/if}
 
   <div class="end-of-layers">
-    <button class="add-layer" title="Add a layer! CSS backgrounds can have multiple gradients layered on top of each other. You can manage them all here.">
+    <button disabled class="add-layer" title="Add a layer! CSS backgrounds can have multiple gradients layered on top of each other. You can manage them all here.">
       <span class="sr-only">New layer</span>
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path fill="currentColor" d="M11 19v-6H5v-2h6V5h2v6h6v2h-6v6h-2Z"/>
@@ -119,7 +119,7 @@
       background: var(--surface-1);
     }
 
-    .layer {
+    .layer, .add-layer {
       background: white;
     }
   }
