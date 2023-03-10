@@ -102,10 +102,18 @@
     }
   }
 
-  function slidingPosition(stop) {
-    // if (stop.position1 == stop.position2)
-    //   flagged for matching
+  function slidingPosition(e, stop) {
+    if (stop.position1 == stop.position2) {
+      stop.position1 = e.target.value
+      stop.position2 = e.target.value
+    }
+    else {
+      stop.position1 = e.target.value
+    }
+    $gradient_stops = [...$gradient_stops]
   }
+
+
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
@@ -126,7 +134,7 @@
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <input on:input={() => slidingPosition(stop)} type="range" bind:value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}">
+          <input on:input={(e) => slidingPosition(e, stop)} type="range" value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}">
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
