@@ -183,7 +183,7 @@
   )
 </script>
 
-<div class="color-wrap" style={`background: ${user_gradient}`}>
+<div class="color-wrap" style={`background: ${classic_gradient}; background: ${user_gradient};`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
@@ -217,7 +217,7 @@
           </button>
         </div>
         <div class="preview">
-          <div bind:this={preview_resizer} class="resizer" style={`background: ${user_gradient}; width: 50cqi;`}></div>  
+          <div bind:this={preview_resizer} class="resizer" style={`background: ${classic_gradient}; background: ${user_gradient}; width: 50cqi;`}></div>  
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
           {/if}
