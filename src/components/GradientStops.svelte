@@ -8,6 +8,8 @@
   import {copyToClipboard} from '../utils/clipboard.ts'
   import {randomNumber} from '../utils/numbers.ts'
 
+  import RangeSlider from './RangeSlider.svelte'
+
   function colorAction(event, position) {
     switch (event.target.value) {
       case 'Remove':
@@ -134,11 +136,13 @@
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <input on:input={(e) => slidingPosition(e, stop)} type="range" value="{stop.position1}" style="accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}">
+          <!-- <input on:input={(e) => slidingPosition(e, stop)} type="range" value="{stop.position1}" style="--accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}"> -->
+          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color};"/>
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
-          <input type="range" bind:value="{stop.position2}" style="accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color}">
+          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color};"/>
+          <!-- <input type="range" bind:value="{stop.position2}" style="--accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color}"> -->
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
@@ -169,11 +173,13 @@
     >
       <h4>Transition</h4>
       <div class="color-hint slider-set">
-        <input 
+        <!-- <input 
           type="range" 
           bind:value="{stop.percentage}" 
           style="accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"
-        />
+        /> -->
+        <RangeSlider bind:value={stop.percentage} 
+          style="--accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"/>
         <!-- style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})" -->
         <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
       </div>
@@ -261,9 +267,17 @@
     text-overflow: ellipsis;
   }
 
+  .color-position > :global(input[type="range"]) {
+    --track-color: var(--surface-2);
+  }
+
   @media (prefers-color-scheme: light) {
     .chip {
       background: white;
+    }
+
+    .color-hint > :global(input[type="range"]) {
+      --track-color: var(--surface-3);
     }
   }
 </style>
