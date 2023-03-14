@@ -15,7 +15,7 @@
   import GradientColorSpace from './GradientColorSpace.svelte'
 </script>
 
-<section class="layers">
+<section class="layers {$gradient_type}">
   <!-- {#each layers as layer}
     <div class="layer selected">
       <span contenteditable>{layer}</span> 
@@ -61,10 +61,15 @@
 <style>
   .layers {
     display: grid;
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto auto auto auto 1fr;
     align-content: start;
+    align-items: start;
     gap: var(--size-2);
     padding-block: 1px;
+  }
+
+  .layers.linear {
+    grid-template-rows: auto auto auto 1fr;
   }
 
   @media (min-width: 1024px) {
