@@ -5,15 +5,18 @@
   export let value
   export let min
   export let max
+  export let step
+  export let emptytrack
 </script>
 
 <input 
   type="range" 
-  class="range-slider" 
-  style="{style}; --track-fill: {value / (max || 100) * 100}%"
+  class="range-slider {emptytrack && 'no-track-fill'}" 
+  style="{style?style:''}; --track-fill: {value / (max || 100) * 100}%"
   bind:value={value}
   min={min || 0}
   max={max || 100}
+  step={step || 1}
 >
 
 <style>
@@ -35,6 +38,11 @@
     background: none;
     margin: 1ex 0;
     display: block;
+  }
+
+  .no-track-fill {
+    --accent-color: var(--track-color); 
+    --thumb-color: var(--surface-4);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -72,7 +80,7 @@
     cursor: ew-resize;
     block-size: var(--thumb-size);
     inline-size: var(--thumb-size);
-    background: var(--accent-color);
+    background: var(--thumb-color, var(--accent-color));
     box-shadow: var(--shadow-4), 0 0 0 var(--thumb-highlight-size) var(--thumb-highlight-color);
     border-radius: 50%;
     margin-block-start: var(--thumb-offset);
@@ -89,7 +97,7 @@
     cursor: ew-resize;
     block-size: var(--thumb-size);
     inline-size: var(--thumb-size);
-    background: var(--accent-color);
+    background: var(--thumb-color, var(--accent-color));
     box-shadow: var(--shadow-4), 0 0 0 var(--thumb-highlight-size) var(--thumb-highlight-color);
     border-radius: 50%;
     margin-block-start: var(--thumb-offset);

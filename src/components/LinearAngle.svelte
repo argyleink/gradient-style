@@ -1,6 +1,7 @@
 <script>
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import AngleIcon from './AngleIcon.svelte'
+  import RangeSlider from './RangeSlider.svelte'
 
   const linear_directions = [
     '--',
@@ -28,7 +29,7 @@
   </select>
   <div class="linear-angle slider-set">
     <AngleIcon angle={$linear_angle} />
-    <input on:input={blurNamedAngle} type="range" bind:value={$linear_angle} min="0" max="360" step="1" style="accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'inherit'}" />
+    <RangeSlider on:input={blurNamedAngle} bind:value={$linear_angle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />
     <input type="number" bind:value={$linear_angle} min="0" max="360" step="1"  class="slider-percentage">
   </div>
 </fieldset>
