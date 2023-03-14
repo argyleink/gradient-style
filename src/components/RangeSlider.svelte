@@ -51,13 +51,6 @@
     }
   }
 
-  @media (hover: none) {
-    .range-slider {
-      --thumb-size: 30px;
-      --thumb-offset: -14px;
-    }
-  }
-
   .range-slider::-webkit-slider-runnable-track {
     appearance: none;
     block-size: var(--track-height);
