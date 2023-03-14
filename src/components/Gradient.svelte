@@ -81,7 +81,10 @@
 
   function maybeConvertColor(color, convert_colors) {
     if (convert_colors) {
-      return new Color(color).to('srgb').toString({ format: 'hex' })
+      try {
+        return new Color(color).to('srgb').toString({ format: 'hex' })
+      }
+      catch {}
     }
     else {
       return color

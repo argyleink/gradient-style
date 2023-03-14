@@ -132,17 +132,15 @@
       <h4>Color</h4>
       <div class="chip color-stop">
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
-        <span class="color-string">{stop.color}</span>
+        <span class="color-string" contenteditable="true" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <!-- <input on:input={(e) => slidingPosition(e, stop)} type="range" value="{stop.position1}" style="--accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color}"> -->
           <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color};"/>
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
           <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color};"/>
-          <!-- <input type="range" bind:value="{stop.position2}" style="--accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color}"> -->
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
