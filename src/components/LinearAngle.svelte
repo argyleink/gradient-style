@@ -21,12 +21,14 @@
 </script>
 
 <fieldset class="stack control-set">
-  <legend>Angle</legend>
-  <select name="named-directions" bind:value={$linear_named_angle}>
-    {#each linear_directions as dir}
-      <option value={dir}>{dir}</option>  
-    {/each}
-  </select>
+  <div class="label-select-combo">
+    <label>Angle</label>
+    <select name="named-directions" bind:value={$linear_named_angle}>
+      {#each linear_directions as dir}
+        <option value={dir}>{dir}</option>  
+      {/each}
+    </select>
+  </div>
   <div class="linear-angle slider-set">
     <AngleIcon angle={$linear_angle} />
     <RangeSlider on:input={blurNamedAngle} bind:value={$linear_angle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />

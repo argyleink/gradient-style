@@ -480,7 +480,7 @@
     display: grid;
     gap: var(--size-2);
     padding-inline: var(--size-5);
-    padding-block: var(--size-3);
+    padding-block: var(--size-2);
   }
 
   :global(.control-set:focus-within) {
@@ -497,6 +497,12 @@
 
   :global(.control-set) {
     position: relative;
+  }
+
+  :global(.label-select-combo) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   :global(.radio-pair) {

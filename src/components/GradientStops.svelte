@@ -245,6 +245,7 @@
     place-items: center;
     gap: var(--size-2);
     justify-self: start;
+    border-radius: var(--radius-round);
   }
 
   .round {
