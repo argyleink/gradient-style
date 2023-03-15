@@ -24,4 +24,11 @@
 		--svooltip-text-size: var(--font-size-0);
 		--svooltip-shadow: var(--shadow-2);
 	}
+
+	@media (prefers-color-scheme: light) {
+		:global(:root) {
+			--svooltip-bg: white;
+			--svooltip-shadow: var(--shadow-5);
+		}
+	}
 </style>
