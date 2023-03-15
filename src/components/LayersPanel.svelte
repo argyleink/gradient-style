@@ -83,6 +83,7 @@
 
   .layers > :global(.control-set) {
     gap: var(--size-4);
+    padding-block: var(--size-2);
   }
 
   .layer {

@@ -480,7 +480,7 @@
     display: grid;
     gap: var(--size-2);
     padding-inline: var(--size-5);
-    padding-block: var(--size-2);
+    padding-block: var(--size-3);
   }
 
   :global(.control-set:focus-within) {
