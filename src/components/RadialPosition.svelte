@@ -15,14 +15,17 @@
 </script>
 
 <fieldset class="control-set">
-  <legend>Position</legend>
-  <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
-    {#each gradient_positions as pos}
-      <option value={pos}>{pos}</option>  
-    {/each}
-  </select>
+  <div class="label-select-combo">
+    <label>Position</label>
+    <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
+      {#each gradient_positions as pos}
+        <option value={pos}>{pos}</option>  
+      {/each}
+    </select>
+  </div>
   <div class="stack">
     <div class="radial-position slider-set">
+      <span>X</span>
       <RangeSlider 
         bind:value={$radial_position.x} 
         min="-100" max="200" 
@@ -32,6 +35,7 @@
       <input type="number" bind:value={$radial_position.x} min="-100" max="200" step="1"  class="slider-percentage">
     </div>
     <div class="radial-position slider-set">
+      <span>Y</span>
       <RangeSlider 
         bind:value={$radial_position.y} 
         min="-100" max="200" 
@@ -42,7 +46,7 @@
       <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
     </div>
     {#if $radial_position.y != null}
-      <button class="remove container-absolute" type="reset" on:click={() => removeRadialPositions()}>✕</button>
+      <button class="remove" type="reset" on:click={() => removeRadialPositions()}>Reset</button>
     {/if}
   </div>
 </fieldset>

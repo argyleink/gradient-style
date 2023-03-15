@@ -9,14 +9,16 @@
 </script>
 
 <fieldset class="control-set">
-  <legend>Size</legend>
-  <select name="radial-size" bind:value={$radial_size}>
-    {#each Object.entries(radial_sizes) as [key, val]}
-      <optgroup label={key}>
-        {#each val as entry}
-          <option value={entry}>{entry}</option>  
-        {/each}
-      </optgroup>
-    {/each}
-  </select>
+  <div class="label-select-combo">
+    <label>Size</label>
+    <select name="radial-size" bind:value={$radial_size}>
+      {#each Object.entries(radial_sizes) as [key, val]}
+        <optgroup label={key}>
+          {#each val as entry}
+            <option value={entry}>{entry}</option>  
+          {/each}
+        </optgroup>
+      {/each}
+    </select>
+  </div>
 </fieldset>

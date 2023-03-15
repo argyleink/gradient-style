@@ -101,6 +101,7 @@
   }
 
   .layer-name {
+    color: var(--text-1);
     font-weight: 700;
   }
 

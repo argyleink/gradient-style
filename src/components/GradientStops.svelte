@@ -188,7 +188,7 @@
 
 <style>
   .color-stop {
-    padding-inline-end: var(--size-3);
+    padding-inline-end: var(--size-2);
   }
 
   .control-set > h4 {
@@ -246,6 +246,10 @@
     gap: var(--size-2);
     justify-self: start;
     border-radius: var(--radius-round);
+  }
+
+  .chip:hover {
+    background: var(--surface-2);
   }
 
   .round {

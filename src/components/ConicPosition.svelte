@@ -15,23 +15,27 @@
 </script>
 
 <fieldset class="control-set">
-  <legend>Position</legend>
-  <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
-    {#each gradient_positions as pos}
-      <option value={pos}>{pos}</option>  
-    {/each}
-  </select>
+  <div class="label-select-combo">
+    <label>Position</label>
+    <select name="conic-position" bind:value={$conic_named_position} disabled={$conic_position.x !== null}>
+      {#each gradient_positions as pos}
+        <option value={pos}>{pos}</option>  
+      {/each}
+    </select>
+  </div>
   <div class="stack">
     <div class="conic-position slider-set">
+      <span>X</span>
       <RangeSlider bind:value={$conic_position.x} min="-100" max="200" step="1" emptytrack="true" />
       <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
     </div>
     <div class="conic-position slider-set">
+      <span>Y</span>
       <RangeSlider bind:value={$conic_position.y} min="-100" max="200" step="1"  on:input={ensurePositionPair} emptytrack="true" />
       <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" on:input={ensurePositionPair}>
     </div>
     {#if $conic_position.y != null}
-      <button class="remove container-absolute" type="reset" on:click={() => removeConicPositions()}>✕</button>
+      <button class="remove" type="reset" on:click={() => removeConicPositions()}>reset</button>
     {/if}
   </div>
 </fieldset>

@@ -541,19 +541,11 @@
   }
 
   :global(.remove) {
-    aspect-ratio: 1;
-    padding: var(--size-1);
-    border-radius: var(--radius-round);
-    line-height: .75;
+    padding-block: var(--size-1);
+    padding-inline: var(--size-2);
     font-size: var(--font-size-0);
-    inline-size: var(--size-5);
-    transition: opacity .2s var(--ease-3);
+    justify-self: end;
   }
-
-  /* :global(fieldset:not(:hover, :focus-within) .remove) {
-    opacity: 0;
-  } */
-
   
 
   :global(.stack) {
