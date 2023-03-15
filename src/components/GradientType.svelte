@@ -1,12 +1,13 @@
 <script>
   import {gradient_type} from '../store/gradient.ts'
+  import { tooltip } from 'svooltip'
 
   const gradient_types = ['linear','radial','conic']
 </script>
 
 <fieldset class="switch-group">
   {#each gradient_types as t}
-    <div class="switch" title={t}>
+    <div class="switch" title={t} use:tooltip={{content: "You're looking beautiful today!"}}>
       <input type="radio" name="gradient-type" id="{t}-gradient" value={t} bind:group={$gradient_type}>
       <label for="{t}-gradient">{t}</label>
       {#if t === 'linear'}

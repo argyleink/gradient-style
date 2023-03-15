@@ -4,14 +4,16 @@
 </script>
 
 <fieldset class="control-set">
-  <legend>Shape</legend>
-  <div class="inline-radios">
-    {#each radial_shapes as shape}
-      <div class="radio-pair">
-        <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
-        <label for="radial-{shape}">{shape}</label>
-      </div>
-    {/each}
+  <div class="label-select-combo">
+    <label>Shape</label>
+    <div class="inline-radios">
+      {#each radial_shapes as shape}
+        <div class="radio-pair">
+          <input type="radio" name="radial-shape" id="radial-{shape}" value={shape} bind:group={$radial_shape}>
+          <label for="radial-{shape}">{shape}</label>
+        </div>
+      {/each}
+    </div>
   </div>
 </fieldset>
 

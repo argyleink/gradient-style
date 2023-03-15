@@ -2,6 +2,8 @@
   import {flip} from 'svelte/animate'
   import {fade} from 'svelte/transition'
 
+  import { tooltip } from 'svooltip'
+
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
   import {updateStops} from '../utils/stops.ts'
@@ -145,7 +147,7 @@
         </div>
       </div>
       {#if $gradient_stops.length > 1}
-        <button class="stop-actions">
+        <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
           <select on:change={(e) => colorAction(e,i)}>
             <option>Color Actions</option>
             <option disabled>--</option>

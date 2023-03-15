@@ -2,6 +2,8 @@
   import { onMount } from 'svelte'
 
   import Color from 'colorjs.io'
+  import { tooltip } from 'svooltip'
+  import 'svooltip/styles.css'
 
   import {gradient_type, gradient_space, gradient_interpolation, 
           gradient_stops, gradient_positions
@@ -198,10 +200,10 @@
       <ColorPicker />
       <LayersPanel />
       <footer class="footer-links">
-        <button disabled class="icon-button">
+        <button disabled class="icon-button" use:tooltip={{content: "Github"}}>
           <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/></svg>
         </button>
-        <button disabled class="icon-button">
+        <button disabled class="icon-button" use:tooltip={{content: "Switch theme"}}>
           <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4q-.425 0-.713-.288T11 3V2q0-.425.288-.713T12 1q.425 0 .713.288T13 2v1q0 .425-.288.713T12 4Zm0 19q-.425 0-.713-.288T11 22v-1q0-.425.288-.713T12 20q.425 0 .713.288T13 21v1q0 .425-.288.713T12 23Zm9-10q-.425 0-.713-.288T20 12q0-.425.288-.713T21 11h1q.425 0 .713.288T23 12q0 .425-.288.713T22 13h-1ZM2 13q-.425 0-.713-.288T1 12q0-.425.288-.713T2 11h1q.425 0 .713.288T4 12q0 .425-.288.713T3 13H2Zm16-7q-.275-.275-.275-.688T18 4.6l.35-.375q.275-.3.7-.3t.725.3q.3.3.3.725t-.3.725l-.375.35q-.3.275-.7.275T18 6ZM4.225 19.775q-.3-.3-.3-.725t.3-.725l.375-.35q.3-.275.7-.275t.7.3q.275.275.288.7T6 19.4l-.35.375q-.275.3-.7.3t-.725-.3Zm14.1 0l-.35-.375q-.275-.3-.275-.7t.3-.7q.275-.275.7-.287t.7.287l.375.35q.3.275.3.7t-.3.725q-.3.3-.725.3t-.725-.3ZM4.6 6l-.375-.35q-.3-.275-.3-.7t.3-.725q.3-.3.725-.3t.725.3l.35.375q.275.3.275.7T6 6q-.275.275-.687.275T4.6 6ZM12 18q-2.5 0-4.25-1.75T6 12q0-2.5 1.75-4.25T12 6q2.5 0 4.25 1.75T18 12q0 2.5-1.75 4.25T12 18Z"/></svg>
         </button>
       </footer>
@@ -212,7 +214,7 @@
     <div class="inline-snap-panels">
       <section class="preview-panel">
         <div class="panel-actions">
-          <button on:click={e => showCodePane()} title="Get the CSS code">
+          <button on:click={e => showCodePane()} use:tooltip={{content: "Get the CSS"}}>
             <span class="sr-only">Get the CSS code</span>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path fill="currentColor" d="M16.7 17.3q-.275.275-.688.275t-.712-.3q-.3-.3-.3-.712t.3-.713l3.875-3.875l-3.9-3.9Q15 7.8 15.012 7.388T15.3 6.7q.275-.275.7-.275t.7.275l4.6 4.6q.3.3.3.7t-.3.7l-4.6 4.6Zm-9.4 0l-4.6-4.6q-.3-.3-.3-.7t.3-.7l4.6-4.6q.275-.275.7-.287t.725.287q.3.3.3.713t-.3.712l-3.9 3.9l3.9 3.9q.275.275.263.688T8.7 17.3q-.275.275-.7.275t-.7-.275Z"/>
@@ -228,7 +230,7 @@
       </section>
       <section class="code-preview-panel">
         <div class="panel-actions">
-          <button on:click={e => showEditorPane()} title="Back to the editor">
+          <button on:click={e => showEditorPane()} use:tooltip={{content: "Back to the editor"}}>
             <span class="sr-only">Back to editor</span>
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="m10.875 19.3l-6.6-6.6q-.15-.15-.213-.325T4 12q0-.2.063-.375t.212-.325l6.6-6.6q.275-.275.688-.287t.712.287q.3.275.313.688T12.3 6.1L7.4 11h11.175q.425 0 .713.288t.287.712q0 .425-.287.713t-.713.287H7.4l4.9 4.9q.275.275.288.7t-.288.7q-.275.3-.7.3t-.725-.3Z"/>
