@@ -168,7 +168,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
-    transition: rotate 30ms ease-out;
+/*     transition: rotate 300ms ease-out; */
   }
 
   .line {
@@ -246,7 +246,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
-    transition: inset 30ms ease-out;
+/*     transition: inset 30ms ease-out; */
   }
 
   .hint {

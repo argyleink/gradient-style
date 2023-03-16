@@ -89,7 +89,6 @@
   }
 
   .layer {
-    cursor: pointer;
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
@@ -105,6 +104,7 @@
   .layer-name {
     color: var(--text-1);
     font-weight: 700;
+    cursor: text;
   }
 
   .end-of-layers {

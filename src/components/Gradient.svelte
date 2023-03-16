@@ -346,10 +346,10 @@
     position: sticky;
     z-index: 1;
     inset-block-start: 0;
-    background: var(--surface-3);
-    margin-block-end: var(--size-5);
     block-size: var(--size-8);
-    box-shadow: var(--shadow-2);
+/*     margin-block-end: var(--size-5); */
+    /* background: var(--surface-3);
+    box-shadow: var(--shadow-2); */
   }
 
   @media (prefers-color-scheme: light) {
@@ -521,6 +521,11 @@
     display: inline-flex;
     place-items: center;
     gap: var(--size-2);
+  }
+
+  :global(.slider-set > label) {
+    color: var(--text-2);
+    font-size: var(--font-size-0);
   }
 
   @media (prefers-color-scheme: light) {

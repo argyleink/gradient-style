@@ -13,15 +13,21 @@ export const gradient_stops = writable([
 
 export const active_stop_index = writable(null)
 
-// static
 export const gradient_positions = [
   'center',
-  'top',
-  'top right',
+  'top left', 'top', 'top right',
   'right',
-  'bottom right',
-  'bottom',
-  'bottom left',
+  'bottom right', 'bottom', 'bottom left',
   'left',
-  'top left'
+]
+
+export const gradient_angles = [
+  'to top left',
+  'to top',
+  'to top right',
+  'to right',
+  'to bottom right',
+  'to bottom',
+  'to bottom left',
+  'to left',
 ]

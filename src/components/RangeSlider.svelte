@@ -23,7 +23,7 @@
   .range-slider {
     --track-height: .5ex;
     --track-fill: 0%;
-    --track-color: var(--surface-1);
+    --track-color: var(--surface-3);
     --thumb-size: 2ex;
     --thumb-offset: -.8ex;
     --thumb-highlight-size: 0px;
@@ -47,6 +47,7 @@
 
   @media (prefers-color-scheme: dark) {
     .range-slider {
+      --track-color: var(--surface-1);
       --thumb-highlight-color: var(--highlight-dark);
     }
   }

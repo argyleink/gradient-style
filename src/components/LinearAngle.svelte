@@ -2,6 +2,7 @@
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import AngleIcon from './AngleIcon.svelte'
   import RangeSlider from './RangeSlider.svelte'
+  import NamedDirections from './NamedDirections.svelte'
 
   const linear_directions = [
     '--',
@@ -23,6 +24,7 @@
 <fieldset class="stack control-set">
   <div class="label-select-combo">
     <label>Angle</label>
+    <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
     <select name="named-directions" bind:value={$linear_named_angle}>
       {#each linear_directions as dir}
         <option value={dir}>{dir}</option>  

@@ -173,14 +173,8 @@
     >
       <h4>Transition</h4>
       <div class="color-hint slider-set">
-        <!-- <input 
-          type="range" 
-          bind:value="{stop.percentage}" 
-          style="accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"
-        /> -->
         <RangeSlider bind:value={stop.percentage} 
           style="--accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"/>
-        <!-- style="background: linear-gradient(to right in {$gradient_space}, {$gradient_stops[i-1]?.color}, {$gradient_stops[i+1]?.color})" -->
         <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
       </div>
     </fieldset>
