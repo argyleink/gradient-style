@@ -30,6 +30,10 @@
 
   <GradientColorSpace />
 
+  {#if isCylindricalSpace($gradient_space)}
+    <HueInterpolation />
+  {/if}
+
   {#if $gradient_type === 'linear'}
     <LinearAngle />
   {/if}
@@ -43,10 +47,6 @@
   {#if $gradient_type === 'conic'}
     <ConicAngle />
     <ConicPosition />
-  {/if}
-
-  {#if isCylindricalSpace($gradient_space)}
-    <HueInterpolation />
   {/if}
 
   <div class="end-of-layers">
