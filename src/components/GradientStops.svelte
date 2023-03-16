@@ -242,9 +242,10 @@
     gap: var(--size-2);
     justify-self: start;
     border-radius: var(--radius-round);
+    transition: background-color .3s var(--ease-3);
   }
 
-  .chip:hover {
+  .chip:is(:hover, :focus-within) {
     background: var(--surface-2);
   }
 
@@ -264,6 +265,10 @@
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  .color-string:focus {
+    outline: none;
   }
 
   .color-position > :global(input[type="range"]) {
