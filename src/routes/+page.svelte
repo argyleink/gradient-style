@@ -15,7 +15,12 @@
 	}
 
 	:global(html) {
-		overflow: hidden;
 		overscroll-behavior: none;
+	}
+
+	@media (min-width: 1024px) {
+		:global(html) {
+			overflow: hidden;
+		}
 	}
 </style>

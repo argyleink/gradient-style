@@ -46,17 +46,17 @@
     'linear': () => 
       `linear-gradient(
       ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, 
-      ${stopsToStrings()}
+      ${stopsToStrings({new_lines: false})}
     )`,
     'radial': () => 
       `radial-gradient(
       ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, 
-      ${stopsToStrings()}
+      ${stopsToStrings({new_lines: false})}
     )`,
     'conic': () => 
       `conic-gradient(
       from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, 
-      ${stopsToStrings()}
+      ${stopsToStrings({new_lines: false})}
     )`
   }
 
@@ -426,6 +426,12 @@
     position: relative;
   }
 
+  @media (max-width: 1024px) {
+    .preview-panel {
+      margin-block: var(--size-6);
+    }
+  }
+
   .code-preview-panel {
     display: grid;
     gap: var(--size-2);
@@ -436,6 +442,12 @@
     position: relative;
   }
 
+  @media (max-width: 1024px) {
+    .code-preview-panel {
+      display: none;
+    }
+  }
+
   .code-preview-panel .panel-actions {
     inset-inline: var(--size-3) auto;
   }
@@ -444,13 +456,17 @@
     display: grid;
     grid-template-columns: 100cqi 100cqi;
     min-block-size: 100%;
-    max-block-size: 100vh;
-    max-block-size: 100dvh;
     overflow: auto;
     overscroll-behavior: contain;
     scroll-snap-type: x mandatory;
-    background-color: var(--surface-1);
     scroll-behavior: smooth;
+  }
+
+  @media (min-width: 1024px) {
+    .inline-snap-panels {
+      max-block-size: 100vh;
+      max-block-size: 100dvh;
+    }
   }
 
   @media (prefers-color-scheme: light) {
