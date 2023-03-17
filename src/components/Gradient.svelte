@@ -453,6 +453,7 @@
   }
 
   .inline-snap-panels {
+    background-color: var(--surface-1);
     display: grid;
     grid-template-columns: 100cqi 100cqi;
     min-block-size: 100%;
