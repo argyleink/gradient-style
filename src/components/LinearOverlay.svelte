@@ -139,7 +139,7 @@
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
-        {#if stop.position2 !== null && stop.position2 !== stop.auto}
+        {#if stop.position2 !== stop.position2 && stop.position2 !== stop.auto}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" use:dragMe={stop} data-position="2">
@@ -149,9 +149,9 @@
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div class="hint" style="inset-inline-start: {stop.percentage}%">
+        <div class="hint" use:dragMe={stop} style="inset-inline-start: {stop.percentage}%">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
-          <svg use:dragMe={stop} viewBox="0 0 256 256">
+          <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
           </svg>
         </div>
