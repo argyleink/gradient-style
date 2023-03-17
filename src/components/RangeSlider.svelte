@@ -1,12 +1,12 @@
 <script>
   import { writable } from 'svelte/store'
 
-  export let style
+  export let style = 'none'
   export let value
-  export let min
-  export let max
-  export let step
-  export let emptytrack
+  export let min = 0
+  export let max = 100
+  export let step = 1
+  export let emptytrack = 'none'
 </script>
 
 <input 
@@ -14,9 +14,9 @@
   class="range-slider {emptytrack && 'no-track-fill'}" 
   style="{style?style:''}; --track-fill: {value / (max || 100) * 100}%"
   bind:value={value}
-  min={min || 0}
-  max={max || 100}
-  step={step || 1}
+  min={min}
+  max={max}
+  step={step}
 >
 
 <style>

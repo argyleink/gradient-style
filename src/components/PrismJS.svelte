@@ -1,8 +1,8 @@
 <script>
   import { onMount, afterUpdate } from 'svelte'
   
-  export let modern_gradient
-  export let classic_gradient
+  export let modern_gradient = 'none'
+  export let classic_gradient = 'none'
   let loaded = false
   
   onMount(() => {
