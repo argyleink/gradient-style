@@ -14,20 +14,20 @@
 		"@fontsource/fira-mono": "^4.5.10",
 		"@neoconfetti/svelte": "^1.0.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/kit": "^1.5.0",
+		"@sveltejs/kit": "^1.12.0",
 		"@types/cookie": "^0.5.1",
-		"prettier": "^2.8.0",
+		"prettier": "^2.8.4",
 		"prettier-plugin-svelte": "^2.8.1",
-		"svelte": "^3.54.0",
-		"svelte-check": "^3.0.1",
-		"svooltip": "^0.5.1",
-		"typescript": "^4.9.3",
-		"vite": "^4.0.0"
+		"svelte": "^3.57.0",
+		"svelte-check": "^3.1.4",
+		"svooltip": "^0.7.2",
+		"typescript": "^5.0.2",
+		"vite": "^4.2.0"
 	},
 	"type": "module",
 	"dependencies": {
 		"colorjs.io": "^0.4.3",
-		"open-props": "^1.5.5",
+		"open-props": "^1.5.6",
 		"prism-themes": "^1.9.0",
 		"prismjs": "^1.29.0"
 	}

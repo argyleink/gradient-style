@@ -23,6 +23,7 @@
 		--svooltip-text: var(--text-1);
 		--svooltip-text-size: var(--font-size-0);
 		--svooltip-shadow: var(--shadow-2);
+		--svooltip-arrow-size: 6px;
 	}
 
 	@media (prefers-color-scheme: light) {
