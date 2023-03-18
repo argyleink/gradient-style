@@ -12,6 +12,13 @@
   export let w = null
   export let h = null
 
+  const dragulaState = {
+    moving: false,
+    left: null,
+    stop: null,
+    target: null,
+  }
+
   linear_named_angle.subscribe(value => {
     if (value === '--') return
     let ng = linear_keywords[value](w,h)
@@ -35,52 +42,66 @@
     })
   }
 
-  function dragMe(node, stop) {
-    let moving = false
-    let left = null
+  function dragula(node) {
+    // all clicks, match stops and forward
+    node.addEventListener('pointerdown', e => {
+      const isDraggable = e.target.closest('[data-stop-index]')
 
-    if (stop.kind === 'hint')
-      left = parseInt(stop.percentage)
-    else
-      left = parseInt(node.dataset.position === "1" 
-        ? stop.position1 
-        : stop.position2)
+      if (isDraggable)
+        dragulaState.target = isDraggable
+        dragulaState.stop = $gradient_stops[isDraggable.dataset.stopIndex]
 
-    node.addEventListener('pointerdown', () => 
-      moving = true)
+        dragIt(isDraggable)
+    })
 
-    node.addEventListener('pointerenter', () =>
-      $active_stop_index = $gradient_stops.indexOf(stop))
-
-    window.addEventListener('pointermove', (e) => {
-      if (moving && e.movementX) {
+    // always watch pointer move
+    window.addEventListener('pointermove', e => {
+      if (dragulaState.moving && e.movementX) {
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
-        left += e.movementX / apercent
+        dragulaState.left += e.movementX / apercent
 
-        if (stop.kind === 'stop') {
-          if (stop.position1 === stop.position2)
-            stop.position2 = Math.round(left)
+        if (dragulaState.stop.kind === 'stop') {
+          if (dragulaState.stop.position1 === dragulaState.stop.position2)
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
 
-          if (node.dataset.position === "1")
-            stop.position1 = Math.round(left)
+          if (dragulaState.target.dataset.position === "1")
+            dragulaState.stop.position1 = Math.round(dragulaState.left)
           else
-            stop.position2 = Math.round(left)
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
         }
         else
-          stop.percentage = Math.round(left)
+          dragulaState.stop.percentage = Math.round(dragulaState.left)
 
         $gradient_stops = [...$gradient_stops]
       }
     })
 
     window.addEventListener('pointerup', () => {
-      moving = false
+      dragulaState.moving = false
+      dragulaState.stop = false
+      dragulaState.target = false
       $active_stop_index = null
     })
+  }
+
+  function dragIt(node) {
+    dragulaState.moving = true
+
+    if (dragulaState.stop.kind === 'hint')
+      dragulaState.left = parseInt(dragulaState.stop.percentage)
+    else
+      dragulaState.left = parseInt(node.dataset.position === "1" 
+        ? dragulaState.stop.position1 
+        : dragulaState.stop.position2)        
+  }
+
+  function activateStop(node, stop) {
+    node.addEventListener('pointerenter', () =>
+      $active_stop_index = $gradient_stops.indexOf(stop))
 
     node.addEventListener('pointerleave', () => {
-      if (moving) return
+      if (dragulaState.moving) return
       $active_stop_index = null
     })
   }
@@ -129,27 +150,27 @@
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
 </div>
 <div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
-  <div class="invisible-track" on:click={e => addStop(e)}></div>
-  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
+  <div class="invisible-track" on:click={addStop}></div>
+  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}" use:dragula>
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
-          <div class="stop" use:dragMe={stop} data-position="1">
+          <div class="stop" use:activateStop={stop} data-stop-index={i} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
         {#if stop.position2 !== stop.position2 && stop.position2 !== stop.auto}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
-            <div class="stop" use:dragMe={stop} data-position="2">
+            <div class="stop" use:activateStop={stop} data-position="2">
               <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
             </div>
           </div>
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div class="hint" use:dragMe={stop} style="inset-inline-start: {stop.percentage}%">
+        <div class="hint" use:activateStop={stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
