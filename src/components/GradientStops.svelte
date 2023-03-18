@@ -9,6 +9,7 @@
   import {updateStops} from '../utils/stops.ts'
   import {copyToClipboard} from '../utils/clipboard.ts'
   import {randomNumber} from '../utils/numbers.ts'
+  import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
 
   import RangeSlider from './RangeSlider.svelte'
 
@@ -131,8 +132,8 @@
       on:mouseleave={() => fieldsetInteractingEnd()} 
       on:focusout={() => fieldsetInteractingEnd()}
     >
-      <h4>Color</h4>
-      <div class="chip color-stop">
+      <h4>Color {i}</h4>
+      <div class="chip color-stop" use:tooltip={{content: whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
         <span class="color-string" contenteditable="true" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
       </div>
@@ -183,10 +184,6 @@
 {/each}
 
 <style>
-  .color-stop {
-    padding-inline-end: var(--size-2);
-  }
-
   .control-set > h4 {
     block-size: 0;
     position: absolute;
@@ -237,16 +234,11 @@
   }
 
   .chip {
-    display: inline-flex;
-    place-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    place-items: center start;
     gap: var(--size-2);
-    justify-self: start;
     border-radius: var(--radius-round);
-    transition: background-color .3s var(--ease-3);
-  }
-
-  .chip:is(:hover, :focus-within) {
-    background: var(--surface-2);
   }
 
   .round {
@@ -261,7 +253,7 @@
   }
 
   .color-string {
-    max-inline-size: 20ch;
+    max-inline-size: calc(100% - var(--size-4));
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

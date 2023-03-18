@@ -352,11 +352,11 @@
     box-shadow: var(--shadow-2); */
   }
 
-  @media (prefers-color-scheme: light) {
+  /* @media (prefers-color-scheme: light) {
     .menu-bar {
       background: white;
     }
-  }
+  } */
 
   .menu-bar > select {
     box-shadow: none;
