@@ -23,7 +23,7 @@
   }
 
   function makeSnippet() {
-    if (modern_gradient && classic_gradient) {
+    if (modern_gradient != 'none' && classic_gradient != 'none') {
       return `
 .modern-gradient {
   background-image: 
@@ -37,7 +37,7 @@
   ;
 }`.trim()
     }
-    else if (modern_gradient) {
+    else if (modern_gradient != 'none') {
       return `
 .modern-gradient {
   background-image: 
@@ -45,7 +45,7 @@
   ;
 }`.trim()
     }
-    else if (classic_gradient) {
+    else if (classic_gradient != 'none') {
       return `
 .classic-gradient {
   background-image: 
