@@ -42,13 +42,17 @@
 
   .no-track-fill {
     --accent-color: var(--track-color); 
-    --thumb-color: var(--surface-4);
+    --thumb-color: white;
   }
 
   @media (prefers-color-scheme: dark) {
     .range-slider {
       --track-color: var(--surface-1);
       --thumb-highlight-color: var(--highlight-dark);
+    }
+
+    .no-track-fill {
+      --thumb-color: var(--surface-4);
     }
   }
 
