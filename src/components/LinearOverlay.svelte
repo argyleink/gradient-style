@@ -56,6 +56,8 @@
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
+      const isDraggable = e.target.closest('[data-stop-index]')
+
       if (dragulaState.moving && e.movementX) {
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
@@ -75,6 +77,12 @@
 
         $gradient_stops = [...$gradient_stops]
       }
+
+      else if (isDraggable) {
+        $active_stop_index = isDraggable.dataset.stopIndex
+      }
+      else
+        $active_stop_index = null
     })
 
     window.addEventListener('pointerup', () => {
@@ -94,16 +102,6 @@
       dragulaState.left = parseInt(node.dataset.position === "1" 
         ? dragulaState.stop.position1 
         : dragulaState.stop.position2)        
-  }
-
-  function activateStop(node, stop) {
-    node.addEventListener('pointerenter', () =>
-      $active_stop_index = $gradient_stops.indexOf(stop))
-
-    node.addEventListener('pointerleave', () => {
-      if (dragulaState.moving) return
-      $active_stop_index = null
-    })
   }
 
   function gradientLineLength(a) {
@@ -128,6 +126,7 @@
     const newStop = {
       kind: 'stop', 
       color: `oklch(80% 0.3 ${randomNumber(0,360)})`, 
+      auto: percent, 
       position1: percent, 
       position2: percent,
     }
@@ -156,21 +155,21 @@
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
-          <div class="stop" use:activateStop={stop} data-stop-index={i} data-position="1">
+          <div class="stop" {stop} data-stop-index={i} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
         {#if stop.position2 !== stop.position2 && stop.position2 !== stop.auto}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
-            <div class="stop" use:activateStop={stop} data-position="2">
+            <div class="stop" {stop} data-position="2">
               <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
             </div>
           </div>
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div class="hint" use:activateStop={stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%">
+        <div class="hint" {stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%">
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
