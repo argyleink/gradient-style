@@ -11,6 +11,8 @@
 	@import 'open-props/style';
 	@import 'open-props/normalize';
 	@import 'open-props/buttons';
+	@import 'open-props/switch/light';
+	@import 'open-props/switch/dark';
 	@import 'prism-themes/themes/prism-nord.css';
 
 	.app {
