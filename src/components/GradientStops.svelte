@@ -139,11 +139,11 @@
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--gray-6)' : stop.color};"/>
+          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--track-color)' : stop.color};"/>
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
-          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--gray-6)' : stop.color};"/>
+          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--track-color)' : stop.color};"/>
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
@@ -175,7 +175,7 @@
       <h4>Transition</h4>
       <div class="color-hint slider-set">
         <RangeSlider bind:value={stop.percentage} 
-          style="--accent-color: {stop.percentage == stop.auto ? 'var(--gray-6)' : 'var(--link)'}"/>
+          style="--accent-color: {stop.percentage == stop.auto ? 'var(--track-color)' : 'var(--link)'}"/>
         <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
       </div>
     </fieldset>

@@ -45,19 +45,22 @@
   function dragula(node) {
     // all clicks, match stops and forward
     node.addEventListener('pointerdown', e => {
-      const isDraggable = e.target.closest('[data-stop-index]')
+      const isStop = e.target.closest('[data-stop-index]')
+      const isRotator = e.target.closest('.invisible-rotator')
 
-      if (isDraggable)
-        dragulaState.target = isDraggable
-        dragulaState.stop = $gradient_stops[isDraggable.dataset.stopIndex]
+      if (isStop) {
+        dragulaState.target = isStop
+        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
-        dragIt(isDraggable)
+        dragIt(isStop)
+      }
+      else if (isRotator) {
+        rotateIt(isRotator)
+      }
     })
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
-      const isDraggable = e.target.closest('[data-stop-index]')
-
       if (dragulaState.moving && e.movementX) {
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
@@ -77,20 +80,24 @@
 
         $gradient_stops = [...$gradient_stops]
       }
-
-      else if (isDraggable) {
-        $active_stop_index = isDraggable.dataset.stopIndex
+      else if (dragulaState.rotating) {
+        $linear_angle += e.movementX
       }
-      else
-        $active_stop_index = null
+      
+      $active_stop_index = 
+        e.target.closest('[data-stop-index]')?.dataset?.stopIndex
     })
 
-    window.addEventListener('pointerup', () => {
+    function stopWatching() {
       dragulaState.moving = false
+      dragulaState.rotating = false
       dragulaState.stop = false
       dragulaState.target = false
       $active_stop_index = null
-    })
+    }
+
+    window.addEventListener('pointerup', stopWatching)
+    window.addEventListener('dragleave', stopWatching)
   }
 
   function dragIt(node) {
@@ -102,6 +109,10 @@
       dragulaState.left = parseInt(node.dataset.position === "1" 
         ? dragulaState.stop.position1 
         : dragulaState.stop.position2)        
+  }
+
+  function rotateIt(node) {
+    dragulaState.rotating = true
   }
 
   function gradientLineLength(a) {
@@ -145,12 +156,15 @@
 </script>
 
 <div class="pie">
-  <div class="visual-vert"></div>
+  {#if $linear_angle > 0}
+    <div class="visual-vert"></div>
+  {/if}
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
 </div>
-<div class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
+<div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
+  <div class="invisible-rotator"></div>
   <div class="invisible-track" on:click={addStop}></div>
-  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}" use:dragula>
+  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i}
       {#if stop.kind === 'stop'}
         <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}">
@@ -336,8 +350,21 @@
   }
 
   .visual-vert {
+    --line-1: white;
     block-size: var(--size-10);
     inline-size: 3px;
     background-image: linear-gradient(to bottom, var(--line-1) 50%, #0000 0);
+  }
+
+  .invisible-rotator {
+    pointer-events: auto;
+    cursor: ew-resize;
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
   }
 </style>

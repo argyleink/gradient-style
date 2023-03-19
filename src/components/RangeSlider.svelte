@@ -12,7 +12,7 @@
 <input 
   type="range" 
   class="range-slider {emptytrack && 'no-track-fill'}" 
-  style="{style?style:''}; --track-fill: {value / (max || 100) * 100}%"
+  style="{style!='none'?style:''}; --track-fill: {value / (max || 100) * 100}%"
   bind:value={value}
   min={min}
   max={max}
