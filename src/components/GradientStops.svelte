@@ -108,7 +108,13 @@
   }
 
   function slidingPosition(e, stop) {
-    if (stop.position1 + 1 == stop.position2 || stop.position1 - 1 == stop.position2) {
+    const range = [
+      stop.position1 + 1,
+      stop.position1 + 2,
+      stop.position1 - 1,
+      stop.position1 - 2,
+    ]
+    if (range.includes(stop.position2)) {
       stop.position2 = stop.position1
     }
     $gradient_stops = [...$gradient_stops]

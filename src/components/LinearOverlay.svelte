@@ -294,7 +294,7 @@
   }
 
   .hint {
-    translate: 0 -5px;
+    translate: -50% -5px;
   }
 
   .hint > svg {
