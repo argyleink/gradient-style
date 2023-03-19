@@ -62,6 +62,7 @@
     // always watch pointer move
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving && e.movementX) {
+        node.setPointerCapture(e.pointerId)
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += e.movementX / apercent
@@ -81,6 +82,7 @@
         $gradient_stops = [...$gradient_stops]
       }
       else if (dragulaState.rotating) {
+        node.setPointerCapture(e.pointerId)
         $linear_angle += e.movementX
       }
       
@@ -88,7 +90,8 @@
         e.target.closest('[data-stop-index]')?.dataset?.stopIndex
     })
 
-    function stopWatching() {
+    function stopWatching(e) {
+      node.releasePointerCapture(e.pointerId)
       dragulaState.moving = false
       dragulaState.rotating = false
       dragulaState.stop = false
@@ -202,6 +205,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
+    touch-action: manipulation;
 /*     transition: rotate 300ms ease-out; */
   }
 
