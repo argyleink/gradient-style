@@ -92,6 +92,7 @@
       }
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
+        $linear_named_angle = '--'
         $linear_angle += e.movementX
       }
       
@@ -395,7 +396,6 @@
 
   .invisible-rotator {
     pointer-events: auto;
-    cursor: ew-resize;
     inline-size: var(--size-10);
     aspect-ratio: var(--ratio-square);
     border-radius: var(--radius-round);
@@ -403,5 +403,6 @@
     inset-block-start: 50%;
     inset-inline-start: 50%;
     transform: translate(-50%, -50%);
+    cursor: ew-resize;
   }
 </style>

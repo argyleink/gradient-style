@@ -141,8 +141,8 @@
           <option>Copy CSS color</option>
           <option>Random color</option>
           <option disabled>--</option>
-          <option disabled={$gradient_stops.length == 1}>Reset</option>
-          <option>Remove</option>
+          <option>Reset</option>
+          <option disabled={$gradient_stops.length == 1}>Remove</option>
         </select>
       </button>
     </fieldset>

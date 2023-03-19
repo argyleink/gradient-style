@@ -7,7 +7,7 @@ export function updateStops(stops) {
     if (stop.kind == 'stop') {
       if (stops.length === 1) {
         stop.position1 = 0
-        stop.position2 = 0 
+        stop.position2 = 100 
       }
       else if (!stop.position1 || stop.position1 === stop.auto) {
         stop.position1 = autoVal
@@ -31,14 +31,8 @@ export function removeStop(stops, pos) {
   const updated = [...stops]
   updated.splice(pos, 2)
 
-  if (updated.length === pos) {
+  if (updated.length === pos)
     updated.pop()
-  }
-  
-  if (updated.length === 1) {
-    updated[0].position1 = 0
-    updated[0].position2 = 100
-  }
 
   return updated
 }
