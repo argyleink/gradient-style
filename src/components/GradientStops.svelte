@@ -108,17 +108,11 @@
   }
 
   function slidingPosition(e, stop) {
-    if (stop.position1 == stop.position2) {
-      stop.position1 = e.target.value
-      stop.position2 = e.target.value
-    }
-    else {
-      stop.position1 = e.target.value
+    if (stop.position1 + 1 == stop.position2 || stop.position1 - 1 == stop.position2) {
+      stop.position2 = stop.position1
     }
     $gradient_stops = [...$gradient_stops]
   }
-
-
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
@@ -131,6 +125,7 @@
       on:focusin={() => fieldsetInteractingStart(stop)} 
       on:mouseleave={() => fieldsetInteractingEnd()} 
       on:focusout={() => fieldsetInteractingEnd()}
+      on:input={(e) => slidingPosition(e, stop)}
     >
       <h4>Color {i}</h4>
       <div class="chip color-stop" use:tooltip={{content: whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
@@ -139,11 +134,11 @@
       </div>
       <div class="stack">
         <div class="color-position slider-set">
-          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--track-color)' : stop.color};"/>
+          <RangeSlider bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--track-color)' : stop.color};"/>
           <input type="number" bind:value={stop.position1} class="slider-percentage">
         </div>
         <div class="color-position slider-set">
-          <RangeSlider on:input={(e) => slidingPosition(e, stop)} bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--track-color)' : stop.color};"/>
+          <RangeSlider bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--track-color)' : stop.color};"/>
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>

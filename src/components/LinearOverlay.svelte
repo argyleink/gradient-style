@@ -182,7 +182,7 @@
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
-        {#if stop.position2 !== stop.position2 && stop.position2 !== stop.auto}
+        {#if stop.position1 !== stop.position2 && stop.position2 !== stop.auto}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" {stop} data-position="2">
@@ -218,7 +218,7 @@
   .line {
     position: absolute;
     inset-block-start: 50%;
-    inset-inline-start: calc(50% - calc(var(--size-5) / 2));
+    inset-inline-start: 50%;
     transform: translate(-50%, -50%);
     display: grid;
     grid-auto-flow: column;
@@ -250,7 +250,7 @@
   }
 
   .stop-wrap {
-    translate: 0 calc(var(--size-3) * -1);
+    translate: -50% calc(var(--size-3) * -1);
   }
 
   .stop-wrap:has(+ .stop-wrap) .stop {
