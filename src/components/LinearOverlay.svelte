@@ -3,7 +3,7 @@
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
 
-  import {updateStops} from '../utils/stops.ts'
+  import {updateStops, removeStop} from '../utils/stops.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
   import {contrast_color_prefer_white} from '../utils/color.ts'
@@ -11,9 +11,12 @@
 
   export let w = null
   export let h = null
+  let dragYdelta = null
 
   const dragulaState = {
     moving: false,
+    start: {x:null,y:null},
+    delta: {x:null,y:null},
     left: null,
     stop: null,
     target: null,
@@ -50,6 +53,8 @@
 
       if (isStop) {
         dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
         dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
         dragIt(isStop)
@@ -61,11 +66,15 @@
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
-      if (dragulaState.moving && e.movementX) {
+      if (dragulaState.moving) {
         node.setPointerCapture(e.pointerId)
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += e.movementX / apercent
+
+        if (Math.abs(dragulaState.start.y - e.screenY) > 50) {
+          dragYdelta = dragulaState.start.y - e.screenY - 24
+        }
 
         if (dragulaState.stop.kind === 'stop') {
           if (dragulaState.stop.position1 === dragulaState.stop.position2)
@@ -94,10 +103,19 @@
 
     function stopWatching(e) {
       node.releasePointerCapture(e.pointerId)
+
+      if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
+        dragYdelta = null
+        $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
+      }
+
       dragulaState.moving = false
       dragulaState.rotating = false
-      dragulaState.stop = false
-      dragulaState.target = false
+      dragulaState.stop = null
+      dragulaState.target = null
+      dragulaState.start.x = null
+      dragulaState.start.y = null
+
       $active_stop_index = null
     }
 
@@ -174,9 +192,9 @@
   <div class="invisible-rotator"></div>
   <div class="invisible-track" on:click={addStop}></div>
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
-    {#each $gradient_stops as stop, i}
+    {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
-        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
+        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta}px; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
           <div class="stop" {stop} data-stop-index={i} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
@@ -270,6 +288,15 @@
     inline-size: var(--size-5);
     border-radius: var(--radius-round);
     border: .5px solid hsl(0 0% 0% / 15%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stop {
+      animation: 
+        var(--animation-scale-up) reverse,
+        var(--animation-fade-out) reverse;
+      animation-duration: 250ms;
+    }
   }
 
   .stop > button {

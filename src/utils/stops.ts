@@ -27,6 +27,22 @@ export function updateStops(stops) {
   return updated
 }
 
+export function removeStop(stops, pos) {
+  const updated = [...stops]
+  updated.splice(pos, 2)
+
+  if (updated.length === pos) {
+    updated.pop()
+  }
+  
+  if (updated.length === 1) {
+    updated[0].position1 = 0
+    updated[0].position2 = 100
+  }
+
+  return updated
+}
+
 function genStopMap(stops) {
   const colors = stops.filter(stop => stop.kind === 'stop')
   const hints = stops.filter(stop => stop.kind === 'hint')

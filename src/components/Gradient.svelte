@@ -103,7 +103,7 @@
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
             s.position1 = '0'
-            s.position2 = '0'
+            s.position2 = '100'
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           }
           else 

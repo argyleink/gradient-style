@@ -6,7 +6,7 @@
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {picker_value} from '../store/colorpicker.ts'
-  import {updateStops} from '../utils/stops.ts'
+  import {updateStops, removeStop} from '../utils/stops.ts'
   import {copyToClipboard} from '../utils/clipboard.ts'
   import {randomNumber} from '../utils/numbers.ts'
   import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
@@ -16,7 +16,7 @@
   function colorAction(event, position) {
     switch (event.target.value) {
       case 'Remove':
-        removeStop(position)
+        $gradient_stops = updateStops(removeStop($gradient_stops, position))
         break
       case 'Reset':
         $gradient_stops[position].position1 = null
@@ -36,21 +36,6 @@
 
     // reset
     event.target.selectedIndex = 0
-  }
-
-  function removeStop(pos) {
-    $gradient_stops.splice(pos, 2)
-
-    if ($gradient_stops.length === pos) {
-      $gradient_stops.pop()
-    }
-    
-    if ($gradient_stops.length === 1) {
-      $gradient_stops[0].position1 = 0
-      $gradient_stops[0].position2 = 0
-    }
-
-    $gradient_stops = updateStops($gradient_stops)
   }
 
   function dupeStop(pos) {
@@ -122,7 +107,7 @@
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
-  <div in:fade="{{duration: 250}}" animate:flip="{{duration: 180}}">
+  <div in:fade="{{duration: 450}}" animate:flip="{{duration: 350}}">
   {#if stop.kind === 'stop'}
     <fieldset 
       style="accent-color: {stop.color}" 
@@ -148,20 +133,18 @@
           <input type="number" bind:value={stop.position2} class="slider-percentage">
         </div>
       </div>
-      {#if $gradient_stops.length > 1}
-        <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
-          <select on:change={(e) => colorAction(e,i)}>
-            <option>Color Actions</option>
-            <option disabled>--</option>
-            <option>Duplicate</option>
-            <option>Copy CSS color</option>
-            <option>Random color</option>
-            <option disabled>--</option>
-            <option>Reset</option>
-            <option>Remove</option>
-          </select>
-        </button>
-      {/if}
+      <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
+        <select on:change={(e) => colorAction(e,i)}>
+          <option>Color Actions</option>
+          <option disabled>--</option>
+          <option>Duplicate</option>
+          <option>Copy CSS color</option>
+          <option>Random color</option>
+          <option disabled>--</option>
+          <option disabled={$gradient_stops.length == 1}>Reset</option>
+          <option>Remove</option>
+        </select>
+      </button>
     </fieldset>
   {/if}
   {#if stop.kind === 'hint'}
