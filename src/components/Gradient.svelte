@@ -15,7 +15,7 @@
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
   import {layers} from '../store/layers.ts'
-  import {stateAsString, deserializeUrl} from '../store/url.ts'
+  import {stateAsString, deserializeUrl, restoreStateFromUrl} from '../store/url.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -33,11 +33,18 @@
   let box_width
   let box_height
 
-  stateAsString.subscribe(v => {
-    // console.log(deserializeUrl(v))
-  })
+  onMount(async () => {
+    const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
+    const potentialState = restoreStateFromUrl()
 
-  onMount(() => {
+    if (potentialState) {
+      $gradient_type = potentialState.type
+    }
+
+    stateAsString.subscribe(state => {
+      window.history.replaceState({}, "", '#'+state)
+    })
+
     const resizeObserver = new ResizeObserver(entries => {
       const entry = entries.at(0)
       box_width = entry.contentBoxSize[0].inlineSize

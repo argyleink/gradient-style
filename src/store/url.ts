@@ -35,8 +35,6 @@ export function serializeUrl(state) {
 	    hash.set(key, state[key])
   }
 
-  // window.location.hash = hash
-  window?.history?.replaceState({}, "", '#'+hash.toString())
   return hash.toString()
 }
 
@@ -46,9 +44,18 @@ export function deserializeUrl(hash) {
   for (const [key, value] of state.entries()) {
   	if (key == 'stops')
   		state[key] = state.getAll(key).map(JSON.parse)
+  	else if (key == '#type')
+  		state.type = value
   	else
 	    state[key] = value
   }
 
   return state
+}
+
+export function restoreStateFromUrl() {
+	if (window.location.hash) {
+		return deserializeUrl(window.location.hash)
+	}
+	else return null
 }
