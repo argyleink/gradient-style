@@ -38,7 +38,12 @@
     const potentialState = restoreStateFromUrl()
 
     if (potentialState) {
-      $gradient_type = potentialState.type
+      if (potentialState.type) 
+        $gradient_type = potentialState.type
+      if (potentialState.linear_angle) 
+        $linear_angle = potentialState.linear_angle
+      if (potentialState.stops) 
+        $gradient_stops = updateStops(potentialState.stops)
     }
 
     stateAsString.subscribe(state => {
