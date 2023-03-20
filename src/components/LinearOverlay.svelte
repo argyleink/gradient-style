@@ -72,9 +72,10 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += e.movementX / apercent
 
-        if (Math.abs(dragulaState.start.y - e.screenY) > 50) {
+        if (Math.abs(dragulaState.start.y - e.screenY) > 50)
           dragYdelta = dragulaState.start.y - e.screenY - 24
-        }
+        else
+          dragYdelta = null
 
         if (dragulaState.stop.kind === 'stop') {
           if (dragulaState.stop.position1 === dragulaState.stop.position2)
@@ -195,7 +196,7 @@
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
-        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta}px; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
+        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
           <div class="stop" {stop} data-stop-index={i} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
