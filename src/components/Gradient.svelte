@@ -15,6 +15,7 @@
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
   import {layers} from '../store/layers.ts'
+  import {stateAsString, deserializeUrl} from '../store/url.ts'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -31,6 +32,10 @@
   let preview_resizer
   let box_width
   let box_height
+
+  stateAsString.subscribe(v => {
+    // console.log(deserializeUrl(v))
+  })
 
   onMount(() => {
     const resizeObserver = new ResizeObserver(entries => {
