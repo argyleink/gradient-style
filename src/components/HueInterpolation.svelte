@@ -25,6 +25,10 @@
 </fieldset>
 
 <style>
+  .control-set {
+    margin-block-start: calc(var(--size-4) * -1);
+  }
+
   .icon-label {
     display: flex;
     align-items: center;

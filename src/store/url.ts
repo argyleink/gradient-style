@@ -4,22 +4,44 @@ import {gradient_type, gradient_space, gradient_interpolation,
         gradient_stops
 } from '../store/gradient.ts'
 import {linear_angle, linear_named_angle} from '../store/linear.ts'
+import {radial_shape, radial_position, radial_named_position, radial_size
+  } from '../store/radial.ts'
 
 export const stateAsString = derived(
 	[
-		gradient_type, gradient_space, gradient_stops,
-		linear_angle, 
+		gradient_type, gradient_space, gradient_stops, gradient_interpolation,
+		linear_angle, linear_named_angle,
 	],
 	([
-		$gradient_type, $gradient_space, $gradient_stops,
-		$linear_angle, 
+		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation,
+		$linear_angle, $linear_named_angle,
 	]) => {
-		return serializeUrl({
+		let urlGradient = {
 			type: $gradient_type,
 			space: $gradient_space,
-			linear_angle: $linear_angle,
-			stops: $gradient_stops,
-		})
+			interpolation: $gradient_interpolation, // only if space is cyll
+		}
+
+		// tension between a pretty string and an easy to loop over state
+		// closer they are, less to manage
+
+		if ($gradient_type === 'linear') {
+			if ($linear_named_angle) urlGradient.linear_named_angle = $linear_named_angle
+			if ($linear_angle) urlGradient.linear_angle = $linear_angle
+		}
+		else if ($gradient_type === 'radial') {
+			urlGradient.linear_angle = $linear_angle
+		}
+		else if ($gradient_type === 'conic') {
+			urlGradient.linear_angle = $linear_angle
+		}
+		else
+			return null
+
+
+		urlGradient.stops = $gradient_stops
+
+		return serializeUrl(urlGradient)
 	}
 )
 

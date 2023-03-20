@@ -35,19 +35,27 @@
 
   onMount(async () => {
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
-    const potentialState = restoreStateFromUrl()
+    const restore = restoreStateFromUrl()
 
-    if (potentialState) {
-      if (potentialState.type) 
-        $gradient_type = potentialState.type
-      if (potentialState.linear_angle) 
-        $linear_angle = potentialState.linear_angle
-      if (potentialState.stops) 
-        $gradient_stops = updateStops(potentialState.stops)
+    // should loop
+    // exceptions only for pretty names: type, stops, etc
+    if (restore) {
+      if (restore.type) 
+        $gradient_type = restore.type
+      if (restore.space) 
+        $gradient_space = restore.space
+      if (restore.interpolation) 
+        $gradient_interpolation = restore.interpolation
+      if (restore.linear_named_angle) 
+        $linear_named_angle = restore.linear_named_angle
+      if (restore.linear_angle) 
+        $linear_angle = restore.linear_angle
+      if (restore.stops) 
+        $gradient_stops = updateStops(restore.stops)
     }
 
     stateAsString.subscribe(state => {
-      window.history.replaceState({}, "", '#'+state)
+      state && window.history.replaceState({}, "", '#'+state)
     })
 
     const resizeObserver = new ResizeObserver(entries => {
@@ -205,7 +213,7 @@
   )
 </script>
 
-<div class="color-wrap" style={`background: ${classic_gradient}; background: ${user_gradient};`}>
+<div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: var(--user-modern);`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
