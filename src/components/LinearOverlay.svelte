@@ -203,9 +203,9 @@
           </div>
         </div>
         {#if stop.position1 !== stop.position2 && stop.position2 !== stop.auto}
-          <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
+          <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" on:mouseleave={mouseOut}>
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
-            <div class="stop" {stop} data-position="2">
+            <div class="stop" data-stop-index={i} data-position="2">
               <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
             </div>
           </div>
