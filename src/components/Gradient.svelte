@@ -37,21 +37,25 @@
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
     const restore = restoreStateFromUrl()
 
-    // should loop
-    // exceptions only for pretty names: type, stops, etc
     if (restore) {
-      if (restore.type) 
-        $gradient_type = restore.type
-      if (restore.space) 
-        $gradient_space = restore.space
-      if (restore.interpolation) 
-        $gradient_interpolation = restore.interpolation
-      if (restore.linear_named_angle) 
-        $linear_named_angle = restore.linear_named_angle
-      if (restore.linear_angle) 
-        $linear_angle = parseInt(restore.linear_angle)
-      if (restore.stops) 
-        $gradient_stops = updateStops(restore.stops)
+      if (restore.type)               $gradient_type = restore.type
+      if (restore.space)              $gradient_space = restore.space
+      if (restore.interpolation)      $gradient_interpolation = restore.interpolation
+
+      if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
+      if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
+
+      if (restore.radial_shape)       $radial_shape = restore.radial_shape
+      if (restore.radial_position)    $radial_position = restore.radial_position
+      if (restore.radial_named_position) $radial_named_position = restore.radial_named_position
+      if (restore.radial_size)        $radial_size = restore.radial_size
+
+      if (restore.conic_angle)        $conic_angle = restore.conic_angle
+      if (restore.conic_position)     $conic_position = restore.conic_position
+      if (restore.conic_named_position) $conic_named_position = restore.conic_named_position
+
+      // last, to kickoff render
+      if (restore.stops)              $gradient_stops = updateStops(restore.stops)
     }
 
     stateAsString.subscribe(state => {

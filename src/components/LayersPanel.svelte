@@ -63,7 +63,7 @@
 <style>
   .layers {
     display: grid;
-    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-rows: auto auto auto auto auto auto 1fr;
     align-content: start;
     align-items: start;
     gap: var(--size-2);

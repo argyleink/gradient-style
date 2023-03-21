@@ -6,34 +6,46 @@ import {gradient_type, gradient_space, gradient_interpolation,
 import {linear_angle, linear_named_angle} from '../store/linear.ts'
 import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
+import {conic_angle, conic_position, conic_named_position
+  } from '../store/conic.ts'
+
+import {isCylindricalSpace} from '../utils/colorspace.ts'
 
 export const stateAsString = derived(
 	[
 		gradient_type, gradient_space, gradient_stops, gradient_interpolation,
 		linear_angle, linear_named_angle,
+		radial_shape, radial_position, radial_named_position, radial_size,
+		conic_angle, conic_position, conic_named_position,
 	],
 	([
 		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation,
 		$linear_angle, $linear_named_angle,
+		$radial_shape, $radial_position, $radial_named_position, $radial_size,
+		$conic_angle, $conic_position, $conic_named_position,
 	]) => {
 		let urlGradient = {
 			type: $gradient_type,
 			space: $gradient_space,
-			interpolation: $gradient_interpolation, // only if space is cyll
 		}
 
-		// tension between a pretty string and an easy to loop over state
-		// closer they are, less to manage
+		if (isCylindricalSpace($gradient_space))
+			urlGradient.interpolation = $gradient_interpolation
 
 		if ($gradient_type === 'linear') {
 			if ($linear_named_angle) urlGradient.linear_named_angle = $linear_named_angle
 			if ($linear_angle) urlGradient.linear_angle = $linear_angle
 		}
 		else if ($gradient_type === 'radial') {
-			urlGradient.linear_angle = $linear_angle
+			urlGradient.radial_shape = $radial_shape
+			urlGradient.radial_position = $radial_position
+			urlGradient.radial_named_position = $radial_named_position
+			urlGradient.radial_size = $radial_size
 		}
 		else if ($gradient_type === 'conic') {
-			urlGradient.linear_angle = $linear_angle
+			urlGradient.conic_angle = $conic_angle
+			urlGradient.conic_position = $conic_position
+			urlGradient.conic_named_position = $conic_named_position
 		}
 		else
 			return null
@@ -53,6 +65,9 @@ export function serializeUrl(state) {
   		for (const stop of state[key])
   			hash.append(key, JSON.stringify(stop))
   	}
+  	else if (key == 'radial_position' || key == 'conic_position') {
+  		hash.set(key, JSON.stringify(state[key]))
+  	}
   	else
 	    hash.set(key, state[key])
   }
@@ -66,6 +81,8 @@ export function deserializeUrl(hash) {
   for (const [key, value] of state.entries()) {
   	if (key == 'stops')
   		state[key] = state.getAll(key).map(JSON.parse)
+  	else if (key == 'radial_position' || key == 'conic_position')
+  		state[key] = JSON.parse(value)
   	else if (key == '#type')
   		state.type = value
   	else
