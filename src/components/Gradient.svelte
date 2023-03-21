@@ -49,7 +49,7 @@
       if (restore.linear_named_angle) 
         $linear_named_angle = restore.linear_named_angle
       if (restore.linear_angle) 
-        $linear_angle = restore.linear_angle
+        $linear_angle = parseInt(restore.linear_angle)
       if (restore.stops) 
         $gradient_stops = updateStops(restore.stops)
     }
