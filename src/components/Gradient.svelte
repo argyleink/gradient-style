@@ -325,6 +325,7 @@
   }
 
 	.gradient-builder {
+    --link: var(--surface-4);
 		display: grid;
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-3);

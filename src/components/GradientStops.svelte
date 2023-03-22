@@ -158,6 +158,9 @@
     >
       <h4>Transition</h4>
       <div class="color-hint slider-set">
+        <div use:tooltip={{html: true, content: '<span class="rich-tooltip"><u>Transition Hint:</u><br>Adjusts the midpoint between 2 stops.<br><br>Delete to reset.</span>', placement: 'top-start',}}>
+          <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2c1.94 0 3.59.7 4.95 2.05C21.3 5.41 22 7.06 22 9c0 1.56-.5 2.96-1.42 4.2c-.94 1.23-2.14 2.07-3.61 2.5l.03-.32V15c0-2.19-.77-4.07-2.35-5.65S11.19 7 9 7h-.37l-.33.03c.43-1.47 1.27-2.67 2.5-3.61C12.04 2.5 13.44 2 15 2M9 8a7 7 0 0 1 7 7a7 7 0 0 1-7 7a7 7 0 0 1-7-7a7 7 0 0 1 7-7m0 2a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5Z"/></svg>
+        </div>
         <RangeSlider bind:value={stop.percentage} 
           style="--accent-color: {stop.percentage == stop.auto ? 'var(--track-color)' : 'var(--link)'}"/>
         <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
@@ -249,6 +252,11 @@
 
   .color-position > :global(input[type="range"]) {
     --track-color: var(--surface-2);
+  }
+
+  .color-hint svg {
+    color: var(--surface-4);
+    inline-size: var(--size-6);
   }
 
   @media (prefers-color-scheme: light) {

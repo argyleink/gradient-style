@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import Color from 'colorjs.io'
-  import {contrast_color, contrast_color_with_alpha} from '../utils/color.ts'
+  import {parse_coords, contrast_color, contrast_color_with_alpha} from '../utils/color.ts'
 
   import {
     picker_value, colorspace, 
@@ -43,59 +43,59 @@
     
     if ($colorspace === 'oklab') {
       const [l,a,b] = parsedColor.coords
-      $oklabL = l * 100
-      $oklabA = a.toString()
-      $oklabB = b.toString()
+      $oklabL = (parse_coords(l) * 100).toFixed()
+      $oklabA = a.toFixed(2).toString()
+      $oklabB = b.toFixed(2).toString()
       $oklabAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'oklch') {
       const [l,c,h] = parsedColor.coords
-      $oklchL = l * 100
-      $oklchC = c.toString()
-      $oklchH = h.toString()
+      $oklchL = (parse_coords(l) * 100).toFixed()
+      $oklchC = c.toFixed(2).toString()
+      $oklchH = h.toFixed().toString()
       $oklchAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'lab') {
       const [l,a,b] = parsedColor.coords
-      $labL = l
-      $labA = a.toString()
-      $labB = b.toString()
+      $labL = parse_coords(l).toFixed()
+      $labA = a.toFixed().toString()
+      $labB = b.toFixed().toString()
       $labAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'lch') {
       const [l,c,h] = parsedColor.coords
-      $lchL = l
-      $lchC = c.toString()
-      $lchH = h.toString()
+      $lchL = parse_coords(l).toFixed()
+      $lchC = c.toFixed().toString()
+      $lchH = h.toFixed().toString()
       $lchAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'hsl') {
       const [h,s,l] = parsedColor.coords
-      $hslL = l
-      $hslS = s.toString()
-      $hslH = h.toString()
+      $hslL = parse_coords(l).toFixed()
+      $hslS = parse_coords(s.toFixed().toString())
+      $hslH = h.toFixed().toString()
       $hslAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'hwb') {
       const [h,w,b] = parsedColor.coords
       $hwbH = h.toString()
-      $hwbW = w
-      $hwbB = b
+      $hwbW = parse_coords(w).toFixed()
+      $hwbB = parse_coords(b).toFixed()
       $hwbAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'srgb' || colorspace === 'rgb') {
       const [r,g,b] = parsedColor.coords
-      $rgbR = r * 100
-      $rgbG = g * 100
-      $rgbB = b * 100
-      $rgbAlpha = parsedColor.alpha * 100
+      $rgbR = (parse_coords(r) * 100).toFixed()
+      $rgbG = (parse_coords(g) * 100).toFixed()
+      $rgbB = (parse_coords(b) * 100).toFixed()
+      $rgbAlpha = (parsedColor.alpha * 100).toFixed()
     }
     else if (isRGBcolor($colorspace)) {
       const [r,g,b] = parsedColor.coords
-      $colorR = r.valueOf() * 100
-      $colorG = g.valueOf() * 100
-      $colorB = b.valueOf() * 100
-      $colorAlpha = parsedColor.alpha * 100
+      $colorR = (parse_coords(r.valueOf()) * 100).toFixed()
+      $colorG = (parse_coords(g.valueOf()) * 100).toFixed()
+      $colorB = (parse_coords(b.valueOf()) * 100).toFixed()
+      $colorAlpha = (parsedColor.alpha * 100).toFixed()
     }
   }
 
@@ -176,6 +176,14 @@
     ].includes(space)
   }
 
+  function spaceChange(e) {
+    const current = new Color(user_color)
+    setColor(current.to(e.target.value === 'display-p3'
+      ? 'p3'
+      : e.target.value))
+    $colorspace = e.target.value
+  }
+
   $: text_overlay = contrast_color_with_alpha(user_color)
   $: bg_overlay = contrast_color(text_overlay)
 
@@ -194,7 +202,7 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" bind:value={$colorspace}> 
+      <select class="colorspace" on:change={spaceChange}> 
         <option>hsl</option>
         <option>hwb</option>
         <option>srgb</option>
@@ -470,10 +478,10 @@
 
   .preview {
     aspect-ratio: var(--ratio-widescreen);
+    min-inline-size: var(--size-content-2);
     display: grid;
     align-content: space-between;
     justify-items: center;
-    block-size: var(--size-content-1);
     padding: var(--size-3);
     box-shadow: var(--inner-shadow-0);
     background: 

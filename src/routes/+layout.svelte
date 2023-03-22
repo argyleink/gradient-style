@@ -32,4 +32,14 @@
 			--svooltip-shadow: var(--shadow-5);
 		}
 	}
+
+	:global(.rich-tooltip) {
+		display: inline-block;
+		max-inline-size: var(--size-content-1);
+		text-wrap: balance;
+	}
+
+	:global(.rich-tooltip p) {
+		color: var(--text-2);
+	}
 </style>

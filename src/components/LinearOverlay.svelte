@@ -212,7 +212,7 @@
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div class="hint" {stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%" on:mouseleave={mouseOut}>
+        <div class="hint" {stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%; visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}" on:mouseleave={mouseOut}>
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>

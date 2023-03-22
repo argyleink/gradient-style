@@ -1,5 +1,9 @@
 import Color from 'colorjs.io'
 
+export function parse_coords(coords) {
+  return Math.max(0, Math.min(100, coords))
+}
+
 export function contrast_color(c) {
   try {
   const color = new Color(c)
