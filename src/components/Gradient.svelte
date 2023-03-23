@@ -252,7 +252,7 @@
           </button>
         </div>
         <div class="preview">
-          <label class="hd-switch" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between (HD) and (sRGB) previews.</span>'}}>
+          <label class="hd-switch" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between (HD) and (sRGB) previews.</span>', delay: [1000, 0]}}>
             <span class="sr-only">HD on or off?</span>
             <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="currentColor" d="M6.75 15q.325 0 .537-.213t.213-.537V13h2v1.25q0 .325.213.537t.537.213q.325 0 .537-.213T11 14.25v-4.5q0-.325-.213-.537T10.25 9q-.325 0-.537.213T9.5 9.75v1.75h-2V9.75q0-.325-.213-.537T6.75 9q-.325 0-.537.213T6 9.75v4.5q0 .325.213.537T6.75 15Zm6.75 0H17q.425 0 .713-.288T18 14v-4q0-.425-.288-.713T17 9h-3.5q-.2 0-.35.15T13 9.5v5q0 .2.15.35t.35.15Zm1-1.5v-3h2v3h-2ZM4 20q-.825 0-1.413-.588T2 18V6q0-.825.588-1.413T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.588 1.413T20 20H4Z"/>
