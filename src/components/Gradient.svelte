@@ -30,6 +30,7 @@
   import Prism from './PrismJS.svelte'
 
   let preview_resizer
+  let preview_hd = true
   let box_width
   let box_height
 
@@ -251,7 +252,14 @@
           </button>
         </div>
         <div class="preview">
-          <div bind:this={preview_resizer} class="resizer" style={`background: ${classic_gradient}; background: ${user_gradient}; width: 50cqi;`}></div>  
+          <label class="hd-switch" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between (HD) and (sRGB) previews.</span>'}}>
+            <span class="sr-only">HD on or off?</span>
+            <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor" d="M6.75 15q.325 0 .537-.213t.213-.537V13h2v1.25q0 .325.213.537t.537.213q.325 0 .537-.213T11 14.25v-4.5q0-.325-.213-.537T10.25 9q-.325 0-.537.213T9.5 9.75v1.75h-2V9.75q0-.325-.213-.537T6.75 9q-.325 0-.537.213T6 9.75v4.5q0 .325.213.537T6.75 15Zm6.75 0H17q.425 0 .713-.288T18 14v-4q0-.425-.288-.713T17 9h-3.5q-.2 0-.35.15T13 9.5v5q0 .2.15.35t.35.15Zm1-1.5v-3h2v3h-2ZM4 20q-.825 0-1.413-.588T2 18V6q0-.825.588-1.413T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.588 1.413T20 20H4Z"/>
+            </svg>
+            <input class="sr-only" bind:checked={preview_hd} type="checkbox" name="hd-gradient">
+          </label>
+          <div bind:this={preview_resizer} class="resizer" style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} width: 50cqi;`}></div>  
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
           {/if}
@@ -348,7 +356,7 @@
     box-shadow: var(--shadow-6);
   }
 
-  .preview > div {
+  .preview > * {
     grid-area: 1/1;
   }
 
@@ -740,5 +748,24 @@
 /*     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight); */
     --_bg: none;
     --_border: none;
+  }
+
+  .hd-switch {
+    cursor: pointer;
+    position: absolute;
+    inset-block-start: calc(var(--size-7) * -1);
+    inset-inline-start: -3px;
+    display: flex;
+    gap: var(--size-1);
+    place-items: center;
+  }
+
+  .hd-switch > svg {
+    color: var(--text-2);
+    box-shadow: var(--shadow-1);
+  }
+
+  .hd-switch:has(:checked) > svg {
+    color: var(--text-1);
   }
 </style>
