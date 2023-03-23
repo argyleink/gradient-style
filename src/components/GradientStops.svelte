@@ -1,6 +1,6 @@
 <script>
   import {flip} from 'svelte/animate'
-  import {fade} from 'svelte/transition'
+  import {fade,scale} from 'svelte/transition'
 
   import { tooltip } from 'svooltip'
 
@@ -107,7 +107,7 @@
 </script>
 
 {#each $gradient_stops as stop, i (stop)}
-  <div in:fade="{{duration: 450}}" animate:flip="{{duration: 350}}">
+  <div in:fade="{{duration: 450}}" out:scale animate:flip="{{duration: 350, delay: 120}}">
   {#if stop.kind === 'stop'}
     <fieldset 
       style="accent-color: {stop.color}" 

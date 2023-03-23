@@ -70,12 +70,4 @@
   .code-block[has-loaded="true"] {
     animation: var(--animation-fade-in) forwards;
   }
-
-  :global(.token.token) {
-    background: var(--user-classic);
-    background: var(--user-modern);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-attachment: fixed;
-  }
 </style>
