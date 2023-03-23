@@ -40,6 +40,8 @@
     $colorspace = parsedColor.space.id === 'p3'
       ? 'display-p3'
       : parsedColor.space.id
+
+    dialog.querySelector('.colorspace').value = $colorspace
     
     if ($colorspace === 'oklab') {
       const [l,a,b] = parsedColor.coords
