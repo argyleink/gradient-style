@@ -46,6 +46,7 @@
     border-radius: var(--radius-round);
     padding: var(--size-2);
     place-content: center;
+    color: var(--text-2);
   }
 
   .switch:hover {
@@ -57,7 +58,7 @@
   }
 
   .switch:has(:checked) {
-    color: var(--link);
+    color: var(--text-1);
     background: var(--surface-2);
   }
 
