@@ -4,7 +4,7 @@
   const radial_sizes = {
     'Default': ['farthest-corner'],
     'Special Angles': ['closest-side', 'closest-corner', 'farthest-side'],
-    'Lengths': ['250px', '50vw', '50cqi', '25rem'],
+    'Lengths': ['250px', '50vw', '25rem'],
   }
 </script>
 
