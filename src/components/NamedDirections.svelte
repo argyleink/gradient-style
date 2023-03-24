@@ -42,7 +42,7 @@
   }
 
   .matrix-dot:checked {
-    background: var(--link);
+    background: var(--text-2);
   }
   
   .matrix-dot[value="center"] { place-self: center }
