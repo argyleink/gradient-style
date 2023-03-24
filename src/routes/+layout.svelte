@@ -36,7 +36,6 @@
 	:global(.rich-tooltip) {
 		display: inline-block;
 		max-inline-size: var(--size-content-1);
-		text-wrap: balance;
 	}
 
 	:global(.rich-tooltip p) {

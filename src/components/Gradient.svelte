@@ -252,11 +252,14 @@
           </button>
         </div>
         <div class="preview">
-          <label class="hd-switch" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between (HD) and (sRGB) previews.</span>', delay: [1000, 0]}}>
+          <label class="hd-switch" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between high and standard gradient previews.<br><br>(HDR) high dynamic range.</span>', delay: [1000, 0]}}>
             <span class="sr-only">HD on or off?</span>
-            <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="currentColor" d="M6.75 15q.325 0 .537-.213t.213-.537V13h2v1.25q0 .325.213.537t.537.213q.325 0 .537-.213T11 14.25v-4.5q0-.325-.213-.537T10.25 9q-.325 0-.537.213T9.5 9.75v1.75h-2V9.75q0-.325-.213-.537T6.75 9q-.325 0-.537.213T6 9.75v4.5q0 .325.213.537T6.75 15Zm6.75 0H17q.425 0 .713-.288T18 14v-4q0-.425-.288-.713T17 9h-3.5q-.2 0-.35.15T13 9.5v5q0 .2.15.35t.35.15Zm1-1.5v-3h2v3h-2ZM4 20q-.825 0-1.413-.588T2 18V6q0-.825.588-1.413T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.588 1.413T20 20H4Z"/>
-            </svg>
+            {#if preview_hd == true}
+              <svg width="32" height="32" viewBox="0 0 20 20"><path fill="#ffffff" d="M4.75 4A2.75 2.75 0 0 0 2 6.75v6.5A2.75 2.75 0 0 0 4.75 16h10.5A2.75 2.75 0 0 0 18 13.25v-6.5A2.75 2.75 0 0 0 15.25 4H4.75ZM4.5 7.5A.5.5 0 0 1 5 8v1.5h2V8a.5.5 0 0 1 1 0v4a.5.5 0 0 1-1 0v-1.5H5V12a.5.5 0 0 1-1 0V8a.5.5 0 0 1 .5-.5ZM9 8a.5.5 0 0 1 .5-.5h.25A2.25 2.25 0 0 1 12 9.75v.5a2.25 2.25 0 0 1-2.25 2.25H9.5A.5.5 0 0 1 9 12V8Zm1 3.475c.57-.116 1-.62 1-1.225v-.5c0-.605-.43-1.11-1-1.225v2.95ZM13 8a.5.5 0 0 1 .5-.5h1a1.5 1.5 0 0 1 .868 2.724l.6 1.6a.5.5 0 0 1-.936.352l-.629-1.676H14V12a.5.5 0 0 1-1 0V8Zm1 1.5h.5a.5.5 0 0 0 0-1H14v1Z"/></svg>
+            {/if}
+            {#if preview_hd == false}
+              <svg width="32" height="32" viewBox="0 0 20 20"><path fill="currentColor" d="M2.854 2.146a.5.5 0 1 0-.708.708l1.416 1.415A2.75 2.75 0 0 0 2 6.75v6.5A2.75 2.75 0 0 0 4.75 16h10.543l1.853 1.854a.5.5 0 0 0 .708-.708l-15-15Zm8.38 9.795a2.241 2.241 0 0 1-1.484.559H9.5A.5.5 0 0 1 9 12V9.707l1 1v.768c.195-.04.374-.125.524-.244l.71.71ZM8 8.707V12a.5.5 0 0 1-1 0v-1.5H5V12a.5.5 0 0 1-1 0V8a.5.5 0 0 1 1 0v1.5h2V8c0-.085.021-.165.058-.235L8 8.707Zm4 1.043v.129l1 1V8a.5.5 0 0 1 .5-.5h1a1.5 1.5 0 0 1 .868 2.724l.6 1.6a.5.5 0 0 1-.936.352l-.629-1.676H14v1.379l3.254 3.254A2.74 2.74 0 0 0 18 13.25v-6.5A2.75 2.75 0 0 0 15.25 4H6.121l3.5 3.5h.129A2.25 2.25 0 0 1 12 9.75Zm2-.25h.5a.5.5 0 0 0 0-1H14v1Z"/></svg>
+            {/if}
             <input class="sr-only" bind:checked={preview_hd} type="checkbox" name="hd-gradient">
           </label>
           <div bind:this={preview_resizer} class="resizer" style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} width: 50cqi;`}></div>  
@@ -761,11 +764,7 @@
   }
 
   .hd-switch > svg {
-    color: var(--text-2);
-    box-shadow: var(--shadow-1);
-  }
-
-  .hd-switch:has(:checked) > svg {
     color: var(--text-1);
+    box-shadow: var(--shadow-1);
   }
 </style>
