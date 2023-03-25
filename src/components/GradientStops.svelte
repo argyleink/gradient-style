@@ -121,7 +121,7 @@
       <h4>Color {i}</h4>
       <div class="chip color-stop" use:tooltip={{content: whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
         <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
-        <span class="color-string" contenteditable="true" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
+        <span class="color-string" contenteditable="true" style="caret-color: {stop.color}" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
       </div>
       <div class="stack">
         <div class="color-position slider-set">
@@ -244,10 +244,25 @@
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: var(--size-1);
   }
 
   .color-string:focus {
     outline: none;
+  }
+
+  .color-string:hover::after {
+    content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
+
+    block-size: 20px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .color-string:hover::after {
+      content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
+    }
   }
 
   .color-position > :global(input[type="range"]) {
