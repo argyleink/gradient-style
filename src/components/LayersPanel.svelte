@@ -68,6 +68,7 @@
     align-items: start;
     gap: var(--size-2);
     padding-block: 1px;
+    accent-color: var(--text-2);
   }
 
   .layers.linear {
