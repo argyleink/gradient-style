@@ -1,7 +1,11 @@
 <script>
   import { onMount } from 'svelte'
   import Color from 'colorjs.io'
-  import {parse_coords, contrast_color, contrast_color_with_alpha} from '../utils/color.ts'
+  import {
+    parse_coords, contrast_color, 
+    contrast_color_with_alpha
+  } from '../utils/color.ts'
+  import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
 
   import {
     picker_value, colorspace, 
@@ -188,6 +192,7 @@
 
   $: text_overlay = contrast_color_with_alpha(user_color)
   $: bg_overlay = contrast_color(text_overlay)
+  $: gamut = whatsTheGamutDamnit(user_color)
 
   $: user_color = gencolor($colorspace,
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
@@ -204,24 +209,29 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" on:change={spaceChange}> 
-        <option>hsl</option>
-        <option>hwb</option>
-        <option>srgb</option>
-        <option>srgb-linear</option>
-        <option>lch</option> 
-        <option>lab</option>
-        <option selected>oklch</option>
-        <option>oklab</option>
-        <option>display-p3</option>
-        <option>rec2020</option>
-        <option>a98-rgb</option>
-        <option>prophoto-rgb</option>
-        <option>xyz</option>
-        <option>xyz-d50</option>
-        <option>xyz-d65</option>
-      </select>
-      <output><code>{user_color}</code></output>
+      <div class="color-meta">
+        <select class="colorspace" on:change={spaceChange}> 
+          <option>hsl</option>
+          <option>hwb</option>
+          <option>srgb</option>
+          <option>srgb-linear</option>
+          <option>lch</option> 
+          <option>lab</option>
+          <option selected>oklch</option>
+          <option>oklab</option>
+          <option>display-p3</option>
+          <option>rec2020</option>
+          <option>a98-rgb</option>
+          <option>prophoto-rgb</option>
+          <option>xyz</option>
+          <option>xyz-d50</option>
+          <option>xyz-d65</option>
+        </select>
+        <code class="gamut">{gamut}</code>
+      </div>
+      <output class="color-information">
+        <code>{user_color}</code>
+      </output>
     </div>
 
     <div class="controls">
@@ -483,7 +493,6 @@
     min-inline-size: var(--size-content-2);
     display: grid;
     align-content: space-between;
-    justify-items: center;
     padding: var(--size-3);
     box-shadow: var(--inner-shadow-0);
     background: 
@@ -562,5 +571,23 @@
   
   .control-input:active::-webkit-slider-thumb {
     cursor: grabbing;
+  }
+
+  .color-information {
+    place-self: center;
+  }
+
+  .color-meta {
+    display: flex; 
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  .gamut {
+    border-radius: var(--radius-round);
+    padding-inline: var(--size-3);
+    font-size: var(--font-size-0);
+    color: var(--contrast-color);
+    background-color: var(--counter-contrast-color);
   }
 </style>
