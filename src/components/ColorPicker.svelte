@@ -167,7 +167,7 @@
   }
 
   function rgbColor() {
-    return `color(${$colorspace} ${$colorR}% ${$colorG}% ${$colorB}%${alphaToString($colorAlpha)})`
+    return `color(${$colorspace === 'prophoto' ? 'prophoto-rgb' : $colorspace} ${$colorR}% ${$colorG}% ${$colorB}%${alphaToString($colorAlpha)})`
   }
 
   function isRGBcolor(space) {
@@ -176,7 +176,7 @@
       'display-p3',
       'rec2020',
       'a98-rgb',
-      'prophoto-rgb',
+      'prophoto',
       'xyz',
       'xyz-d50',
       'xyz-d65',
@@ -226,7 +226,7 @@
         <option>display-p3</option>
         <option>rec2020</option>
         <option>a98-rgb</option>
-        <option>prophoto-rgb</option>
+        <option>prophoto</option>
         <option>xyz</option>
         <option>xyz-d50</option>
         <option>xyz-d65</option>
@@ -589,11 +589,11 @@
     font-size: var(--font-size-3);
     display: inline-flex;
     align-items: center;
-    gap: var(--size-2);
+    white-space: nowrap;
   }
 
   .color-information > svg {
-    block-size: 1em;
+    block-size: .9em;
     opacity: 0;
     transition: opacity .3s ease;
   }
