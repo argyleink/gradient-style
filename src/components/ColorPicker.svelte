@@ -214,7 +214,7 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" on:change={spaceChange} title="Colorspace"> 
+      <select class="colorspace" on:change={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});"> 
         <optgroup label="Standard">
           <option value="srgb">rgb</option>
           <option>srgb-linear</option>
