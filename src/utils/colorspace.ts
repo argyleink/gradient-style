@@ -15,7 +15,7 @@ export function whatsTheGamutDamnit(color) {
     const rec2020 = new Color('rec2020', new Color(color).to('rec2020').coords)
     const xyz = new Color('xyz', new Color(color).to('xyz').coords)
 
-    if (xyz.inGamut()) gamut = 'Beyond rec2020'
+    if (xyz.inGamut()) gamut = 'xyz'
     if (rec2020.inGamut()) gamut = 'rec2020'
     if (p3.inGamut()) gamut = 'p3'
     if (srgb.inGamut()) gamut = 'srgb'

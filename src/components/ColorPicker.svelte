@@ -5,6 +5,7 @@
     parse_coords, contrast_color, 
     contrast_color_with_alpha
   } from '../utils/color.ts'
+  import {copyToClipboard} from '../utils/clipboard.ts'
   import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
 
   import {
@@ -190,7 +191,11 @@
     $colorspace = e.target.value
   }
 
-  $: text_overlay = contrast_color_with_alpha(user_color)
+  function copyColor() {
+    copyToClipboard(user_color)
+  }
+
+  $: text_overlay = contrast_color(user_color)
   $: bg_overlay = contrast_color(text_overlay)
   $: gamut = whatsTheGamutDamnit(user_color)
 
@@ -209,29 +214,30 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <div class="color-meta">
-        <select class="colorspace" on:change={spaceChange}> 
-          <option>hsl</option>
-          <option>hwb</option>
-          <option>srgb</option>
-          <option>srgb-linear</option>
-          <option>lch</option> 
-          <option>lab</option>
-          <option selected>oklch</option>
-          <option>oklab</option>
-          <option>display-p3</option>
-          <option>rec2020</option>
-          <option>a98-rgb</option>
-          <option>prophoto-rgb</option>
-          <option>xyz</option>
-          <option>xyz-d50</option>
-          <option>xyz-d65</option>
-        </select>
-        <code class="gamut">{gamut}</code>
-      </div>
-      <output class="color-information">
-        <code>{user_color}</code>
+      <select class="colorspace" on:change={spaceChange} title="Colorspace"> 
+        <option>hsl</option>
+        <option>hwb</option>
+        <option>srgb</option>
+        <option>srgb-linear</option>
+        <option>lch</option> 
+        <option>lab</option>
+        <option selected>oklch</option>
+        <option>oklab</option>
+        <option>display-p3</option>
+        <option>rec2020</option>
+        <option>a98-rgb</option>
+        <option>prophoto-rgb</option>
+        <option>xyz</option>
+        <option>xyz-d50</option>
+        <option>xyz-d65</option>
+      </select>
+      <output class="color-information" on:click={copyColor}>
+        {user_color}
+        <svg width="32" height="32" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Z"/>
+        </svg>
       </output>
+      <div class="gamut" title="Gamut">{gamut}</div>
     </div>
 
     <div class="controls">
@@ -481,18 +487,21 @@
   }
 
   .colorspace {
-    justify-self: end;
-    color: var(--contrast-color);
-    background-color: var(--counter-contrast-color);
+    --_bg: transparent;
+    color: var(--counter-contrast-color);
     background-repeat: no-repeat;
     border: none;
+    padding-inline-start: 0;
+    padding-block: 0;
+    box-shadow: none;
   }
 
   .preview {
     aspect-ratio: var(--ratio-widescreen);
     min-inline-size: var(--size-content-2);
     display: grid;
-    align-content: space-between;
+    align-content: end;
+    justify-items: start;
     padding: var(--size-3);
     box-shadow: var(--inner-shadow-0);
     background: 
@@ -543,6 +552,7 @@
     background-color: var(--surface-1);
     border-radius: var(--radius-round);
     block-size: 1rem;
+    box-shadow: var(--inner-shadow-0);
   }
 
   .alpha {
@@ -574,7 +584,22 @@
   }
 
   .color-information {
-    place-self: center;
+    cursor: pointer;
+    color: var(--counter-contrast-color);
+    font-size: var(--font-size-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--size-2);
+  }
+
+  .color-information > svg {
+    block-size: 1em;
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+
+  .color-information:is(:hover, :focus) > svg {
+    opacity: 1;
   }
 
   .color-meta {
@@ -584,10 +609,9 @@
   }
 
   .gamut {
-    border-radius: var(--radius-round);
-    padding-inline: var(--size-3);
+    border-radius: var(--radius-round) 0 0 var(--radius-round);
     font-size: var(--font-size-0);
-    color: var(--contrast-color);
-    background-color: var(--counter-contrast-color);
+    color: var(--counter-contrast-color);
+    margin-block-start: var(--size-1);
   }
 </style>
