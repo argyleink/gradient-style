@@ -215,21 +215,27 @@
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
       <select class="colorspace" on:change={spaceChange} title="Colorspace"> 
-        <option>hsl</option>
-        <option>hwb</option>
-        <option>srgb</option>
-        <option>srgb-linear</option>
-        <option>lch</option> 
-        <option>lab</option>
-        <option selected>oklch</option>
-        <option>oklab</option>
-        <option>display-p3</option>
-        <option>rec2020</option>
-        <option>a98-rgb</option>
-        <option>prophoto</option>
-        <option>xyz</option>
-        <option>xyz-d50</option>
-        <option>xyz-d65</option>
+        <optgroup label="Standard">
+          <option value="srgb">rgb</option>
+          <option>srgb-linear</option>
+          <option>hsl</option>
+          <option>hwb</option>
+        </optgroup>
+        <optgroup label="HD">
+          <option>display-p3</option>
+          <option>a98-rgb</option>
+        </optgroup>
+        <optgroup label="Ultra HD">
+          <option>lab</option>
+          <option>lch</option> 
+          <option selected>oklch</option>
+          <option>oklab</option>
+          <option>rec2020</option>
+          <option>prophoto</option>
+          <option>xyz</option>
+          <option>xyz-d50</option>
+          <option>xyz-d65</option>
+        </optgroup>
       </select>
       <output class="color-information" on:click={copyColor}>
         {user_color}
@@ -491,6 +497,7 @@
     color: var(--counter-contrast-color);
     background-repeat: no-repeat;
     border: none;
+    outline: none;
     padding-inline-start: 0;
     padding-block: 0;
     box-shadow: none;
