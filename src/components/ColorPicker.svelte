@@ -237,13 +237,13 @@
           <option>xyz-d65</option>
         </optgroup>
       </select>
+      <div class="gamut" title="Gamut">{gamut}</div>
       <output class="color-information" on:click={copyColor}>
         {user_color}
         <svg width="32" height="32" viewBox="0 0 24 24">
           <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Z"/>
         </svg>
       </output>
-      <div class="gamut" title="Gamut">{gamut}</div>
     </div>
 
     <div class="controls">
@@ -493,20 +493,25 @@
   }
 
   .colorspace {
-    --_bg: transparent;
+    --_bg: color-mix(in oklch, var(--counter-contrast-color), transparent 90%);
+    align-self: start;
     color: var(--counter-contrast-color);
-    background-repeat: no-repeat;
-    border: none;
+    padding-inline-start: var(--size-2);
+    padding-block: var(--size-1);
+    border: 1px solid white;
+    border-color: color-mix(in oklch, var(--counter-contrast-color), transparent 70%);
     outline: none;
-    padding-inline-start: 0;
-    padding-block: 0;
-    box-shadow: none;
+  }
+
+  .colorspace:is(:hover,:focus) {
+    border-color: color-mix(in oklch, var(--counter-contrast-color), transparent 50%);
   }
 
   .preview {
     aspect-ratio: var(--ratio-widescreen);
     min-inline-size: var(--size-content-2);
     display: grid;
+    grid-template-rows: 1fr auto auto;
     align-content: end;
     justify-items: start;
     padding: var(--size-3);
