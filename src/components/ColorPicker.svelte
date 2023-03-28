@@ -250,7 +250,7 @@
       {#if $colorspace === 'oklab'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
+          <input autofocus class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
           <input type="number" bind:value={$oklabL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -276,7 +276,7 @@
       {#if $colorspace === 'oklch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
+          <input autofocus class="control-input" type="range" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
           <input type="number" bind:value={$oklchL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -302,7 +302,7 @@
       {#if $colorspace === 'lab'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input autofocus class="control-input" type="range" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
           <input type="number" bind:value={$labL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -328,7 +328,7 @@
       {#if $colorspace === 'lch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input class="control-input" type="range" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input autofocus class="control-input" type="range" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
           <input type="number" bind:value={$lchL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -354,7 +354,7 @@
       {#if $colorspace === 'hsl'}
         <div class="control">
           <span class="control-channel">H</span>
-          <input class="control-input" type="range" min="0" max="360" bind:value={$hslH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hslH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
           <input type="number" bind:value={$hslH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -380,7 +380,7 @@
       {#if $colorspace === 'hwb'}
         <div class="control">
           <span class="control-channel">H</span>
-          <input class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
           <input type="number" bind:value={$hwbH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -406,7 +406,7 @@
       {#if $colorspace === 'srgb'}
         <div class="control">
           <span class="control-channel">R</span>
-          <input class="control-input" type="range" min="0" max="100" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+          <input autofocus class="control-input" type="range" min="0" max="100" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
           <input type="number" bind:value={$rgbR} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -432,7 +432,7 @@
       {#if isRGBcolor($colorspace)}
         <div class="control">
           <span class="control-channel">R</span>
-          <input class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+          <input autofocus class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
           <input type="number" bind:value={$colorR} min="0" max="100" class="slider-percentage">
         </div>
 
