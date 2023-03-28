@@ -1,5 +1,8 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { writable } from 'svelte/store'
+
+  const dispatch = createEventDispatcher()
 
   export let style = 'none'
   export let value
@@ -7,6 +10,10 @@
   export let max = 100
   export let step = 1
   export let emptytrack = 'none'
+
+  function dispatchChange() {
+    dispatch('change', { value })
+  }
 </script>
 
 <input 
@@ -14,6 +21,7 @@
   class="range-slider {emptytrack && 'no-track-fill'}" 
   style="{style!='none'?style:''}; --track-fill: {value / (max || 100) * 100}%"
   bind:value={value}
+  on:input={dispatchChange}
   min={min}
   max={max}
   step={step}

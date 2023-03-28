@@ -17,7 +17,8 @@
   ]
 
   function blurNamedAngle() {
-    $linear_named_angle = '--'
+    if ($linear_named_angle !== '--')
+      $linear_named_angle = '--'
   }
 </script>
 
@@ -33,7 +34,7 @@
   </div>
   <div class="linear-angle slider-set">
     <AngleIcon angle={$linear_angle} />
-    <RangeSlider on:input={blurNamedAngle} bind:value={$linear_angle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />
-    <input type="number" bind:value={$linear_angle} min="0" max="360" step="1"  class="slider-percentage">
+    <RangeSlider bind:value={$linear_angle} on:change={blurNamedAngle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />
+    <input type="number" bind:value={$linear_angle} on:input={blurNamedAngle} min="0" max="360" step="1"  class="slider-percentage">
   </div>
 </fieldset>
