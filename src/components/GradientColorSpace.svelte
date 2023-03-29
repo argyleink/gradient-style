@@ -2,7 +2,7 @@
   import {gradient_space} from '../store/gradient.ts'
 </script>
 
-<fieldset class="control-set">
+<fieldset class="control-set gradient-colorspace">
   <div class="label-select-combo">
     <label>Color Space</label>
     <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
@@ -24,3 +24,9 @@
     </select>
   </div>
 </fieldset>
+
+<style>
+  .gradient-colorspace {
+    padding-block-start: 0;
+  }
+</style>
