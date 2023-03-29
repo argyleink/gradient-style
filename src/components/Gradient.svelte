@@ -23,6 +23,8 @@
   import {randomNumber} from '../utils/numbers.ts'
 
   import GradientStops from './GradientStops.svelte'
+  import GradientColorSpace from './GradientColorSpace.svelte'
+  import HueInterpolation from './HueInterpolation.svelte'
 
   import LinearOverlay from './LinearOverlay.svelte'
   import ColorPicker from './ColorPicker.svelte'
@@ -309,6 +311,12 @@
           </select>
         </button> -->
       </div>
+
+      <GradientColorSpace />
+
+      {#if isCylindricalSpace($gradient_space)}
+        <HueInterpolation />
+      {/if}
 
       <GradientStops />
 

@@ -38,6 +38,10 @@
 		max-inline-size: var(--size-content-1);
 	}
 
+	:global(.rich-tooltip.wide) {
+		max-inline-size: var(--size-content-2);
+	}
+
 	:global(.rich-tooltip p) {
 		color: var(--text-2);
 	}

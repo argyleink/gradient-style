@@ -5,7 +5,6 @@
   import NamedDirections from './NamedDirections.svelte'
 
   const linear_directions = [
-    '--',
     'to right',
     'to left',
     'to bottom right',
@@ -27,6 +26,7 @@
     <label>Angle</label>
     <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
     <select name="named-directions" bind:value={$linear_named_angle}>
+      <option disabled>--</option>
       {#each linear_directions as dir}
         <option value={dir}>{dir}</option>  
       {/each}

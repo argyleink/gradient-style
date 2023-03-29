@@ -1,5 +1,4 @@
 <script>
-  import {isCylindricalSpace} from '../utils/colorspace.ts'
   import { tooltip } from 'svooltip'
 
   import {gradient_type, gradient_space} from '../store/gradient.ts'
@@ -12,8 +11,7 @@
   import RadialPosition from './RadialPosition.svelte'
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
-  import HueInterpolation from './HueInterpolation.svelte'
-  import GradientColorSpace from './GradientColorSpace.svelte'
+  
 </script>
 
 <section class="layers {$gradient_type}">
@@ -27,12 +25,6 @@
     <span contenteditable bind:textContent={$layers} class="layer-name"></span> 
     <GradientType />
   </div>
-
-  <GradientColorSpace />
-
-  {#if isCylindricalSpace($gradient_space)}
-    <HueInterpolation />
-  {/if}
 
   {#if $gradient_type === 'linear'}
     <LinearAngle />
@@ -63,7 +55,7 @@
 <style>
   .layers {
     display: grid;
-    grid-template-rows: auto auto auto auto auto auto 1fr;
+    grid-template-rows: auto auto auto auto 1fr;
     align-content: start;
     align-items: start;
     gap: var(--size-2);
@@ -72,6 +64,10 @@
   }
 
   .layers.linear {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .layers.conic {
     grid-template-rows: auto auto auto 1fr;
   }
 
@@ -98,6 +94,7 @@
     justify-content: space-between;
     padding-block: var(--size-2);
     padding-inline: var(--size-5);
+    margin-block-end: var(--size-3);
     background: var(--surface-3);
     box-shadow: var(--shadow-2);
   }

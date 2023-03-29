@@ -72,10 +72,10 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += e.movementX / apercent
 
-        if (Math.abs(dragulaState.start.y - e.screenY) > 50)
-          dragYdelta = dragulaState.start.y - e.screenY - 24
-        else
-          dragYdelta = null
+        // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
+        //   dragYdelta = dragulaState.start.y - e.screenY - 24
+        // else
+        //   dragYdelta = null
 
         if (dragulaState.stop.kind === 'stop') {
           if (dragulaState.stop.position1 === dragulaState.stop.position2)
@@ -94,7 +94,15 @@
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
         $linear_named_angle = '--'
-        $linear_angle += e.movementX
+
+        if ($linear_angle < 90 || $linear_angle > 270) $linear_angle += e.movementX
+        else $linear_angle -= e.movementX
+
+        if ($linear_angle < 180) $linear_angle += e.movementY
+        else $linear_angle -= e.movementY
+
+        if ($linear_angle > 360) $linear_angle = 0
+        if ($linear_angle < 0) $linear_angle = 360
       }
       
       if (e.target.closest('[data-stop-index]'))
@@ -106,10 +114,10 @@
     function stopWatching(e) {
       node.releasePointerCapture(e.pointerId)
 
-      if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
-        dragYdelta = null
-        $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
-      }
+      // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
+      //   dragYdelta = null
+      //   $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
+      // }
 
       dragulaState.moving = false
       dragulaState.rotating = false
@@ -182,6 +190,16 @@
 
     $gradient_stops = updateStops($gradient_stops)
   }
+
+  function deleteStop(stop) {
+    if ($gradient_stops.length <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+  }
+
+  function relinkStop(stop) {
+    stop.position2 = stop.position1
+    $gradient_stops = updateStops($gradient_stops)
+  }
 </script>
 
 <div class="pie">
@@ -196,14 +214,24 @@
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
-        <div class="stop-wrap" style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" on:mouseleave={mouseOut}>
+        <div 
+          class="stop-wrap" 
+          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
+          on:mouseleave={mouseOut} 
+          on:dblclick={()=>deleteStop(stop)}
+        >
           <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
           <div class="stop" {stop} data-stop-index={i} data-position="1">
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
-        {#if stop.position1 !== stop.position2 && stop.position2 !== stop.auto}
-          <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" on:mouseleave={mouseOut}>
+        {#if stop.position1 !== stop.position2}
+          <div 
+            class="stop-wrap" 
+            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
+            on:mouseleave={mouseOut} 
+            on:dblclick={()=>relinkStop(stop)}
+          >
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" data-stop-index={i} data-position="2">
               <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
