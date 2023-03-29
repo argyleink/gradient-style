@@ -288,6 +288,10 @@
     --track-color: var(--surface-2);
   }
 
+  .color-hint {
+    margin-inline: var(--size-2)
+  }
+
   .color-hint svg {
     color: var(--surface-4);
     inline-size: var(--size-6);

@@ -72,10 +72,10 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += e.movementX / apercent
 
-        if (Math.abs(dragulaState.start.y - e.screenY) > 50)
-          dragYdelta = dragulaState.start.y - e.screenY - 24
-        else
-          dragYdelta = null
+        // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
+        //   dragYdelta = dragulaState.start.y - e.screenY - 24
+        // else
+        //   dragYdelta = null
 
         if (dragulaState.stop.kind === 'stop') {
           if (dragulaState.stop.position1 === dragulaState.stop.position2)
@@ -202,7 +202,7 @@
             <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           </div>
         </div>
-        {#if stop.position1 !== stop.position2 && stop.position2 !== stop.auto}
+        {#if stop.position1 !== stop.position2}
           <div class="stop-wrap" style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" on:mouseleave={mouseOut}>
             <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" data-stop-index={i} data-position="2">
