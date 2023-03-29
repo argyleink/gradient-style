@@ -111,7 +111,7 @@
   }
 
   function spaceToString() {
-    return isCylindricalSpace($gradient_space)
+    return isCylindricalSpace($gradient_space) && $gradient_interpolation !== 'shorter'
       ? `in ${$gradient_space} ${$gradient_interpolation} hue`
       : `in ${$gradient_space}`
   }
