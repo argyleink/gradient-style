@@ -60,7 +60,10 @@
     }
 
     stateAsString.subscribe(state => {
-      state && window.history.replaceState({}, "", '#'+state)
+      clearTimeout(window.syncStateTimer)
+      window.syncStateTimer = setTimeout(() => {
+        state && window.history.replaceState({}, "", '#'+state)
+      }, 500)
     })
 
     const resizeObserver = new ResizeObserver(entries => {
