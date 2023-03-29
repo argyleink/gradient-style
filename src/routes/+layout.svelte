@@ -11,7 +11,7 @@
 	@import 'open-props/style';
 	@import 'open-props/normalize';
 	@import 'open-props/buttons';
-	@import 'prism-themes/themes/prism-nord.css';
+	@import 'prism-themes/themes/prism-night-owl.css';
 
 	.app {
 		display: grid;

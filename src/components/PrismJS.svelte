@@ -65,10 +65,23 @@
     opacity: 0;
     max-inline-size: 90cqi;
     background-color: var(--gray-10);
+    border-radius: var(--radius-3);
     cursor: auto;
   }
 
   .code-block[has-loaded="true"] {
     animation: var(--animation-fade-in) forwards;
+  }
+
+  :global(code[class*="language-"]) {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-2);
+  }
+
+  @media (pointer: coarse) {
+    input[type="checkbox"] {
+      inline-size: 2rem;
+      block-size: 2rem;
+    }
   }
 </style>
