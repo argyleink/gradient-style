@@ -94,7 +94,15 @@
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
         $linear_named_angle = '--'
-        $linear_angle += e.movementX
+
+        if ($linear_angle < 90 || $linear_angle > 270) $linear_angle += e.movementX
+        else $linear_angle -= e.movementX
+
+        if ($linear_angle < 180) $linear_angle += e.movementY
+        else $linear_angle -= e.movementY
+
+        if ($linear_angle > 360) $linear_angle = 0
+        if ($linear_angle < 0) $linear_angle = 360
       }
       
       if (e.target.closest('[data-stop-index]'))
