@@ -114,10 +114,10 @@
     function stopWatching(e) {
       node.releasePointerCapture(e.pointerId)
 
-      if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
-        dragYdelta = null
-        $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
-      }
+      // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
+      //   dragYdelta = null
+      //   $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
+      // }
 
       dragulaState.moving = false
       dragulaState.rotating = false
