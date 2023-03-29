@@ -18,7 +18,7 @@
 <fieldset class="control-set">
   <div class="label-select-combo">
     <label>Position</label>
-    <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" />
+    <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" on:change={removeRadialPositions} />
     <select name="radial-position" bind:value={$radial_named_position} disabled={$radial_position.x !== null}>
       {#each gradient_positions as pos}
         <option value={pos}>{pos}</option>  
@@ -43,7 +43,7 @@
         min="-100" max="200" 
         step="1" 
         emptytrack 
-        on:input={ensureRadialPair}
+        on:change={ensureRadialPair}
       />
       <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
     </div>

@@ -124,7 +124,7 @@
         <span class="color-string" contenteditable="true" style="caret-color: {stop.color}" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
       </div>
       <div class="positions-pair">
-        <div class="linked" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} on:click={() => stop.position2 = stop.position1}>
+        <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} on:click={() => stop.position2 = stop.position1}>
           {#if stop.position1 === stop.position2}
             <svg class="linked-on" width="32" height="32" viewBox="0 0 24 24">
               <path fill="currentColor" d="M7 17q-2.075 0-3.538-1.463T2 12q0-2.075 1.463-3.538T7 7h3q.425 0 .713.288T11 8q0 .425-.288.713T10 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17H7Zm2-4q-.425 0-.713-.288T8 12q0-.425.288-.713T9 11h6q.425 0 .713.288T16 12q0 .425-.288.713T15 13H9Zm5 4q-.425 0-.713-.288T13 16q0-.425.288-.713T14 15h3q1.25 0 2.125-.875T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.463T22 12q0 2.075-1.463 3.538T17 17h-3Z"/>
@@ -134,7 +134,7 @@
               <path fill="currentColor" d="m15.825 13l-2-2h2q.425 0 .713.288t.287.712q0 .425-.288.713t-.712.287Zm3.425 3.45l-1.5-1.55q.975-.275 1.613-1.063T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.438T22 12q0 1.425-.75 2.638t-2 1.812Zm-.15 5.45l-17-17q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l17 17q.275.275.275.7t-.275.7q-.275.275-.7.275t-.7-.275ZM10 17H7q-2.075 0-3.538-1.463T2 12q0-1.75 1.063-3.088T5.75 7.15L7.6 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17Zm1.6-4H8.175q-.425 0-.713-.288T7.176 12q0-.425.288-.713T8.175 11h1.45l1.975 2Z"/>
             </svg>
           {/if}
-        </div>
+        </button>
         <div class="stack">
           <div class="color-position slider-set">
             <RangeSlider bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--track-color)' : stop.color};"/>
@@ -266,14 +266,14 @@
     outline: none;
   }
 
-  .color-string:hover::after {
+  .color-string:is(:hover, :focus)::after {
     content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
 
     block-size: 20px;
   }
 
   @media (prefers-color-scheme: light) {
-    .color-string:hover::after {
+    .color-string:is(:hover, :focus)::after {
       content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
     }
   }
@@ -304,11 +304,10 @@
   }
 
   .linked {
-    display: grid;
-    inline-size: var(--size-4);
     rotate: .75turn;
-    cursor: pointer;
+    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
   }
+
   .linked > * {
     grid-area: 1 / 1;
   }

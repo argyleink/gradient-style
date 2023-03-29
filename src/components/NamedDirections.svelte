@@ -1,13 +1,20 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { tooltip } from 'svooltip'
   import {gradient_positions, gradient_angles} from '../store/gradient.ts'
+
+  const dispatch = createEventDispatcher()
 
   export let id = 'named-directions'
   export let selected = 'center'
   export let mode = 'position'
+
+  function dispatchChange() {
+    dispatch('change', { selected })
+  }
 </script>
 
-<fieldset id={id} class="angle-matrix">
+<fieldset id={id} class="angle-matrix" on:input={dispatchChange}>
   {#if mode === 'position'}
     {#each gradient_positions as d}
       <input type="radio" class="matrix-dot" name="{id}-group" value={d} title={d} bind:group={selected} use:tooltip={{content: d}}>
