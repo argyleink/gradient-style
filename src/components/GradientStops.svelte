@@ -12,6 +12,7 @@
   import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
 
   import RangeSlider from './RangeSlider.svelte'
+  import Menu from './Menu.svelte'
 
   function colorAction(event, position) {
     switch (event.target.value) {
@@ -148,7 +149,8 @@
           </div>
         </div>
         <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
-          <select on:change={(e) => colorAction(e,i)}>
+          <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 16a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2m0-6a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2m0-6a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2Z"/></svg>
+          <!-- <select on:change={(e) => colorAction(e,i)}>
             <option>Color Actions</option>
             <option disabled>--</option>
             <option>Duplicate</option>
@@ -157,7 +159,8 @@
             <option disabled>--</option>
             <option>Reset</option>
             <option disabled={$gradient_stops.length == 1}>Remove</option>
-          </select>
+          </select> -->
+          <Menu />
         </button>
       </fieldset>
     {/if}
@@ -218,7 +221,8 @@
     inset-inline-end: var(--size-3);
     inset-block-start: var(--size-3);
     inline-size: var(--size-5);
-    overflow: hidden;
+    block-size: var(--size-5);
+/*     overflow: hidden; */
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
