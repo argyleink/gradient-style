@@ -63,8 +63,5 @@
         <sup>%</sup>
       </div>
     </div>
-    {#if $radial_position.y != null}
-      <button class="remove" type="reset" on:click={() => removeRadialPositions()}>Reset</button>
-    {/if}
   </div>
 </fieldset>

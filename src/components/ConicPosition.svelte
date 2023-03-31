@@ -51,8 +51,5 @@
         <sup>%</sup>
       </div>
     </div>
-    {#if $conic_position.y != null}
-      <button class="remove" type="reset" on:click={() => removeConicPositions()}>reset</button>
-    {/if}
   </div>
 </fieldset>
