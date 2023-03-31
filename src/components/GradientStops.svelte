@@ -325,6 +325,7 @@
   }
 
   .linked {
+    --_ink-shadow: none;
     rotate: .75turn;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
   }

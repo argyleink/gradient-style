@@ -649,7 +649,7 @@
     text-align: end;
     max-inline-size: 2em;
     padding-block: 0;
-    padding-inline-end: var(--size-1);
+    padding-inline-end: .25ch;
     padding-inline-start: 0;
     -moz-appearance:textfield;
     background: none;
