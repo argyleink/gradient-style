@@ -70,7 +70,7 @@
         node.setPointerCapture(e.pointerId)
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
-        dragulaState.left += e.movementX / apercent
+        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
         // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
         //   dragYdelta = dragulaState.start.y - e.screenY - 24

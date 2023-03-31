@@ -94,7 +94,7 @@
     justify-content: space-between;
     padding-block: var(--size-2);
     padding-inline: var(--size-5);
-    margin-block-end: var(--size-3);
+    margin-block-end: var(--size-2);
     background: var(--surface-3);
     box-shadow: var(--shadow-2);
   }
