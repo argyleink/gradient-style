@@ -39,12 +39,13 @@
 <style>
   .gradient-colorspace {
     padding-block-start: 0;
+    padding-inline: var(--size-4);
   }
 
   .label-select-combo > label {
     display: flex;
     align-items: center;
-    gap: var(--size-1);
+    gap: var(--size-2);
   }
 
   .info-icon {

@@ -27,6 +27,7 @@
 <style>
   .control-set {
     margin-block-start: calc(var(--size-4) * -1);
+    padding-inline: var(--size-4);
   }
 
   .icon-label {
