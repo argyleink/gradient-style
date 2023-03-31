@@ -59,6 +59,7 @@
   }
 
   .mini-link {
+    color: inherit;
     padding: 0;
     margin: 0;
     line-height: 0;
