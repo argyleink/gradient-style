@@ -39,7 +39,7 @@
 <style>
   .gradient-colorspace {
     padding-block-start: 0;
-    padding-inline: var(--size-4);
+    padding-inline: var(--size-3);
   }
 
   .label-select-combo > label {
