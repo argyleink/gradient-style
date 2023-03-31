@@ -582,6 +582,15 @@
     gap: var(--size-2);
   }
 
+  :global(.input-suffix) {
+    display: flex;
+    align-items: center;
+  }
+
+  :global(.input-suffix > sup) {
+    color: var(--text-2);
+  }
+
   .gradient-builder :global(input[type="range"]) {
     inline-size: 100%;
   }
@@ -637,10 +646,11 @@
   :global(.slider-percentage) {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    direction: rtl;
-    max-inline-size: 4.8ch;
+    text-align: end;
+    max-inline-size: 2em;
     padding-block: 0;
-    padding-inline-end: 0;
+    padding-inline-end: var(--size-1);
+    padding-inline-start: 0;
     -moz-appearance:textfield;
     background: none;
   }

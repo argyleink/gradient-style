@@ -35,7 +35,10 @@
     <div class="conic-position slider-set">
       <label>X</label>
       <RangeSlider bind:value={$conic_position.x} min="-100" max="200" step="1" emptytrack="true" on:change={resetNamedPosition} />
-      <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
+      <div class="input-suffix">
+        <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
+        <sup>%</sup>
+      </div>
     </div>
     <div class="conic-position slider-set">
       <label>Y</label>
@@ -43,7 +46,10 @@
         ensurePositionPair()
         resetNamedPosition()
       }} />
-      <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" on:change={ensurePositionPair}>
+      <div class="input-suffix">
+        <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" on:change={ensurePositionPair}>
+        <sup>%</sup>
+      </div>
     </div>
     {#if $conic_position.y != null}
       <button class="remove" type="reset" on:click={() => removeConicPositions()}>reset</button>

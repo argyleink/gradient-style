@@ -41,7 +41,10 @@
         emptytrack 
         on:change={resetNamedPosition}
       />
-      <input type="number" bind:value={$radial_position.x} min="-100" max="200" step="1"  class="slider-percentage">
+      <div class="input-suffix">
+        <input type="number" bind:value={$radial_position.x} min="-100" max="200" step="1"  class="slider-percentage">
+        <sup>%</sup>
+      </div>
     </div>
     <div class="radial-position slider-set">
       <label>Y</label>
@@ -55,7 +58,10 @@
           resetNamedPosition()
         }}
       />
-      <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
+      <div class="input-suffix">
+        <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
+        <sup>%</sup>
+      </div>
     </div>
     {#if $radial_position.y != null}
       <button class="remove" type="reset" on:click={() => removeRadialPositions()}>Reset</button>

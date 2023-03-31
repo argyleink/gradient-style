@@ -139,11 +139,17 @@
           <div class="stack">
             <div class="color-position slider-set">
               <RangeSlider bind:value={stop.position1} style="--accent-color: {stop.position1 === null ? 'var(--track-color)' : stop.color};"/>
-              <input type="number" bind:value={stop.position1} class="slider-percentage">
+              <div class="input-suffix">
+                <input type="number" bind:value={stop.position1} class="slider-percentage">
+                <sup>%</sup>
+              </div>
             </div>
             <div class="color-position slider-set">
               <RangeSlider bind:value={stop.position2} style="--accent-color: {stop.position1 === stop.position2 ? 'var(--track-color)' : stop.color};"/>
-              <input type="number" bind:value={stop.position2} class="slider-percentage">
+              <div class="input-suffix">
+                <input type="number" bind:value={stop.position2} class="slider-percentage">
+                <sup>%</sup>
+              </div>
             </div>
           </div>
         </div>
