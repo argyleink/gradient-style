@@ -122,7 +122,7 @@
         <h4>Color {i}</h4>
         <div class="chip color-stop" use:tooltip={{content: whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
           <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
-          <span class="color-string" contenteditable="true" style="caret-color: {stop.color}" bind:innerHTML={stop.color} spellcheck="false">{stop.color}</span>
+          <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
         </div>
         <div class="positions-pair">
           <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} on:click={() => stop.position2 = stop.position1}>
@@ -259,6 +259,8 @@
   }
 
   .color-string {
+    background: #0000;
+    padding: 0;
     max-inline-size: calc(100% - var(--size-4));
     overflow-x: hidden;
     white-space: nowrap;
