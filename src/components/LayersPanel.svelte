@@ -12,6 +12,7 @@
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
   
+  $: visibility = false
 </script>
 
 <section class="layers {$gradient_type}">
@@ -22,6 +23,13 @@
     </div>
   {/each} -->
   <div class="layer selected">
+    <!-- <button class="layer-visibility" on:click={()=>visibility = !visibility}>
+      {#if visibility}
+        <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 16q1.875 0 3.188-1.313T16.5 11.5q0-1.875-1.313-3.188T12 7q-1.875 0-3.188 1.313T7.5 11.5q0 1.875 1.313 3.188T12 16Zm0-1.8q-1.125 0-1.913-.788T9.3 11.5q0-1.125.788-1.913T12 8.8q1.125 0 1.913.788T14.7 11.5q0 1.125-.787 1.913T12 14.2Zm0 4.8q-3.65 0-6.65-2.038T1 11.5q1.35-3.425 4.35-5.463T12 4q3.65 0 6.65 2.038T23 11.5q-1.35 3.425-4.35 5.463T12 19Z"/></svg>
+      {:else}
+        <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m19.8 22.6l-4.2-4.15q-.875.275-1.762.413T12 19q-3.775 0-6.725-2.087T1 11.5q.525-1.325 1.325-2.463T4.15 7L1.4 4.2l1.4-1.4l18.4 18.4l-1.4 1.4ZM12 16q.275 0 .513-.025t.512-.1l-5.4-5.4q-.075.275-.1.513T7.5 11.5q0 1.875 1.313 3.188T12 16Zm7.3.45l-3.175-3.15q.175-.425.275-.863t.1-.937q0-1.875-1.313-3.188T12 7q-.5 0-.938.1t-.862.3L7.65 4.85q1.025-.425 2.1-.637T12 4q3.775 0 6.725 2.087T23 11.5q-.575 1.475-1.513 2.738T19.3 16.45Zm-4.625-4.6l-3-3q.7-.125 1.288.113t1.012.687q.425.45.613 1.038t.087 1.162Z"/></svg>
+      {/if}
+    </button> -->
     <span contenteditable bind:textContent={$layers} class="layer-name"></span> 
     <GradientType />
   </div>
@@ -109,6 +117,13 @@
     place-self: end;
     position: sticky;
     inset-block-end: 0;
+  }
+
+  .layer-visibility {
+    max-inline-size: var(--size-5);    
+    padding: 0;
+    border-radius: var(--radius-round);
+    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
   }
 
   .add-layer {

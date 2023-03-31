@@ -183,7 +183,10 @@
           </div>
           <RangeSlider bind:value={stop.percentage} 
             style="--accent-color: {stop.percentage == stop.auto ? 'var(--track-color)' : 'var(--link)'}"/>
-          <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
+          <div class="input-suffix">
+            <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
+            <sup>%</sup>
+          </div>
         </div>
       </fieldset>
     {/if}
