@@ -267,7 +267,11 @@
             {/if}
             <input class="sr-only" bind:checked={preview_hd} type="checkbox" name="hd-gradient">
           </label>
-          <div bind:this={preview_resizer} class="resizer" style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} width: 50cqi;`}></div>  
+          <div 
+            bind:this={preview_resizer} 
+            class="resizer" 
+            style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 50cqi;'}`}>
+          </div>  
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
           {/if}
