@@ -64,5 +64,6 @@
     padding: 0;
     margin: 0;
     line-height: 0;
+    border-radius: var(--radius-round);
   }
 </style>
