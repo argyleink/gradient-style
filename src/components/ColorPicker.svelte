@@ -187,7 +187,7 @@
     const current = new Color(user_color)
     setColor(current.to(e.target.value === 'display-p3'
       ? 'p3'
-      : e.target.value))
+      : e.target.value).toGamut())
     $colorspace = e.target.value
   }
 
