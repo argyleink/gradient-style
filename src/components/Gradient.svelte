@@ -29,6 +29,7 @@
   import LinearOverlay from './LinearOverlay.svelte'
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
+  import Presets from './Presets.svelte'
   import Prism from './PrismJS.svelte'
 
   let preview_resizer
@@ -232,6 +233,7 @@
         <div class="gradient-logo" style="background:{user_gradient}"></div>
         <h1 class="brand-name">HD G<b>rad</b>ients</h1>
       </header>
+      <Presets />
       <ColorPicker />
       <LayersPanel />
       <footer class="footer-links">
@@ -742,7 +744,7 @@
     background: var(--surface-2);
     block-size: 100%;
     align-content: start;
-    grid-template-rows: auto [layers] 1fr [footer-links] auto;
+    grid-template-rows: auto auto [layers] 1fr [footer-links] auto;
   }
 
   @media (prefers-color-scheme: light) {
