@@ -49,7 +49,7 @@
 			named_position: 'top left',
 			stops: [
 				{color: 'oklch(75% 0.5 156)'},
-				{kind: 'hint', auto: '50', percentage: '65'},
+				{kind: 'hint', auto: '50', percentage: '50'},
 				{color: 'oklch(70% 0.5 261)'},
 			],
 		},
