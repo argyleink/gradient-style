@@ -123,6 +123,25 @@
 				{color: 'oklch(90% .3 200)'},
 			],
 		},
+		{
+			name: 'Mmm Pie',
+			gradient: 'conic-gradient(from 0deg at center in oklch, oklch(77% 0.50 200), 26%, oklch(77% 0.50 230) 0%, 46%, oklch(77% 0.50 260) 0%, 59%, oklch(77% 0.50 280) 0%, 82%, oklch(77% 0.50 300) 0%)',
+			type: 'conic',
+			space: 'oklch',
+			angle: 0,
+			named_position: 'center',
+			stops: [
+				{color: 'oklch(77% 0.50 200)', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '26'},
+				{color: 'oklch(77% 0.50 230)', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '46'},
+				{color: 'oklch(77% 0.50 260)', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '60'},
+				{color: 'oklch(77% 0.50 280)', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '82'},
+				{color: 'oklch(77% 0.50 300)', position1: '0', position2: '0'},
+			],
+		},
 	]
 
 	function presetClicked(preset) {
