@@ -183,11 +183,9 @@
 <section class="presets">
 	<p class="sr-only">presets</p>
 	<div class="scroller">
-		<!-- <span class="spacer"></span> -->
 		{#each presets as preset}
 			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} on:click={()=>presetClicked(preset)}></button>
 		{/each}
-		<span class="spacer"></span>
 	</div>
 </section>
 
@@ -207,6 +205,12 @@
 	.scroller {
 		display: flex;
 		gap: var(--size-3);
+	}
+
+	.scroller::after {
+		content: '';
+		flex-shrink: 0;
+		inline-size: var(--size-1);
 	}
 
 	.preset, .spacer {
