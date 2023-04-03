@@ -42,7 +42,7 @@
 		},
 		{
 			name: 'Chlorophyll',
-			gradient: 'conic-gradient(from 0deg at top left in oklch, oklch(75% 0.5 156), 65%, oklch(70% 0.5 261))',
+			gradient: 'conic-gradient(from 0deg at top left in oklch, oklch(75% 0.5 156), oklch(70% 0.5 261))',
 			type: 'conic',
 			space: 'oklch',
 			angle: 0,
