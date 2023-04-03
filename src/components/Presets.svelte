@@ -41,16 +41,15 @@
 			],
 		},
 		{
-			name: 'Chlorophyll',
-			gradient: 'conic-gradient(from 0deg at top left in oklch, oklch(75% 0.5 156), oklch(70% 0.5 261))',
-			type: 'conic',
-			space: 'oklch',
-			angle: 0,
-			named_position: 'top left',
+			name: 'Peaches',
+			gradient: 'linear-gradient(to bottom left in oklab, oklch(55% .45 350), oklch(100% .4 95))',
+			type: 'linear',
+			angle_name: 'bottom left',
+			space: 'oklab',
 			stops: [
-				{color: 'oklch(75% 0.5 156)'},
-				{kind: 'hint', auto: '50', percentage: '50'},
-				{color: 'oklch(70% 0.5 261)'},
+				{color: 'oklch(55% .45 350)'},
+				{kind: 'hint', auto: null, percentage: null},
+				{color: 'oklch(100% .4 95)'},
 			],
 		},
 		{
@@ -88,6 +87,19 @@
 			],
 		},
 		{
+			name: 'Chlorophyll',
+			gradient: 'conic-gradient(from 0deg at top left in oklch, oklch(75% 0.5 156), oklch(70% 0.5 261))',
+			type: 'conic',
+			space: 'oklch',
+			angle: 0,
+			named_position: 'top left',
+			stops: [
+				{color: 'oklch(75% 0.5 156)'},
+				{kind: 'hint', auto: '50', percentage: '50'},
+				{color: 'oklch(70% 0.5 261)'},
+			],
+		},
+		{
 			name: 'Honeycomb',
 			gradient: 'linear-gradient(to bottom right in oklab, oklch(100% .5 109), oklch(72% .5 100))',
 			type: 'linear',
@@ -97,18 +109,6 @@
 				{color: 'oklch(100% .5 109)'},
 				{kind: 'hint', auto: null, percentage: null},
 				{color: 'oklch(72% .5 100)'},
-			],
-		},
-		{
-			name: 'Peaches',
-			gradient: 'linear-gradient(to bottom left in oklab, oklch(55% .45 350), oklch(100% .4 95))',
-			type: 'linear',
-			angle_name: 'bottom left',
-			space: 'oklab',
-			stops: [
-				{color: 'oklch(55% .45 350)'},
-				{kind: 'hint', auto: null, percentage: null},
-				{color: 'oklch(100% .4 95)'},
 			],
 		},
 		{
