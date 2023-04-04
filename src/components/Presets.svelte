@@ -142,6 +142,44 @@
 				{color: 'oklch(77% 0.50 300)', position1: '0', position2: '0'},
 			],
 		},
+		{
+			name: 'Huey',
+			gradient: 'conic-gradient(in oklch longer hue, oklch(70% .3 0), oklch(70% .3 0))',
+			type: 'conic',
+			space: 'oklch',
+			interpolation: 'longer',
+			angle: 0,
+			named_position: 'center',
+			stops: [
+				{color: 'oklch(70% .3 0)', position1: null, position2: null},
+				{kind: 'hint', auto: null, percentage: '50'},
+				{color: 'oklch(70% .3 0)', position1: null, position2: null},
+			],
+		},
+		{
+			name: 'Solid Yo.',
+			gradient: 'linear-gradient(in oklab, oklch(70% .3 0) 0 0)',
+			type: 'linear',
+			angle_name: 'right',
+			space: 'oklab',
+			stops: [
+				{color: 'oklch(70% .3 0)'}
+			],
+		},
+		{
+			name: 'Modal',
+			gradient: "radial-gradient(closest-corner circle at center in oklab, oklch(0% 0 0 / 0%), oklch(0% 0 0))",
+			type: 'radial',
+			named_size: 'closest-corner',
+			shape: 'circle',
+			named_position: 'center',
+			space: 'oklab',
+			stops: [
+				{color: 'oklch(0% 0 0 / 0%)'},
+				{kind: 'hint', auto: null, percentage: null},
+				{color: 'oklch(0% 0 0)'},
+			],
+		},
 	]
 
 	function presetClicked(preset) {
@@ -150,6 +188,8 @@
 
 		if (preset.interpolation) 
 			$gradient_interpolation = preset.interpolation
+		else
+			$gradient_interpolation = 'shorter'
 
 		const convertedStops = preset.stops.map(stop => {
 			if (stop.kind !== 'hint') {
