@@ -1,5 +1,6 @@
 <script>
   import { onMount, afterUpdate } from 'svelte'
+  import { copyToClipboard } from '../utils/clipboard.ts'
   
   export let modern_gradient = 'none'
   export let classic_gradient = 'none'
@@ -14,12 +15,8 @@
     Prism.highlightAll()
   })
 
-  function textSelectNode(node) {
-    const range = document.createRange()
-    const selection = window.getSelection()
-    range.selectNode(node)
-    selection.removeAllRanges()
-    selection.addRange(range)
+  function copy() {
+    copyToClipboard(snippet)
   }
 
   function makeSnippet() {
@@ -58,9 +55,28 @@
   $: snippet = makeSnippet(modern_gradient, classic_gradient)
 </script>
 
-<pre class="code-block" has-loaded={loaded} on:click={e => textSelectNode(e.target)} on:focus={() => textSelectNode()}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
+<div class="copyable-block">
+<pre class="code-block" has-loaded={loaded}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
+<button class="copy-code" on:click={copy}>Copy</button>
+</div>
 
 <style>
+  .copyable-block {
+    display: grid;
+    place-items: end;
+  }
+
+  .copyable-block > * {
+    grid-area: 1 / 1;
+  }
+
+  .copy-code {
+    font-size: var(--font-size-0);
+    z-index: var(--layer-1);
+    padding-inline: var(--size-2);
+    padding-block: var(--size-1);
+  }
+
   .code-block {
     opacity: 0;
     max-inline-size: 90cqi;
