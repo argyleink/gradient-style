@@ -142,10 +142,16 @@
             s.position2 = '100'
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           }
-          else 
-            return s.position1 != null && s.position1 != s.auto
+          else {
+            let stop1 = s.position1 != null && s.position1 != s.auto
               ? maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '%'
               : maybeConvertColor(s.color, convert_colors)
+            let stop2 = s.position2 != null
+              ? s.position2 + '%'
+              : ''
+            
+            return stop1 + stop2
+          }
         }
         else if (s.kind === 'hint') {
           return s.percentage + '%'
