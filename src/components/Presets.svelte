@@ -204,6 +204,30 @@
 				{color: 'oklch(100% .4 5)', position1: '0', position2: '0'},
 			],
 		},
+		{
+			name: 'Sunburst',
+			gradient: 'conic-gradient(from 0deg at bottom left in oklab, #fff, 2%, #f00 0%, 8%, #fff 0%, 13%, #f00 0%, 18%, #fff 0%, 21%, #f00 0%, 24%, #fff 0%)',
+			type: 'conic',
+			space: 'oklab',
+			interpolation: 'longer',
+			angle: 0,
+			named_position: 'bottom left',
+			stops: [
+				{color: '#fff'},
+				{kind: 'hint', auto: null, percentage: '2'},
+				{color: '#f00', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '8'},
+				{color: '#fff', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '13'},
+				{color: '#f00', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '18'},
+				{color: '#fff', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '21'},
+				{color: '#f00', position1: '0', position2: '0'},
+				{kind: 'hint', auto: null, percentage: '24'},
+				{color: '#fff', position1: '0', position2: '0'},
+			],
+		},
 	]
 
 	function presetClicked(preset) {
