@@ -209,6 +209,7 @@
     <div class="visual-vert"></div>
   {/if}
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
+  <div class="dot"></div>
 </div>
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
   <div class="invisible-rotator"></div>
@@ -423,6 +424,17 @@
     block-size: var(--size-10);
     inline-size: 3px;
     background-image: linear-gradient(to bottom, var(--line-1) 50%, #0000 0);
+  }
+
+  .dot {
+    background: white;
+    inline-size: var(--size-2);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .invisible-rotator {

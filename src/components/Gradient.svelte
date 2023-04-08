@@ -27,6 +27,7 @@
   import HueInterpolation from './HueInterpolation.svelte'
 
   import LinearOverlay from './LinearOverlay.svelte'
+  import RadialOverlay from './RadialOverlay.svelte'
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Presets from './Presets.svelte'
@@ -283,6 +284,9 @@
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
           {/if}
+          <!--{#if $gradient_type === 'radial'}
+            <RadialOverlay w={box_width} h={box_height} />
+          {/if}-->
         </div>
       </section>
       <section class="code-preview-panel">
