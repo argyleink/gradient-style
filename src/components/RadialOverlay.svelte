@@ -16,7 +16,6 @@
   }
 
   function determineOverlaySize() {
-    const quadrant = determineQuadrant()
     const pos = determineAbsPosition()
     const distances = calcDistances(pos)
 
@@ -84,16 +83,9 @@
       }
     }
     else return {
-      w: w * 2,
-      h: w * 2,
+      w: parseInt($radial_size) * 2,
+      h: parseInt($radial_size) * 2,
     }
-  }
-
-  function determineQuadrant() {
-    let tophalve  = $radial_position.y < 50 ? 'n' : 's'
-    let sidehalve = $radial_position.x < 50 ? 'w' : 'e'
-
-    return tophalve + sidehalve
   }
 
   function namedPosToPercent() {
