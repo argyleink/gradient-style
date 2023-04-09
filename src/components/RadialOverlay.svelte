@@ -2,8 +2,8 @@
   import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
 
-  export let w = 0
-  export let h = 0
+  export let w
+  export let h
 
   function determineOverlaySize() {
     const quadrant = determineQuadrant()
@@ -87,14 +87,69 @@
   }
 
   function determineAbsPosition() {
-    // (maybe parse named ones)
-    let x = percentToDecimal($radial_position.x)
-    let y = percentToDecimal($radial_position.y)
+    let x = $radial_position.x
+    let y = $radial_position.y
+
+    if ($radial_named_position !== '--') {
+      switch ($radial_named_position) {
+        case 'top':
+          x = 50
+          y = 0
+          break
+        case 'right':
+          x = 100
+          y = 50
+          break
+        case 'bottom':
+          x = 50
+          y = 100
+          break
+        case 'left':
+          x = 0
+          y = 50
+          break
+        case 'top right':
+          x = 100
+          y = 0
+          break
+        case 'bottom right':
+          x = 100
+          y = 100
+          break
+        case 'bottom left':
+          x = 0
+          y = 100
+          break
+        case 'top left':
+          x = 0
+          y = 0
+          break
+        default:
+          x = 50
+          y = 50
+          break
+      }
+    }
 
     return {
-      x: Math.round(w * x),
-      y: Math.round(h * y),
+      x: Math.round(w * percentToDecimal(x)),
+      y: Math.round(h * percentToDecimal(y)),
     }
+  }
+
+  function overlayPosition() {
+    if ($radial_named_position != '--') {
+      let abs = determineAbsPosition()
+      return {
+        x: abs.x + 'px',
+        y: abs.y + 'px',
+      }
+    }
+    else
+      return {
+        x: $radial_position.x + '%',
+        y: $radial_position.y + '%',
+      }
   }
 
   function calcDiagonalLength(pos) {
@@ -121,10 +176,17 @@
     $radial_size
   )
 
-  // if contains ['closest-side', 'closest-corner', 'farthest-side']
+  $: position = overlayPosition(
+    $radial_position,
+    $radial_named_position
+  )
 </script>
 
-<div class="overlay" style="left: {$radial_position.x || 'auto'}%; top: {$radial_position.y || 'auto'}%; {$radial_position.x && 'translate: -50% -50%;'}">
+<div class="overlay" style="
+  left: {position.x}; 
+  top: {position.y};
+  {position.x && 'translate: -50% -50%;'}
+">
   <div class="dot"></div>
   <div class="edge" style="
     width:{size.w}px; 
