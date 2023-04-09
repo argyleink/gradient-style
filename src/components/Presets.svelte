@@ -271,6 +271,10 @@
 					$radial_position.x = preset.position1
 					$radial_position.y = preset.position2
 				}
+
+				if (preset.named_size) {
+					$radial_size = preset.named_size
+				}
 				break
 			case 'conic':
 				if (preset.named_position) {

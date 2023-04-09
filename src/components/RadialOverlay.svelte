@@ -98,7 +98,6 @@
 
   function namedPosToPercent() {
     let x, y
-
     
     switch ($radial_named_position) {
       case 'top':
