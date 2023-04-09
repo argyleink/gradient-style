@@ -5,6 +5,16 @@
   export let w
   export let h
 
+  const dragulaState = {
+    moving: false,
+    start: {x:null,y:null},
+    delta: {x:null,y:null},
+    left: null,
+    top: null,
+    stop: null,
+    target: null,
+  }
+
   function determineOverlaySize() {
     const quadrant = determineQuadrant()
     const pos = determineAbsPosition()
@@ -86,49 +96,60 @@
     return tophalve + sidehalve
   }
 
+  function namedPosToPercent() {
+    let x, y
+
+    
+    switch ($radial_named_position) {
+      case 'top':
+        x = 50
+        y = 0
+        break
+      case 'right':
+        x = 100
+        y = 50
+        break
+      case 'bottom':
+        x = 50
+        y = 100
+        break
+      case 'left':
+        x = 0
+        y = 50
+        break
+      case 'top right':
+        x = 100
+        y = 0
+        break
+      case 'bottom right':
+        x = 100
+        y = 100
+        break
+      case 'bottom left':
+        x = 0
+        y = 100
+        break
+      case 'top left':
+        x = 0
+        y = 0
+        break
+      default:
+        x = 50
+        y = 50
+        break
+    }
+
+    return {x,y}
+  }
+
   function determineAbsPosition() {
     let x = $radial_position.x
     let y = $radial_position.y
 
     if ($radial_named_position !== '--') {
-      switch ($radial_named_position) {
-        case 'top':
-          x = 50
-          y = 0
-          break
-        case 'right':
-          x = 100
-          y = 50
-          break
-        case 'bottom':
-          x = 50
-          y = 100
-          break
-        case 'left':
-          x = 0
-          y = 50
-          break
-        case 'top right':
-          x = 100
-          y = 0
-          break
-        case 'bottom right':
-          x = 100
-          y = 100
-          break
-        case 'bottom left':
-          x = 0
-          y = 100
-          break
-        case 'top left':
-          x = 0
-          y = 0
-          break
-        default:
-          x = 50
-          y = 50
-          break
-      }
+      let namedPos = namedPosToPercent()
+      x = namedPos.x
+      y = namedPos.y
     }
 
     return {
@@ -169,6 +190,89 @@
     return percent / 100
   }
 
+  function dragula(node) {
+    // all clicks, match stops and forward
+    node.addEventListener('pointerdown', e => {
+      const isStop = e.target.closest('[data-stop-index]')
+
+      if (isStop) {
+        // dragulaState.target = isStop
+        // dragulaState.start.x = e.screenX
+        // dragulaState.start.y = e.screenY
+        // dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
+
+        // dragIt(isStop)
+      }
+      else {
+        dragulaState.target = e.target
+        if ($radial_named_position != '--') {
+          let pos = namedPosToPercent()
+          dragulaState.left = pos.x
+          dragulaState.top = pos.y
+          $radial_named_position = '--'
+          $radial_position.x = pos.x
+          $radial_position.y = pos.y
+        }
+        dragIt(e.target)
+      }
+    })
+
+    // always watch pointer move
+    window.addEventListener('pointermove', e => {
+      if (dragulaState.moving) {
+        node.setPointerCapture(e.pointerId)
+        let apercent = w / 100
+        dragulaState.left += e.movementX / apercent
+        dragulaState.top += e.movementY / apercent
+
+        // if (dragulaState.stop.kind === 'stop') {
+        //   if (dragulaState.stop.position1 === dragulaState.stop.position2)
+        //     dragulaState.stop.position2 = Math.round(dragulaState.left)
+
+        //   if (dragulaState.target.dataset.position === "1")
+        //     dragulaState.stop.position1 = Math.round(dragulaState.left)
+        //   else
+        //     dragulaState.stop.position2 = Math.round(dragulaState.left)
+        // }
+        // else
+          // dragulaState.stop.percentage = Math.round(dragulaState.left)
+        
+        $radial_position.x = Math.round(dragulaState.left)
+        $radial_position.y = Math.round(dragulaState.top)
+      }
+      
+      // if (e.target.closest('[data-stop-index]'))
+      //   $active_stop_index = e.target
+      //     .closest('[data-stop-index]')
+      //     .dataset.stopIndex
+    })
+
+    function stopWatching(e) {
+      node.releasePointerCapture(e.pointerId)
+
+      dragulaState.moving = false
+      dragulaState.stop = null
+      dragulaState.target = null
+      dragulaState.left = null
+      dragulaState.top = null
+
+      // $active_stop_index = null
+    }
+
+    window.addEventListener('pointerup', stopWatching)
+    window.addEventListener('dragleave', stopWatching)
+  }
+
+  function dragIt(node) {
+    dragulaState.moving = true
+
+    // if (dragulaState.stop.kind === 'hint')
+    //   dragulaState.left = parseInt(dragulaState.stop.percentage)
+    // else
+    dragulaState.left = $radial_position.x
+    dragulaState.top = $radial_position.y
+  }
+
   $: size = determineOverlaySize(
     $radial_position,
     $radial_named_position,
@@ -188,7 +292,7 @@
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
-  <div class="edge" style="
+  <div class="edge" use:dragula style="
     width:{size.w}px; 
     height:{size.h}px;
   "></div>
@@ -202,10 +306,11 @@
     grid-area: 1/1;
     display: grid;
     pointer-events: none;
-    touch-action: manipulation;
   }
 
   .edge {
+    pointer-events: auto;
+    cursor: move;
     position: absolute;
     place-self: center;
     border: 2px dashed var(--line-2);

@@ -262,8 +262,6 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
-    touch-action: manipulation;
-/*     transition: rotate 300ms ease-out; */
   }
 
   .line {
