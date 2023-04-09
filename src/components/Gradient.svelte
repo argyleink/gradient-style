@@ -148,7 +148,7 @@
               ? maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '%'
               : maybeConvertColor(s.color, convert_colors)
             let stop2 = s.position2 != null
-              ? s.position2 + '%'
+              ? ' ' + s.position2 + '%'
               : ''
             
             return stop1 + stop2
