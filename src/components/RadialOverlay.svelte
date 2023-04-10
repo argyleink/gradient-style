@@ -2,8 +2,8 @@
   import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
 
-  export let w
-  export let h
+  export let w = null
+  export let h = null
 
   const dragulaState = {
     moving: false,
@@ -264,7 +264,7 @@
     dragulaState.top = $radial_position.y
   }
 
-  $: size = determineOverlaySize(
+  $: size = determineOverlaySize(h,w,
     $radial_position,
     $radial_named_position,
     $radial_shape,
