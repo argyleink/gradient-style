@@ -31,8 +31,8 @@
 			type: 'radial',
 			named_size: 'farthest-corner',
 			shape: 'circle',
-			position1: '50',
-			position2: '113',
+			position1: 50,
+			position2: 113,
 			space: 'oklch',
 			stops: [
 				{color: 'oklch(80% .3 34)'},
