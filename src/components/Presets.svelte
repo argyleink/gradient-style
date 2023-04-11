@@ -326,7 +326,7 @@
 	}
 
 	.preset, .spacer {
-		flex: 1 0 auto;
+		flex: 0 0 auto;
 		--_item-size: var(--size-7);
 		inline-size: var(--_item-size);
 		block-size: var(--_item-size);
