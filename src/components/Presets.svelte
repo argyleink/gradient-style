@@ -268,6 +268,7 @@
 					$radial_position.y = null
 				}
 				else {
+					$radial_named_position = '--'
 					$radial_position.x = preset.position1
 					$radial_position.y = preset.position2
 				}
