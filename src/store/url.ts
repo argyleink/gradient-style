@@ -24,6 +24,7 @@ export const stateAsString = derived(
 		$radial_shape, $radial_position, $radial_named_position, $radial_size,
 		$conic_angle, $conic_position, $conic_named_position,
 	]) => {
+		// todo: rate limit this work
 		let urlGradient = {
 			type: $gradient_type,
 			space: $gradient_space,
