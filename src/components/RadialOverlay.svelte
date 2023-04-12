@@ -204,6 +204,7 @@
           $radial_position.x = pos.x
           $radial_position.y = pos.y
         }
+        node.setPointerCapture(e.pointerId)
         dragIt(e.target)
       }
     })
@@ -211,7 +212,6 @@
     // always watch pointer move
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
-        node.setPointerCapture(e.pointerId)
         let apercent = w / 100
         dragulaState.left += e.movementX / apercent
         dragulaState.top += e.movementY / apercent
@@ -283,7 +283,8 @@
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
-  <div class="edge" use:dragula style="
+  <div class="dragzone" use:dragula></div>
+  <div class="edge" style="
     width:{size.w}px; 
     height:{size.h}px;
   "></div>
@@ -300,8 +301,7 @@
   }
 
   .edge {
-    pointer-events: auto;
-    cursor: move;
+    pointer-events: none;
     position: absolute;
     place-self: center;
     border: 2px dashed var(--line-2);
@@ -318,5 +318,25 @@
     inset-block-start: 50%;
     inset-inline-start: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  .dragzone {
+    cursor: move;
+    pointer-events: auto;
+    place-self: center;
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    transition: box-shadow .5s var(--ease-3);
+    --_shadow-size: 0px;
+    box-shadow: inset 0 0 0 var(--_shadow-size) hsl(0 0% 100% / 25%);
+  }
+
+  .dragzone:hover {
+    --_shadow-size: var(--size-10);
   }
 </style>
