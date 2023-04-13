@@ -154,7 +154,7 @@
           </div>
         </div>
         <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
-          <select on:change={(e) => colorAction(e,i)}>
+          <select tabindex="-1" on:change={(e) => colorAction(e,i)}>
             <option disabled selected>Color Actions</option>
             <option disabled>--</option>
             <option>Duplicate</option>

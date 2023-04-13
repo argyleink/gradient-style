@@ -262,6 +262,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
+    will-change: rotate;
   }
 
   .line {

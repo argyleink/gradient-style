@@ -298,6 +298,7 @@
     grid-area: 1/1;
     display: grid;
     pointer-events: none;
+    will-change: translate, left, top;
   }
 
   .edge {
