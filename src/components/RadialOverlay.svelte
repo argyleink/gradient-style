@@ -283,7 +283,7 @@
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
-  <div class="dragzone" use:dragula></div>
+  <div class="dragzone" use:dragula style="max-inline-size: {size.w * .2}px"></div>
   <div class="edge" style="
     width:{size.w}px; 
     height:{size.h}px;
