@@ -202,6 +202,16 @@
 
   function globalAction(event) {
     switch (event.target.value) {
+      case 'Start new':
+        $gradient_type = 'linear'
+        $gradient_space = 'oklab'
+        $gradient_stops = [
+          {kind: 'stop', color: '#000', auto: '0', position1: '0', position2: '0'}, 
+          {kind: 'hint', auto: '50', percentage: '50'},
+          {kind: 'stop', color: '#fff', auto: '100', position1: '100', position2: '100'},
+        ]
+        $linear_named_angle = 'to right'
+        break
       case 'Provide feedback':
         window.open('https://discord.gg/nm4mkWxF')
         break
@@ -317,8 +327,9 @@
           <select tabindex="-1" on:change={globalAction}>
             <option disabled selected>Actions</option>
             <option disabled>--</option>
-            <option disabled>Copy Modern CSS</option>
-            <option disabled>Copy Classic CSS</option>
+            <option>Start new</option>
+            <option disabled>Copy modern CSS</option>
+            <option disabled>Copy classic CSS</option>
             <option disabled>Reset all stops to auto</option>
             <option disabled>--</option>
             <option disabled>Toggle light & dark</option>
