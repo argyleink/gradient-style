@@ -235,12 +235,6 @@
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .stop-actions {
-      box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
-    }
-  }
-
   .stop-actions > select {
     --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
@@ -249,11 +243,9 @@
   }
 
   .chip {
-    display: grid;
-    grid-template-columns: auto 1fr;
+    display: flex;
     place-items: center start;
     gap: var(--size-2);
-    border-radius: var(--radius-round);
   }
 
   .round {
@@ -274,23 +266,19 @@
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: var(--size-1);
   }
 
   .color-string:focus {
     outline: none;
   }
 
-  .color-string:is(:hover, :focus)::after {
+  .chip.color-stop:is(:hover, :focus)::after {
     content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
-
     block-size: 20px;
   }
 
   @media (prefers-color-scheme: light) {
-    .color-string:is(:hover, :focus)::after {
+    .chip.color-stop:is(:hover, :focus)::after {
       content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
     }
   }

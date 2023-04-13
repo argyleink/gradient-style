@@ -7,7 +7,7 @@
 <style>
   .angle-icon {
     background-color: var(--surface-1);
-    background-image: conic-gradient(var(--link), var(--angle), transparent 0%);
+    background-image: conic-gradient(var(--text-2), var(--angle), transparent 0%);
     border-radius: var(--radius-round);
     aspect-ratio: var(--ratio-square);
     inline-size: 5ch;

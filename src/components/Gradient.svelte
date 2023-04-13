@@ -243,14 +243,14 @@
       <ColorPicker />
       <LayersPanel />
       <Presets />
-      <footer class="footer-links">
+      <!-- <footer class="footer-links">
         <button disabled class="icon-button" use:tooltip={{content: "Github"}}>
           <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/></svg>
         </button>
         <button disabled class="icon-button" use:tooltip={{content: "Switch theme"}}>
           <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4q-.425 0-.713-.288T11 3V2q0-.425.288-.713T12 1q.425 0 .713.288T13 2v1q0 .425-.288.713T12 4Zm0 19q-.425 0-.713-.288T11 22v-1q0-.425.288-.713T12 20q.425 0 .713.288T13 21v1q0 .425-.288.713T12 23Zm9-10q-.425 0-.713-.288T20 12q0-.425.288-.713T21 11h1q.425 0 .713.288T23 12q0 .425-.288.713T22 13h-1ZM2 13q-.425 0-.713-.288T1 12q0-.425.288-.713T2 11h1q.425 0 .713.288T4 12q0 .425-.288.713T3 13H2Zm16-7q-.275-.275-.275-.688T18 4.6l.35-.375q.275-.3.7-.3t.725.3q.3.3.3.725t-.3.725l-.375.35q-.3.275-.7.275T18 6ZM4.225 19.775q-.3-.3-.3-.725t.3-.725l.375-.35q.3-.275.7-.275t.7.3q.275.275.288.7T6 19.4l-.35.375q-.275.3-.7.3t-.725-.3Zm14.1 0l-.35-.375q-.275-.3-.275-.7t.3-.7q.275-.275.7-.287t.7.287l.375.35q.3.275.3.7t-.3.725q-.3.3-.725.3t-.725-.3ZM4.6 6l-.375-.35q-.3-.275-.3-.7t.3-.725q.3-.3.725-.3t.725.3l.35.375q.275.3.275.7T6 6q-.275.275-.687.275T4.6 6ZM12 18q-2.5 0-4.25-1.75T6 12q0-2.5 1.75-4.25T12 6q2.5 0 4.25 1.75T18 12q0 2.5-1.75 4.25T12 18Z"/></svg>
         </button>
-      </footer>
+      </footer> -->
     </div>
   </contain-er>
   
@@ -310,22 +310,24 @@
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <div class="menu-bar">
-        <button class="menu-bar-icon" disabled>
+        <!-- <button class="menu-bar-icon" disabled>
           <span class="sr-only">Settings</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path fill="currentColor" d="m9.25 22l-.4-3.2q-.325-.125-.613-.3t-.562-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12.337v-.674q0-.163.025-.338L1.95 9.375l2.75-4.75l2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95l-2.75 4.75l-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2h-5.5Zm2.8-6.5q1.45 0 2.475-1.025T15.55 12q0-1.45-1.025-2.475T12.05 8.5q-1.475 0-2.488 1.025T8.55 12q0 1.45 1.012 2.475T12.05 15.5Z"/>
           </svg>
-        </button>
-        <!-- <button class="icon-button">
+        </button> -->
+        <button class="global-actions">
           <select>
             <option>Actions</option>
             <option disabled>--</option>
-            <option disabled>Copy 2023+ CSS</option>
+            <option disabled>Copy Modern CSS</option>
             <option disabled>Copy Classic CSS</option>
-            <option disabled>Pick a preset</option>
-            <option disabled>Reset all</option>
+            <option disabled>Reset all stops to default</option>
+            <option disabled>--</option>
+            <option disabled>Toggle light & dark</option>
+            <option disabled>Provide feedback</option>
           </select>
-        </button> -->
+        </button>
       </div>
 
       <GradientColorSpace />
@@ -410,21 +412,12 @@
     justify-content: end;
     align-items: center;
     gap: var(--size-3);
-    padding-inline: var(--size-4);
+    padding-inline: var(--size-3);
     position: sticky;
     z-index: 1;
     inset-block-start: 0;
     block-size: var(--size-8);
-/*     margin-block-end: var(--size-5); */
-    /* background: var(--surface-3);
-    box-shadow: var(--shadow-2); */
   }
-
-  /* @media (prefers-color-scheme: light) {
-    .menu-bar {
-      background: white;
-    }
-  } */
 
   .menu-bar > select {
     box-shadow: none;
@@ -803,5 +796,26 @@
   .hd-switch > svg {
     color: var(--text-1);
     box-shadow: var(--shadow-1);
+  }
+
+  .global-actions {
+    --_bg: transparent;
+    position: relative;
+    inline-size: var(--size-7);
+    overflow: hidden;
+    border-radius: var(--radius-round);
+    padding-inline: 0;
+    aspect-ratio: 1;
+    border: none;
+    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    background-image: url(https://api.iconify.design/material-symbols:settings-rounded.svg?color=%23adb5bd);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
+  }
+
+  .global-actions > select {
+    --_bg: transparent;
+    position: absolute;
   }
 </style>

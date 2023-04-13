@@ -293,7 +293,7 @@
 </script>
 
 <section class="presets">
-	<p class="sr-only">presets</p>
+	<p>Presets</p>
 	<div class="scroller">
 		{#each presets as preset}
 			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} on:click={()=>presetClicked(preset)}></button>
@@ -303,11 +303,26 @@
 
 <style>
 	.presets {
+		display: grid;
+		gap: var(--size-2);
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
-		padding-block: var(--size-3);
+		padding-block: var(--size-2) var(--size-3);
 		padding-inline: var(--size-5);
 		scroll-padding-inline: var(--size-5);
+		border-block-start: 1px solid var(--surface-1);
+	}
+
+	@media (prefers-color-scheme: light) {
+		.presets {
+			border-block-start-color: var(--surface-4);
+		}
+	}
+
+	.presets > p {
+		position: sticky;
+		inline-size: max-content;
+		inset-inline-start: 0;
 	}
 
 	.presets .preset {
@@ -317,12 +332,6 @@
 	.scroller {
 		display: flex;
 		gap: var(--size-3);
-	}
-
-	.scroller::after {
-		content: '';
-		flex-shrink: 0;
-		inline-size: var(--size-1);
 	}
 
 	.preset, .spacer {
