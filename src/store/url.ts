@@ -51,7 +51,6 @@ export const stateAsString = derived(
 		else
 			return null
 
-
 		urlGradient.stops = $gradient_stops
 
 		return serializeUrl(urlGradient)
