@@ -320,6 +320,8 @@
 	}
 
 	.presets > p {
+		font-size: var(--font-size-0);
+		text-transform: uppercase;
 		position: sticky;
 		inline-size: max-content;
 		inset-inline-start: 0;
