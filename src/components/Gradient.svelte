@@ -203,7 +203,7 @@
   function globalAction(event) {
     switch (event.target.value) {
       case 'Provide feedback':
-        console.log('feedback')
+        window.open('https://discord.gg/nm4mkWxF')
         break
     }
 
@@ -319,7 +319,7 @@
             <option disabled>--</option>
             <option disabled>Copy Modern CSS</option>
             <option disabled>Copy Classic CSS</option>
-            <option disabled>Reset all stops to default</option>
+            <option disabled>Reset all stops to auto</option>
             <option disabled>--</option>
             <option disabled>Toggle light & dark</option>
             <option>Provide feedback</option>
