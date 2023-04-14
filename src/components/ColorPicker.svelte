@@ -493,7 +493,6 @@
   }
 
   .colorspace {
-    --_bg: color-mix(in oklch, var(--counter-contrast-color), transparent 90%);
     align-self: start;
     color: var(--counter-contrast-color);
     padding-inline-start: var(--size-2);
@@ -503,8 +502,13 @@
     outline: none;
   }
 
+  .colorspace:not(:hover,:focus) {
+    --_bg: color-mix(in oklch, var(--counter-contrast-color), transparent 90%);
+  }
+
   .colorspace:is(:hover,:focus) {
     border-color: color-mix(in oklch, var(--counter-contrast-color), transparent 50%);
+    color: var(--counter-contrast-color);
   }
 
   .preview {

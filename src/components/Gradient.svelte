@@ -807,7 +807,6 @@
   }
 
   .global-actions {
-    --_bg: transparent;
     position: relative;
     inline-size: var(--size-7);
     overflow: hidden;
@@ -822,8 +821,15 @@
     background-size: 75%;
   }
 
-  .global-actions > select {
+  .global-actions:not(:focus-within) {
     --_bg: transparent;
+  }
+
+  .global-actions:not(:active,:focus) select {
+    opacity: 0;
+  }
+
+  .global-actions > select {
     position: absolute;
   }
 </style>
