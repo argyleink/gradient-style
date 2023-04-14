@@ -27,12 +27,12 @@
 		},
 		{
 			name: 'Tri Dye',
-			gradient: 'radial-gradient(farthest-corner circle at 50% 113% in oklch, oklch(80% .3 34), oklch(90% .3 200))',
+			gradient: 'radial-gradient(farthest-corner circle at 50% 115% in oklch, oklch(80% .3 34), oklch(90% .3 200))',
 			type: 'radial',
 			named_size: 'farthest-corner',
 			shape: 'circle',
 			position1: 50,
-			position2: 113,
+			position2: 115,
 			space: 'oklch',
 			stops: [
 				{color: 'oklch(80% .3 34)'},
@@ -293,7 +293,7 @@
 </script>
 
 <section class="presets">
-	<p>Presets</p>
+	<p>Premade</p>
 	<div class="scroller">
 		{#each presets as preset}
 			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} on:click={()=>presetClicked(preset)}></button>
