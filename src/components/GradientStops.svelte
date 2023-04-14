@@ -276,8 +276,8 @@
     opacity: 0;
     content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
     block-size: 20px;
-    right: var(--size-6);
-    position: relative;
+    right: var(--size-8);
+    position: absolute;
     transition: opacity .3s var(--ease-3);
   }
 
