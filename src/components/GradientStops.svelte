@@ -272,13 +272,21 @@
     outline: none;
   }
 
-  .chip.color-stop:is(:hover, :focus)::after {
+  .chip.color-stop::after {
+    opacity: 0;
     content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
     block-size: 20px;
+    right: var(--size-6);
+    position: relative;
+    transition: opacity .3s var(--ease-3);
+  }
+
+  .chip.color-stop:is(:hover, :focus)::after {
+    opacity: 1;
   }
 
   @media (prefers-color-scheme: light) {
-    .chip.color-stop:is(:hover, :focus)::after {
+    .chip.color-stop::after {
       content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
     }
   }
