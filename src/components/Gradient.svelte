@@ -252,13 +252,13 @@
   )
 </script>
 
-<div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: var(--user-modern);`}>
+<div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <div class="primary-sidebar">
       <header class="brand">
-        <div class="gradient-logo" style="background:{user_gradient}"></div>
+        <div class="gradient-logo" style="background:{preview_hd ? user_gradient : classic_gradient}"></div>
         <h1 class="brand-name">HD G<b>rad</b>ients</h1>
       </header>
       <ColorPicker />
