@@ -4,7 +4,8 @@
 
 <svelte:head>
 	<title>CSS HD Gradients</title>
-	<meta name="description" content="Color 4 complaint CSS gradient builder." />
+	<meta name="description" content="Wide gamut Color 4 complaint CSS gradient builder." />
+	<meta id="browsertheme" name="theme-color" content="#ff00ff">
 </svelte:head>
 
 <Gradient />
