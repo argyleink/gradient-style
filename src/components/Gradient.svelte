@@ -37,10 +37,12 @@
   let preview_hd = true
   let box_width
   let box_height
+  let metatag
 
   onMount(async () => {
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
     const restore = restoreStateFromUrl()
+    metatag = document.querySelector('#browsertheme')
 
     if (restore) {
       if (restore.type)               $gradient_type = restore.type
@@ -68,6 +70,12 @@
       window.syncStateTimer = setTimeout(() => {
         state && window.history.replaceState({}, "", '#'+state)
       }, 500)
+    })
+
+    gradient_stops.subscribe(state => {
+      const [first] = state
+      if (!metatag) return
+      metatag.content = new Color(first.color).to('srgb').toString({ format: 'hex' })
     })
 
     const resizeObserver = new ResizeObserver(entries => {
