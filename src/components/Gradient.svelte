@@ -73,9 +73,13 @@
     })
 
     gradient_stops.subscribe(state => {
-      const [first] = state
       if (!metatag) return
-      metatag.content = new Color(first.color).to('srgb').toString({ format: 'hex' })
+      try {
+        const [first] = state
+        const newmeta = new Color(first.color)
+        metatag.content = newmeta.to('srgb').toString({ format: 'hex' })
+      }
+      catch (err) {}
     })
 
     const resizeObserver = new ResizeObserver(entries => {
