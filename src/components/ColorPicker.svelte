@@ -91,7 +91,7 @@
       $hwbAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'srgb' || colorspace === 'rgb') {
-      const [r,g,b] = parsedColor.toGamut({space: 'srgb', method: 'oklch.c'}).coords
+      const [r,g,b] = parsedColor.toGamut({space: 'srgb', method: 'clip'}).coords
       $rgbR = (parse_coords(r) * 100).toFixed()
       $rgbG = (parse_coords(g) * 100).toFixed()
       $rgbB = (parse_coords(b) * 100).toFixed()
@@ -161,7 +161,7 @@
   }
 
   function alphaToString(alpha) {
-    return alpha === '100'
+    return alpha === '100' || alpha === 100
       ? ''
       : ` / ${alpha}%`
   }

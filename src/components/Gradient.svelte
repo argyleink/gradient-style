@@ -141,7 +141,7 @@
   function maybeConvertColor(color, convert_colors) {
     if (convert_colors) {
       try {
-        return new Color(color).toGamut({space: 'srgb', method: 'oklch.c'}).toString({ format: 'hex' })
+        return new Color(color).toGamut({space: 'srgb', method: 'clip'}).to('srgb').toString({ format: 'hex' })
       }
       catch {}
     }
