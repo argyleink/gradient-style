@@ -293,7 +293,7 @@
 </script>
 
 <section class="presets">
-	<p>Premade</p>
+	<p>HD Examples</p>
 	<div class="scroller">
 		{#each presets as preset}
 			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} on:click={()=>presetClicked(preset)}></button>
@@ -307,7 +307,7 @@
 		gap: var(--size-2);
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
-		padding-block: var(--size-2) var(--size-3);
+		padding-block: var(--size-3);
 		padding-inline: var(--size-5);
 		scroll-padding-inline: var(--size-5);
 		border-block-start: 1px solid var(--surface-1);

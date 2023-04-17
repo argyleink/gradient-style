@@ -271,7 +271,10 @@
     <div class="primary-sidebar">
       <header class="brand">
         <div class="gradient-logo" style="background:{preview_hd ? user_gradient : classic_gradient}"></div>
-        <h1 class="brand-name">HD G<b>rad</b>ients</h1>
+        <h1 class="brand-name">
+          HD G<b>rad</b>ients
+          <sup class="brand-name-badge">beta</sup>
+        </h1>
       </header>
       <ColorPicker />
       <LayersPanel />
@@ -776,9 +779,29 @@
     }
   }
 
+  .brand-name {
+    position: relative;
+  }
+
   .brand-name:hover > b {
     color: cyan;
     color: color(display-p3 0 1 1);
+  }
+
+  .brand-name-badge {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    transform: translateX(75%) translateY(-2ch);
+    display: inline-flex;
+    place-items: center;
+    text-transform: uppercase;
+    font-size: var(--font-size-00);
+    background: var(--surface-4);
+    line-height: 1;
+    padding-inline: var(--size-2);
+    padding-block: var(--size-1);
+    border-radius: var(--radius-round);
   }
 
   .footer-links {
