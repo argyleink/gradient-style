@@ -38,11 +38,14 @@
   let box_width
   let box_height
   let metatag
+  let svgicon
 
   onMount(async () => {
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
     const restore = restoreStateFromUrl()
+
     metatag = document.querySelector('#browsertheme')
+    svgicon = document.querySelector('#svgicon')
 
     if (restore) {
       if (restore.type)               $gradient_type = restore.type
@@ -73,11 +76,17 @@
     })
 
     gradient_stops.subscribe(state => {
-      if (!metatag) return
+      if (!metatag || !svgicon) return
       try {
-        const [first] = state
-        const newmeta = new Color(first.color)
-        metatag.content = newmeta.to('srgb').toString({ format: 'hex' })
+        clearTimeout(window.syncColorTimer)
+        window.syncColorTimer = setTimeout(() => {
+          const [first] = state
+          const newmeta = new Color(first.color)
+
+          metatag.content = newmeta.to('srgb').toString({ format: 'hex' })
+          svgicon.href = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle fill='${newmeta.to('srgb').toString()}' cx='50' cy='50' r='50'/></svg>`
+          // svgicon.href = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><mask id='stripes'><rect height='40%' width='100%' fill='white' /><rect height='7%' y='41%' width='100%' fill='white' /><rect height='6%' y='50%' width='100%' fill='white' /><rect height='5%' y='59%' width='100%' fill='white' /><rect height='4%' y='68%' width='100%' fill='white' /><rect height='3%' y='78%' width='100%' fill='white' /><rect height='2%' y='90%' width='100%' fill='white' /><rect height='1%' y='99%' width='100%' fill='white' /></mask><circle mask='url(#stripes)' fill='${newmeta.to('srgb').toString()}' cx='50' cy='50' r='50'/></svg>`
+        }, 500)
       }
       catch (err) {}
     })
