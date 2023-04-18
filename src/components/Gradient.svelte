@@ -787,7 +787,7 @@
     }
   }
 
-  .brand-name {
+  .brand {
     position: relative;
   }
 
@@ -799,17 +799,17 @@
   .brand-name-badge {
     position: absolute;
     inset-block-start: 0;
-    inset-inline-end: 0;
-    transform: translateX(75%) translateY(-2ch);
+    inset-inline-start: 0;
+    transform: translate(-37%, 100%) rotateZ(-45deg);
     display: inline-flex;
     place-items: center;
     text-transform: uppercase;
     font-size: var(--font-size-00);
     background: var(--surface-4);
     line-height: 1;
-    padding-inline: var(--size-2);
+    padding-inline: var(--size-10);
     padding-block: var(--size-1);
-    border-radius: var(--radius-round);
+    box-shadow: var(--shadow-2);
   }
 
   .footer-links {
