@@ -115,8 +115,11 @@
     background-image: var(--icon-arrow-right);
     background-position: -1px center;
     background-size: 3ex;
-    background-repeat: no-repeat;
-    
+    background-repeat: no-repeat; 
+  }
+
+  .layer-toggle::-webkit-details-marker {
+    display: none;
   }
 
   @media (prefers-color-scheme: light) {
