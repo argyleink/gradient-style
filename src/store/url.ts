@@ -1,4 +1,3 @@
-import * as LZstring from 'lz-string'
 import {derived} from 'svelte/store'
 
 import {gradient_type, gradient_space, gradient_interpolation, 
@@ -62,9 +61,8 @@ export function serializeUrl(state) {
 
   for (const key in state) {
   	if (key == 'stops') {
-  		for (const stop of state[key]) {
-  			hash.append(key, LZstring.compressToUTF16(JSON.stringify(stop)))
-  		}
+  		for (const stop of state[key])
+  			hash.append(key, JSON.stringify(stop))
   	}
   	else if (key == 'radial_position' || key == 'conic_position') {
   		hash.set(key, JSON.stringify(state[key]))
@@ -81,7 +79,7 @@ export function deserializeUrl(hash) {
 
   for (const [key, value] of state.entries()) {
   	if (key == 'stops')
-  		state[key] = state.getAll(key).map(LZstring.decompressFromUTF16).map(JSON.parse)
+  		state[key] = state.getAll(key).map(JSON.parse)
   	else if (key == 'radial_position' || key == 'conic_position')
   		state[key] = JSON.parse(value)
   	else if (key == '#type')
