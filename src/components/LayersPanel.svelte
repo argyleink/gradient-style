@@ -122,12 +122,6 @@
     display: none;
   }
 
-  @media (prefers-color-scheme: light) {
-    .layer-toggle {
-      background-color: white;
-    }
-  }
-
   .layer-toggle {
     outline-offset: -2px;
   }
@@ -173,12 +167,12 @@
   }
 
   @media (prefers-color-scheme: light) {
-    .layers {
-      background: var(--surface-1);
+    .layers, .layer {
+      background-color: var(--surface-1);
     }
 
-    .layer, .add-layer {
-      background: white;
+    .layer-toggle, .add-layer {
+      background-color: white;
     }
   }
 </style>
