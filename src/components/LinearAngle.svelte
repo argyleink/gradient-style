@@ -21,9 +21,9 @@
   }
 </script>
 
-<fieldset class="stack control-set">
+<fieldset class="stack control-set linear-angle">
   <div class="label-select-combo">
-    <label>Angle</label>
+    <label for="linear-angle">Angle</label>
     <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
     <select name="named-directions" bind:value={$linear_named_angle}>
       <option disabled>--</option>
@@ -32,7 +32,7 @@
       {/each}
     </select>
   </div>
-  <div class="linear-angle slider-set">
+  <div class="slider-set">
     <AngleIcon angle={$linear_angle} />
     <RangeSlider bind:value={$linear_angle} on:change={blurNamedAngle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />
     <div class="input-suffix">
@@ -41,3 +41,9 @@
     </div>
   </div>
 </fieldset>
+
+<style>
+  .linear-angle {
+    gap: var(--size-5);
+  }
+</style>

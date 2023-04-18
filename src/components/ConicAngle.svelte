@@ -5,7 +5,7 @@
 </script>
 
 <fieldset class="control-set">
-  <legend>Angle</legend>
+  <label>Angle</label>
   <div class="linear-angle slider-set">
     <AngleIcon angle={$conic_angle} />
     <RangeSlider bind:value={$conic_angle} min="0" max="360" step="1" style="--accent-color: var(--link);" />
