@@ -146,6 +146,7 @@
     flex: 1;
     color: var(--text-1);
     font-weight: 700;
+    user-select: none;
   }
 
   .end-of-layers {
