@@ -62,8 +62,9 @@ export function serializeUrl(state) {
 
   for (const key in state) {
   	if (key == 'stops') {
-  		for (const stop of state[key])
-  			hash.append(key, LZstring.compressToEncodedURIComponent(JSON.stringify(stop)))
+  		for (const stop of state[key]) {
+  			hash.append(key, LZstring.compressToUTF16(JSON.stringify(stop)))
+  		}
   	}
   	else if (key == 'radial_position' || key == 'conic_position') {
   		hash.set(key, JSON.stringify(state[key]))
@@ -80,7 +81,7 @@ export function deserializeUrl(hash) {
 
   for (const [key, value] of state.entries()) {
   	if (key == 'stops')
-  		state[key] = state.getAll(key).map(LZstring.decompressFromEncodedURIComponent).map(JSON.parse)
+  		state[key] = state.getAll(key).map(LZstring.decompressFromUTF16).map(JSON.parse)
   	else if (key == 'radial_position' || key == 'conic_position')
   		state[key] = JSON.parse(value)
   	else if (key == '#type')
