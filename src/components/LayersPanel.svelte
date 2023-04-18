@@ -28,7 +28,7 @@
     </div>
   {/each} -->
   <details class="layer selected" open>
-    <summary>
+    <summary class="layer-toggle">
       <!-- <button class="layer-visibility" on:click={toggleVisibility} use:tooltip={{content: "Show or hide (not ready)"}}>
         {#if visibility}
           <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 16q1.875 0 3.188-1.313T16.5 11.5q0-1.875-1.313-3.188T12 7q-1.875 0-3.188 1.313T7.5 11.5q0 1.875 1.313 3.188T12 16Zm0-1.8q-1.125 0-1.913-.788T9.3 11.5q0-1.125.788-1.913T12 8.8q1.125 0 1.913.788T14.7 11.5q0 1.125-.787 1.913T12 14.2Zm0 4.8q-3.65 0-6.65-2.038T1 11.5q1.35-3.425 4.35-5.463T12 4q3.65 0 6.65 2.038T23 11.5q-1.35 3.425-4.35 5.463T12 19Z"/></svg>
@@ -97,7 +97,7 @@
     padding: 0;
   }
 
-  .layer > summary {
+  .layer-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -116,20 +116,27 @@
     background-position: -1px center;
     background-size: 3ex;
     background-repeat: no-repeat;
+    
   }
 
-  .layer > summary {
+  @media (prefers-color-scheme: light) {
+    .layer-toggle {
+      background-color: white;
+    }
+  }
+
+  .layer-toggle {
     outline-offset: -2px;
   }
   
   .layer[open] > summary {background-image: var(--icon-arrow-down)}
 
-  .layer > summary:hover {--icon-arrow-right: var(--icon-arrow-right-hover-light)}
-  .layer[open] > summary:hover {background-image: var(--icon-arrow-down-hover-light)}
+  .layer-toggle:hover {--icon-arrow-right: var(--icon-arrow-right-hover-light)}
+  .layer[open] > summary:hover {--icon-arrow-down: var(--icon-arrow-down-hover-light)}
 
   @media (prefers-color-scheme: dark) {
-    .layer > summary:hover {--icon-arrow-right: var(--icon-arrow-right-hover-dark)}
-    .layer[open] > summary:hover {background-image: var(--icon-arrow-down-hover-dark)}
+    .layer-toggle:hover {--icon-arrow-right: var(--icon-arrow-right-hover-dark)}
+    .layer[open] > summary:hover {--icon-arrow-down: var(--icon-arrow-down-hover-dark)}
   }
 
   .layer-name {
