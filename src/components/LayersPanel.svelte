@@ -102,13 +102,16 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--size-2);
-    background: var(--surface-3);
     box-shadow: var(--shadow-2);
     margin: 0;
     padding-inline-start: var(--size-5);
     border-radius: 0;
     --icon-arrow-down: url(https://api.iconify.design/ci:caret-down.svg?color=%23adb5bd);
+    --icon-arrow-down-hover-light: url(https://api.iconify.design/ci:caret-down.svg?color=%23111111);
+    --icon-arrow-down-hover-dark: url(https://api.iconify.design/ci:caret-down.svg?color=%23ffffff);
     --icon-arrow-right: url(https://api.iconify.design/ci:caret-right.svg?color=%23adb5bd);
+    --icon-arrow-right-hover-light: url(https://api.iconify.design/ci:caret-right.svg?color=%23111111);
+    --icon-arrow-right-hover-dark: url(https://api.iconify.design/ci:caret-right.svg?color=%23ffffff);
     background-image: var(--icon-arrow-right);
     background-position: -1px center;
     background-size: 3ex;
@@ -118,9 +121,15 @@
   .layer > summary {
     outline-offset: -2px;
   }
+  
+  .layer[open] > summary {background-image: var(--icon-arrow-down)}
 
-  .layer[open] > summary {
-    background-image: var(--icon-arrow-down);
+  .layer > summary:hover {--icon-arrow-right: var(--icon-arrow-right-hover-light)}
+  .layer[open] > summary:hover {background-image: var(--icon-arrow-down-hover-light)}
+
+  @media (prefers-color-scheme: dark) {
+    .layer > summary:hover {--icon-arrow-right: var(--icon-arrow-right-hover-dark)}
+    .layer[open] > summary:hover {background-image: var(--icon-arrow-down-hover-dark)}
   }
 
   .layer-name {
