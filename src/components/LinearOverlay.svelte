@@ -1,4 +1,6 @@
 <script>
+  import { tooltip } from 'svooltip'
+
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
   import {picker_value} from '../store/colorpicker.ts'
@@ -202,6 +204,14 @@
     stop.position2 = stop.position1
     $gradient_stops = updateStops($gradient_stops)
   }
+
+  function watchKeyboard() {
+    console.log('watch')
+  }
+
+  function stopWatchingKeyboard() {
+    console.log('watch')
+  }
 </script>
 
 <div class="pie">
@@ -212,39 +222,53 @@
   <div class="dot"></div>
 </div>
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
-  <div class="invisible-rotator"></div>
+  <div class="invisible-rotator" use:tooltip={{content: `${$linear_angle}deg`}}></div>
   <div class="invisible-track" on:click={addStop}></div>
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
         <div 
+          tabindex="0"
+          use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
           style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
           on:mouseleave={mouseOut} 
           on:dblclick={()=>deleteStop(stop)}
+          on:focus={watchKeyboard}
+          on:blur={stopWatchingKeyboard}
         >
-          <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position1}%</div>
           <div class="stop" {stop} data-stop-index={i} data-position="1">
-            <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
+            <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
           <div 
+            tabindex="0"
+            use:tooltip={{content: `${stop.position2}%`}}
             class="stop-wrap" 
             style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
             on:mouseleave={mouseOut} 
             on:dblclick={()=>relinkStop(stop)}
           >
-            <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.position2}%</div>
             <div class="stop" data-stop-index={i} data-position="2">
-              <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
+              <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div class="hint" {stop} data-stop-index={i} style="inset-inline-start: {stop.percentage}%; visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}" on:mouseleave={mouseOut}>
-          <div class="value-tip" style="--show: {$active_stop_index == i ? 1 : 0}; rotate: calc(90deg - {$linear_angle}deg)">{stop.percentage}%</div>
+        <div 
+          class="hint" 
+          tabindex="0"
+          use:tooltip={{content: `${stop.percentage}%`}}
+          {stop} 
+          data-stop-index={i} 
+          style="
+            inset-inline-start: {stop.percentage}%; 
+            visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
+          " 
+          on:mouseleave={mouseOut}
+        >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
           </svg>
@@ -262,6 +286,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
+    touch-action: none;
     will-change: rotate;
   }
 
@@ -300,7 +325,7 @@
   }
 
   .stop-wrap {
-    translate: -50% calc(var(--size-3) * -1);
+    translate: -50% 0;
   }
 
   .stop-wrap:has(+ .stop-wrap) .stop {
@@ -349,11 +374,10 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
-/*     transition: inset 30ms ease-out; */
   }
 
   .hint {
-    translate: -50% -5px;
+    translate: -50% 50%;
   }
 
   .hint > svg {
@@ -372,19 +396,6 @@
 
   :is(.hint > svg, .stop):active {
     cursor: grabbing;
-  }
-
-  .value-tip {
-    opacity: var(--show);
-    translate: 0 calc(var(--show) * -3px);
-    transition: opacity .3s ease, translate .5s var(--ease-squish-3);
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    background: white;
-    color: var(--gray-7);
-    padding-inline: .25lh;
-    border-radius: var(--radius-2);
-    box-shadow: var(--shadow-2);
   }
 
   .pie {
