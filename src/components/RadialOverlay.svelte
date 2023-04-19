@@ -212,9 +212,10 @@
     // always watch pointer move
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
-        let apercent = w / 100
-        dragulaState.left += e.movementX / apercent
-        dragulaState.top += e.movementY / apercent
+        let wpercent = w / 100
+        let hpercent = h / 100
+        dragulaState.left += e.movementX / wpercent
+        dragulaState.top += e.movementY / hpercent
 
         // if (dragulaState.stop.kind === 'stop') {
         //   if (dragulaState.stop.position1 === dragulaState.stop.position2)
