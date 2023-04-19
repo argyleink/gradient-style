@@ -82,9 +82,20 @@
         }
       }
     }
-    else return {
-      w: parseInt($radial_size) * 2,
-      h: parseInt($radial_size) * 2,
+    else {
+      if ($radial_shape === 'circle') {
+        return {
+          w: parseInt($radial_size) * 2,
+          h: parseInt($radial_size) * 2,
+        }
+      }
+      else {
+        let [w,h] = $radial_size.split(' ')
+        return {
+          w: parseInt(w) * 2,
+          h: parseInt(h) * 2,
+        }
+      }
     }
   }
 
