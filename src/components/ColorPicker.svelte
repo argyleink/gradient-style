@@ -513,7 +513,7 @@
 
   .preview {
     aspect-ratio: var(--ratio-widescreen);
-    min-inline-size: var(--size-content-2);
+    min-inline-size: 75vw;
     display: grid;
     grid-template-rows: 1fr auto auto;
     align-content: end;
@@ -523,6 +523,12 @@
     background: 
       linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);
+  }
+
+  @media (min-width: 600px) {
+    .preview {
+      min-inline-size: var(--size-content-2);
+    }
   }
 
   .preview > :global(output > code) {
