@@ -1,4 +1,6 @@
 <script>
+  import { tooltip } from 'svooltip'
+
   import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
 
@@ -294,7 +296,7 @@
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
-  <div class="dragzone" use:dragula style="max-inline-size: {size.w * .2}px"></div>
+  <div tabindex="0" class="dragzone" use:tooltip={{content: $radial_named_position == '--' ? `${position.x} ${position.y}` : $radial_named_position}} use:dragula style="max-inline-size: {size.w * .2}px"></div>
   <div class="edge" style="
     width:{size.w}px; 
     height:{size.h}px;
