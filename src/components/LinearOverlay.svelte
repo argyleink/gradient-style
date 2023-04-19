@@ -262,6 +262,7 @@
     position: relative;
     grid-area: 1/1;
     pointer-events: none;
+    touch-action: none;
     will-change: rotate;
   }
 

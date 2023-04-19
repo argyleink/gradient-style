@@ -427,8 +427,8 @@
     resize: both;
     overflow: hidden;
     min-block-size: 80px;
-    max-inline-size: 100cqi;
-    max-block-size: 100cqb;
+    max-inline-size: 95cqi;
+    max-block-size: 95cqb;
     aspect-ratio: var(--ratio-widescreen);
   }
 
@@ -520,7 +520,7 @@
 
   @media (max-width: 1024px) {
     .preview-panel {
-      margin-block: var(--size-6);
+      padding-block: var(--size-8);
     }
   }
 
@@ -535,7 +535,7 @@
   }
 
   @media (max-width: 1024px) {
-    .code-preview-panel {
+    .code-preview-panel, .panel-actions {
       display: none;
     }
   }
@@ -553,12 +553,14 @@
     overscroll-behavior: contain;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
+    overflow: hidden;
   }
 
   @media (min-width: 1024px) {
     .inline-snap-panels {
       max-block-size: 100vh;
       max-block-size: 100dvh;
+      overflow: auto;
     }
   }
 
@@ -789,6 +791,8 @@
 
   .brand {
     position: relative;
+    text-align: center;
+    padding-block: var(--size-3);
   }
 
   .brand-name:hover > b {

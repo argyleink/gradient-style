@@ -33,7 +33,7 @@
     --track-fill: 0%;
     --track-color: var(--surface-3);
     --thumb-size: 2ex;
-    --thumb-offset: -.8ex;
+    --thumb-offset: calc(var(--thumb-size) * -.5);
     --thumb-highlight-size: 0px;
 
     --highlight-light: hsl(var(--gray-5-hsl)/25%);
@@ -46,6 +46,7 @@
     background: none;
     margin: 1ex 0;
     display: block;
+    touch-action: none;
   }
 
   .no-track-fill {
@@ -112,6 +113,12 @@
   @media (prefers-reduced-motion: no-preference) {
     .range-slider::-moz-range-thumb {
       transition: box-shadow .1s;
+    }
+  }
+
+  @media not (hover) {
+    .range-slider {
+      --thumb-size: 24px;
     }
   }
 

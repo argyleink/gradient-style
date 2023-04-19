@@ -298,6 +298,7 @@
     grid-area: 1/1;
     display: grid;
     pointer-events: none;
+    touch-action: none;
     will-change: translate, left, top;
   }
 
