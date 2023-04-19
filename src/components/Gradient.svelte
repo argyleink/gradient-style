@@ -631,6 +631,7 @@
 
   :global(.input-suffix > sup) {
     color: var(--text-2);
+    font-size: var(--font-size-0);
   }
 
   .gradient-builder :global(input[type="range"]) {
