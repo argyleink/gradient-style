@@ -245,7 +245,7 @@
           }, delay + (i * stagger))
         })
         break
-      case 'Provide feedback':
+      case 'Help & feedback':
         window.open('https://discord.gg/nm4mkWxF')
         break
     }
@@ -374,7 +374,7 @@
             <option disabled>--</option>
             <option disabled>Toggle light & dark</option>
             <option>Tips & tricks</option>
-            <option>Provide feedback</option>
+            <option>Help & feedback</option>
           </select>
         </button>
       </div>

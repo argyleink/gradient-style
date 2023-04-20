@@ -5,18 +5,18 @@
   export let title = 'Hint title'
   export let copy = 'this is some copy'
 
-	let seen = true
+	let seen = false
 
   function hideMe() {
-    setTimeout(() => seen = false, 10)
+    setTimeout(() => seen = true, 10)
   }
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-{#if seen}
+{#if !seen}
   <div 
     class="hint hiding" 
-    tabindex="0"
+    tabindex={seen ? null : 0}
     use:tooltip={{html: true, content: `
       <span class="rich-tooltip">
         <b>${title}</b><br>
