@@ -32,8 +32,8 @@
     --track-height: .5ex;
     --track-fill: 0%;
     --track-color: var(--surface-3);
-    --thumb-size: 2ex;
-    --thumb-offset: calc(var(--thumb-size) * -.5);
+    --thumb-size: 16px;
+    --thumb-offset: calc(var(--thumb-size) * -.4);
     --thumb-highlight-size: 0px;
 
     --highlight-light: hsl(var(--gray-5-hsl)/25%);
