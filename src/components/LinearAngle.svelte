@@ -1,8 +1,10 @@
 <script>
   import {linear_angle, linear_named_angle} from '../store/linear.ts'
+
   import AngleIcon from './AngleIcon.svelte'
   import RangeSlider from './RangeSlider.svelte'
   import NamedDirections from './NamedDirections.svelte'
+  import Hint from './Hint.svelte'
 
   const linear_directions = [
     'to right',
@@ -23,7 +25,10 @@
 
 <fieldset class="stack control-set linear-angle">
   <div class="label-select-combo">
-    <label for="linear-angle">Angle</label>
+    <label for="linear-angle">
+      <!-- <Hint title="Linear gradient angle" copy="CSS offers adaptive keywords for angles and also allows specific angles.<br><br>Currently only degrees are supported." /> -->
+      Angle
+    </label>
     <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
     <select name="named-directions" bind:value={$linear_named_angle}>
       <option disabled>--</option>

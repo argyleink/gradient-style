@@ -42,6 +42,11 @@
 		max-inline-size: var(--size-content-2);
 	}
 
+	:global(.rich-tooltip > b:first-of-type) {
+		display: inline-block;
+		margin-block-end: var(--size-1);
+	}
+
 	:global(.rich-tooltip p) {
 		color: var(--text-2);
 	}

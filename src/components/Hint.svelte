@@ -8,7 +8,7 @@
 	let seen = true
 
   function hideMe() {
-    seen = false
+    setTimeout(() => seen = false, 10)
   }
 </script>
 
@@ -34,7 +34,7 @@
 
 <style>
   .hint, .ping {
-    --color: deeppink;
+    --color: lime;
     position: absolute;
     inline-size: 15px;
     aspect-ratio: var(--ratio-square);
@@ -44,11 +44,13 @@
 
   @media (dynamic-range: high) {
     .hint, .ping {
-      --color: oklch(90% .5 320);
+      --color: oklch(90% .5 140);
     }
   }
 
   .hint {
+    place-self: start;
+    z-index: var(--layer-1);
     transition: opacity .5s ease;
     animation: var(--animation-pulse);
     background-color: color-mix(in oklch, var(--color) 90%, transparent);
