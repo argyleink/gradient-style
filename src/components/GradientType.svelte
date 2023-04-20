@@ -1,11 +1,13 @@
 <script>
   import {gradient_type} from '../store/gradient.ts'
   import { tooltip } from 'svooltip'
+  import Hint from './Hint.svelte'
 
   const gradient_types = ['linear','radial','conic']
 </script>
 
 <fieldset class="switch-group">
+  <Hint title="Gradient types" copy="Here you can change between linear, radial and conic types." />
   {#each gradient_types as t}
     <div class="switch" title={t} use:tooltip={{content: "You're looking beautiful today!"}}>
       <input type="radio" name="gradient-type" id="{t}-gradient" value={t} bind:group={$gradient_type}>

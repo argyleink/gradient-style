@@ -234,6 +234,15 @@
         ]
         $linear_named_angle = 'to right'
         break
+      case 'Tips & tricks':
+        let delay = 0
+        let stagger = 500
+        document.querySelectorAll('.hint').forEach((hint, i) => {
+          setTimeout(()=> {
+            hint.style.opacity = 1
+          }, delay + (i * stagger))
+        })
+        break
       case 'Provide feedback':
         window.open('https://discord.gg/nm4mkWxF')
         break
@@ -358,6 +367,7 @@
             <option disabled>Reset all stops to auto</option>
             <option disabled>--</option>
             <option disabled>Toggle light & dark</option>
+            <option>Tips & tricks</option>
             <option>Provide feedback</option>
           </select>
         </button>
