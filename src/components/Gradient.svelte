@@ -241,7 +241,7 @@
         let stagger = 250
         document.querySelectorAll('.hint').forEach((hint, i) => {
           setTimeout(()=> {
-            hint.style.opacity = 1
+            hint.classList.remove('hiding')
           }, delay + (i * stagger))
         })
         break

@@ -15,8 +15,7 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 {#if seen}
   <div 
-    style="opacity: 0"
-    class="hint" 
+    class="hint hiding" 
     tabindex="0"
     use:tooltip={{html: true, content: `
       <span class="rich-tooltip">
@@ -54,6 +53,11 @@
     transition: opacity .5s ease;
     animation: var(--animation-pulse);
     background-color: color-mix(in oklch, var(--color) 90%, transparent);
+  }
+
+  .hiding {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .ping {
