@@ -7,8 +7,11 @@
 
 	let seen = false
 
-  function hideMe() {
-    setTimeout(() => seen = true, 10)
+  function hideMe(e) {
+    setTimeout(() => {
+      seen = true
+      e.target.removeAttribute('tabindex')
+    }, 10)
   }
 </script>
 
@@ -16,7 +19,6 @@
 {#if !seen}
   <div 
     class="hint hiding" 
-    tabindex={seen ? null : 0}
     use:tooltip={{html: true, content: `
       <span class="rich-tooltip">
         <b>${title}</b><br>

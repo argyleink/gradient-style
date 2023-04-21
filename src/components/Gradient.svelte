@@ -242,6 +242,7 @@
         document.querySelectorAll('.hint').forEach((hint, i) => {
           setTimeout(()=> {
             hint.classList.remove('hiding')
+            hint.setAttribute('tabindex', "0")
           }, delay + (i * stagger))
         })
         break
