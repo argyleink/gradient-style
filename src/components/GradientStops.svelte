@@ -124,7 +124,7 @@
         {#if i === 0}
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
         {/if}
-        <div class="chip color-stop" use:tooltip={{content: whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
+        <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
           <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
           <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
         </div>
