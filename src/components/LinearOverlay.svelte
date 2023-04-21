@@ -205,12 +205,25 @@
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function watchKeyboard() {
-    console.log('watch')
-  }
+  function handleKeypress(e, datum, prop) {
+    if (e.target.classList.contains('stop-color')) return
 
-  function stopWatchingKeyboard() {
-    console.log('watch')
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+      e.preventDefault()
+
+      if (['ArrowLeft','ArrowDown'].includes(e.key)) {
+        if (datum.hasOwnProperty('position1') && datum.position1 === datum.position2)
+          datum.position2 -= 1
+        datum[prop] -= 1
+      }
+      else {
+        if (datum.hasOwnProperty('position1') && datum.position1 === datum.position2)
+          datum.position2 += 1
+        datum[prop] += 1
+      }
+
+      $gradient_stops = $gradient_stops
+    }
   }
 </script>
 
@@ -221,6 +234,7 @@
   <div class="visual" style="--ng: {$linear_angle}deg"></div>
   <div class="dot"></div>
 </div>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
   <div class="invisible-rotator" use:tooltip={{content: `${$linear_angle}deg`}}></div>
   <div class="invisible-track" on:click={addStop}></div>
@@ -233,12 +247,11 @@
           class="stop-wrap" 
           style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
           on:mouseleave={mouseOut} 
+          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
           on:dblclick={()=>deleteStop(stop)}
-          on:focus={watchKeyboard}
-          on:blur={stopWatchingKeyboard}
         >
-          <div class="stop" {stop} data-stop-index={i} data-position="1">
-            <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+          <div class="stop" data-stop-index={i} data-position="1">
+            <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -248,10 +261,11 @@
             class="stop-wrap" 
             style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
             on:mouseleave={mouseOut} 
+            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
             on:dblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2">
-              <button style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -261,13 +275,13 @@
           class="hint" 
           tabindex="0"
           use:tooltip={{content: `${stop.percentage}%`}}
-          {stop} 
           data-stop-index={i} 
           style="
             inset-inline-start: {stop.percentage}%; 
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
           on:mouseleave={mouseOut}
+          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
@@ -325,6 +339,7 @@
   }
 
   .stop-wrap {
+    border-radius: var(--radius-round);
     translate: -50% 0;
   }
 
