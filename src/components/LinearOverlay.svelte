@@ -205,24 +205,27 @@
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function handleKeypress(e, datum, prop) {
+  function handleKeypress(e, stop, prop) {
     if (e.target.classList.contains('stop-color')) return
 
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
       e.preventDefault()
 
       if (['ArrowLeft','ArrowDown'].includes(e.key)) {
-        if (datum.hasOwnProperty('position1') && datum.position1 === datum.position2)
-          datum.position2 -= 1
-        datum[prop] -= 1
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 -= 1
+        stop[prop] -= 1
       }
       else {
-        if (datum.hasOwnProperty('position1') && datum.position1 === datum.position2)
-          datum.position2 += 1
-        datum[prop] += 1
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 += 1
+        stop[prop] += 1
       }
 
       $gradient_stops = $gradient_stops
+    }
+    else if (['Backspace','Delete'].includes(e.key)) {
+      deleteStop(stop)
     }
   }
 </script>
