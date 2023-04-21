@@ -239,7 +239,7 @@
 </div>
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
-  <div class="invisible-rotator" use:tooltip={{content: `${$linear_angle}deg`}}></div>
+  <div class="invisible-rotator" use:tooltip={{content: $linear_named_angle == '--' ? `${$linear_angle}deg` : $linear_named_angle}}></div>
   <div class="invisible-track" on:click={addStop}></div>
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
     {#each $gradient_stops as stop, i (stop)}
