@@ -247,7 +247,7 @@
         })
         break
       case 'Help & feedback':
-        window.open('https://discord.gg/nm4mkWxF')
+        window.open('https://discord.gg/Kt7ksqRM4V')
         break
     }
 
