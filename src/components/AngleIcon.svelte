@@ -1,8 +1,10 @@
 <script>
-  export let angle = 0
+  import { tooltip } from 'svooltip'
+
+  export let angle = 0;
 </script>
 
-<div class="angle-icon" style="--angle:{angle}deg"></div>
+<div class="angle-icon" style="--angle:{angle}deg" use:tooltip={{content: angle+'deg'}}></div>
 
 <style>
   .angle-icon {
