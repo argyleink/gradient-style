@@ -238,7 +238,7 @@
         break
       case 'Tips & tricks':
         let delay = 0
-        let stagger = 250
+        let stagger = 100
         document.querySelectorAll('.hint').forEach((hint, i) => {
           setTimeout(()=> {
             hint.classList.remove('hiding')
@@ -334,6 +334,7 @@
             bind:this={preview_resizer} 
             class="resizer" 
             style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 50cqi;'}`}>
+              <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
           </div>  
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
