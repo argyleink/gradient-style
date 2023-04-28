@@ -7,7 +7,7 @@ export function isCylindricalSpace(space:string):Boolean {
 export function whatsTheGamutDamnit(color) {
   let gamut = 'srgb'
 
-  if (color.startsWith('#')) return gamut
+  if (color?.startsWith('#')) return gamut
 
   try {
     const srgb = new Color('srgb', new Color(color).to('srgb').coords)
@@ -20,8 +20,21 @@ export function whatsTheGamutDamnit(color) {
     if (p3.inGamut()) gamut = 'p3'
     if (srgb.inGamut()) gamut = 'srgb'
   } catch (e) {
+    console.error(e)
     return gamut
   }
 
   return gamut
+}
+
+export function getColorJSspaceID(space) {
+  if (space === 'display-p3') return 'p3'
+  if (space === 'a98-rgb') return 'a98rgb'
+  return space
+}
+
+export function reverseColorJSspaceID(space) {
+  if (space === 'p3') return 'display-p3'
+  if (space === 'a98rgb') return 'a98-rgb'
+  return space
 }

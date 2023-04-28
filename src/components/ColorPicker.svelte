@@ -6,7 +6,7 @@
     contrast_color_with_alpha
   } from '../utils/color.ts'
   import {copyToClipboard} from '../utils/clipboard.ts'
-  import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
+  import {whatsTheGamutDamnit, getColorJSspaceID, reverseColorJSspaceID} from '../utils/colorspace.ts'
 
   import {
     picker_value, colorspace, 
@@ -42,9 +42,7 @@
 
   function setColor(color) {
     const parsedColor = new Color(color)
-    $colorspace = parsedColor.space.id === 'p3'
-      ? 'display-p3'
-      : parsedColor.space.id
+    $colorspace = reverseColorJSspaceID(parsedColor.space.id)
 
     dialog.querySelector('.colorspace').value = $colorspace
     
@@ -185,9 +183,7 @@
 
   function spaceChange(e) {
     const current = new Color(user_color)
-    setColor(current.to(e.target.value === 'display-p3'
-      ? 'p3'
-      : e.target.value).toGamut())
+    setColor(current.to(getColorJSspaceID(e.target.value)).toGamut())
     $colorspace = e.target.value
   }
 
