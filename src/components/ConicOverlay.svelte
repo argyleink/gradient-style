@@ -41,6 +41,86 @@
     })
   }
 
+  function percentToDecimal(percent) {
+    return percent / 100
+  }
+
+  function namedPosToPercent() {
+    let x, y
+    
+    switch ($conic_named_position) {
+      case 'top':
+        x = 50
+        y = 0
+        break
+      case 'right':
+        x = 100
+        y = 50
+        break
+      case 'bottom':
+        x = 50
+        y = 100
+        break
+      case 'left':
+        x = 0
+        y = 50
+        break
+      case 'top right':
+        x = 100
+        y = 0
+        break
+      case 'bottom right':
+        x = 100
+        y = 100
+        break
+      case 'bottom left':
+        x = 0
+        y = 100
+        break
+      case 'top left':
+        x = 0
+        y = 0
+        break
+      default:
+        x = 50
+        y = 50
+        break
+    }
+
+    return {x,y}
+  }
+
+  function determineAbsPosition() {
+    let x = $conic_position.x
+    let y = $conic_position.y
+
+    if ($conic_named_position !== '--') {
+      let namedPos = namedPosToPercent()
+      x = namedPos.x
+      y = namedPos.y
+    }
+
+    return {
+      x: Math.round(w * percentToDecimal(x)),
+      y: Math.round(h * percentToDecimal(y)),
+    }
+  }
+
+  function overlayPosition() {
+    if ($conic_named_position != '--') {
+      let abs = determineAbsPosition()
+      return {
+        x: abs.x + 'px',
+        y: abs.y + 'px',
+      }
+    }
+    else
+      return {
+        x: $conic_position.x + '%',
+        y: $conic_position.y + '%',
+      }
+  }
+
   function dragula(node) {
     // all clicks, match stops and forward
     node.addEventListener('pointerdown', e => {
@@ -58,34 +138,31 @@
       else if (isRotator) {
         rotateIt(isRotator)
       }
+      else {
+        dragulaState.target = e.target
+        if ($conic_named_position != '--') {
+          let pos = namedPosToPercent()
+          dragulaState.left = pos.x
+          dragulaState.top = pos.y
+          $conic_named_position = '--'
+          $conic_position.x = pos.x
+          $conic_position.y = pos.y
+        }
+        node.setPointerCapture(e.pointerId)
+        dragIt(e.target)
+      }
     })
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
-        node.setPointerCapture(e.pointerId)
-        let apercent = w / 100
-        apercent = $conic_angle >= 180 ? -apercent : apercent
-        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
-
-        // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
-        //   dragYdelta = dragulaState.start.y - e.screenY - 24
-        // else
-        //   dragYdelta = null
-
-        if (dragulaState.stop.kind === 'stop') {
-          if (dragulaState.stop.position1 === dragulaState.stop.position2)
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
-
-          if (dragulaState.target.dataset.position === "1")
-            dragulaState.stop.position1 = Math.round(dragulaState.left)
-          else
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
-        }
-        else
-          dragulaState.stop.percentage = Math.round(dragulaState.left)
-
-        $gradient_stops = [...$gradient_stops]
+        let wpercent = w / 100
+        let hpercent = h / 100
+        dragulaState.left += e.movementX / wpercent
+        dragulaState.top += e.movementY / hpercent
+        
+        $conic_position.x = Math.round(dragulaState.left)
+        $conic_position.y = Math.round(dragulaState.top)
       }
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
@@ -127,13 +204,8 @@
 
   function dragIt(node) {
     dragulaState.moving = true
-
-    if (dragulaState.stop.kind === 'hint')
-      dragulaState.left = parseInt(dragulaState.stop.percentage)
-    else
-      dragulaState.left = parseInt(node.dataset.position === "1" 
-        ? dragulaState.stop.position1 
-        : dragulaState.stop.position2)        
+    dragulaState.left = $conic_position.x
+    dragulaState.top = $conic_position.y  
   }
 
   function rotateIt(node) {
@@ -154,18 +226,29 @@
   function gradientAngle(ng) {
     return ng - 90
   }
+
+  $: position = overlayPosition(
+    $conic_position,
+    $conic_named_position
+  )
 </script>
 
-<div class="pie">
-  {#if $conic_angle > 0}
-    <div class="visual-vert"></div>
-  {/if}
-  <div class="visual" style="--ng: {$conic_angle}deg"></div>
-  <div class="dot"></div>
-</div>
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div use:dragula class="conic-overlay" style="rotate: {gradientAngle($conic_angle)}deg">
+<div use:dragula class="conic-overlay" style="
+  rotate: {gradientAngle($conic_angle)}deg;
+  left: {position.x}; 
+  top: {position.y};
+  {position.x && 'translate: -50% -50%;'}
+">
+  <div class="pie" style="rotate: {$conic_angle * -1 + 90}deg">
+    {#if $conic_angle > 0}
+      <div class="visual-vert"></div>
+    {/if}
+    <div class="visual" style="--ng: {$conic_angle}deg"></div>
+    <div class="dot"></div>
+  </div>
   <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
+  <div tabindex="0" class="dragzone" use:tooltip={{content: $conic_named_position == '--' ? `${position.x} ${position.y}` : $conic_named_position}} use:dragula style="max-inline-size: {w * .2}px"></div>
 </div>
 
 <style>
@@ -175,9 +258,10 @@
 
     position: relative;
     grid-area: 1/1;
+    display: grid;
     pointer-events: none;
     touch-action: none;
-    will-change: rotate;
+    will-change: translate, left, top;
   }
 
   .line {
@@ -293,6 +377,7 @@
     --line-1: hsl(0 0% 100% / 50%);
     --line-2: hsl(0 0% 100% / 10%);
 
+    rotate: 90deg;
     position: relative;
     grid-area: 1/1;
     display: grid;
@@ -348,5 +433,25 @@
     inset-inline-start: 50%;
     transform: translate(-50%, -50%);
     cursor: ew-resize;
+  }
+
+  .dragzone {
+    cursor: move;
+    pointer-events: auto;
+    place-self: center;
+    inline-size: var(--size-8);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    transition: box-shadow .5s var(--ease-3);
+    --_shadow-size: 0px;
+    box-shadow: inset 0 0 0 var(--_shadow-size) hsl(0 0% 100% / 25%);
+  }
+
+  .dragzone:hover {
+    --_shadow-size: var(--size-10);
   }
 </style>
