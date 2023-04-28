@@ -287,7 +287,8 @@
 
   $: position = overlayPosition(
     $radial_position,
-    $radial_named_position
+    $radial_named_position,
+    w, h
   )
 </script>
 

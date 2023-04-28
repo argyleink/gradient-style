@@ -232,7 +232,8 @@
 
   $: position = overlayPosition(
     $conic_position,
-    $conic_named_position
+    $conic_named_position,
+    w, h
   )
 </script>
 
