@@ -1,0 +1,352 @@
+<script>
+  import { tooltip } from 'svooltip'
+
+  import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
+  import {conic_angle, conic_named_position, conic_position} from '../store/conic.ts'
+  import {picker_value} from '../store/colorpicker.ts'
+
+  import {updateStops, removeStop} from '../utils/stops.ts'
+  import {linear_keywords} from'../utils/linear.ts'
+  import {degToRad, radToDeg} from '../utils/radial.ts'
+  import {contrast_color_prefer_white} from '../utils/color.ts'
+  import {randomNumber} from '../utils/numbers.ts'
+
+  export let w = null
+  export let h = null
+  let dragYdelta = null
+
+  const dragulaState = {
+    moving: false,
+    start: {x:null,y:null},
+    delta: {x:null,y:null},
+    left: null,
+    stop: null,
+    target: null,
+  }
+
+  function pickColor(stop, e) {
+    const picker = document.getElementById('color-picker')
+
+    picker.setAnchor(e.target)
+    picker.setColor(stop.color)
+    picker.showModal()
+
+    const unsub = picker_value.subscribe(value => {
+      stop.color = value
+      $gradient_stops = [...$gradient_stops]
+    })
+
+    picker.addEventListener('closing', () => {
+      unsub()
+    })
+  }
+
+  function dragula(node) {
+    // all clicks, match stops and forward
+    node.addEventListener('pointerdown', e => {
+      const isStop = e.target.closest('[data-stop-index]')
+      const isRotator = e.target.closest('.invisible-rotator')
+
+      if (isStop) {
+        dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
+        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
+
+        dragIt(isStop)
+      }
+      else if (isRotator) {
+        rotateIt(isRotator)
+      }
+    })
+
+    // always watch pointer move
+    window.addEventListener('pointermove', e => {
+      if (dragulaState.moving) {
+        node.setPointerCapture(e.pointerId)
+        let apercent = w / 100
+        apercent = $conic_angle >= 180 ? -apercent : apercent
+        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
+
+        // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
+        //   dragYdelta = dragulaState.start.y - e.screenY - 24
+        // else
+        //   dragYdelta = null
+
+        if (dragulaState.stop.kind === 'stop') {
+          if (dragulaState.stop.position1 === dragulaState.stop.position2)
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
+
+          if (dragulaState.target.dataset.position === "1")
+            dragulaState.stop.position1 = Math.round(dragulaState.left)
+          else
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
+        }
+        else
+          dragulaState.stop.percentage = Math.round(dragulaState.left)
+
+        $gradient_stops = [...$gradient_stops]
+      }
+      else if (dragulaState.rotating) {
+        node.setPointerCapture(e.pointerId)
+
+        $conic_angle += e.movementX
+        $conic_angle += e.movementY
+
+        if ($conic_angle > 360) $conic_angle = 0
+        if ($conic_angle < 0) $conic_angle = 360
+      }
+      
+      if (e.target.closest('[data-stop-index]'))
+        $active_stop_index = e.target
+          .closest('[data-stop-index]')
+          .dataset.stopIndex
+    })
+
+    function stopWatching(e) {
+      node.releasePointerCapture(e.pointerId)
+
+      // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
+      //   dragYdelta = null
+      //   $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
+      // }
+
+      dragulaState.moving = false
+      dragulaState.rotating = false
+      dragulaState.stop = null
+      dragulaState.target = null
+      dragulaState.start.x = null
+      dragulaState.start.y = null
+
+      $active_stop_index = null
+    }
+
+    window.addEventListener('pointerup', stopWatching)
+    window.addEventListener('dragleave', stopWatching)
+  }
+
+  function dragIt(node) {
+    dragulaState.moving = true
+
+    if (dragulaState.stop.kind === 'hint')
+      dragulaState.left = parseInt(dragulaState.stop.percentage)
+    else
+      dragulaState.left = parseInt(node.dataset.position === "1" 
+        ? dragulaState.stop.position1 
+        : dragulaState.stop.position2)        
+  }
+
+  function rotateIt(node) {
+    dragulaState.rotating = true
+  }
+
+  function mouseOut() {
+    $active_stop_index = null
+  }
+
+  function gradientLineLength(a) {
+    if (!w && !h) return null
+    a = degToRad(a)
+    let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
+    return l + 'px'
+  }
+
+  function gradientAngle(ng) {
+    return ng - 90
+  }
+</script>
+
+<div class="pie">
+  {#if $conic_angle > 0}
+    <div class="visual-vert"></div>
+  {/if}
+  <div class="visual" style="--ng: {$conic_angle}deg"></div>
+  <div class="dot"></div>
+</div>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div use:dragula class="conic-overlay" style="rotate: {gradientAngle($conic_angle)}deg">
+  <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
+</div>
+
+<style>
+  .conic-overlay {
+    --line-1: hsl(0 0% 100% / 90%);
+    --line-2: hsl(0 0% 100% / 50%);
+
+    position: relative;
+    grid-area: 1/1;
+    pointer-events: none;
+    touch-action: none;
+    will-change: rotate;
+  }
+
+  .line {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-auto-flow: column;
+    place-items: center;
+    place-content: center space-between;
+    block-size: 2px;
+    inline-size: 100%;
+    background: var(--line-1);
+  }
+
+  .line::after {
+    content: "";
+    block-size: 2px;
+    position: absolute;
+    background: repeating-linear-gradient(to right, #0000 0 5px, var(--line-2) 0 10px);
+    inline-size: 150cqmax;
+    z-index: -1;
+  }
+
+  .invisible-track {
+    cursor: copy;
+    pointer-events: auto;
+    position: absolute;
+    block-size: 1rem;
+    inline-size: 100%;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    transform: translateY(-50%);
+  }
+
+  .stop-wrap {
+    border-radius: var(--radius-round);
+    translate: -50% 0;
+  }
+
+  .stop-wrap:has(+ .stop-wrap) .stop {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .stop-wrap + .stop-wrap .stop {
+    clip-path: inset(0 0 0 50%);
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--contrast-fill, white);
+    aspect-ratio: 1;
+    inline-size: var(--size-5);
+    border-radius: var(--radius-round);
+    border: .5px solid hsl(0 0% 0% / 15%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stop {
+      animation: 
+        var(--animation-scale-up) reverse,
+        var(--animation-fade-out) reverse;
+      animation-duration: 250ms;
+    }
+  }
+
+  .stop > button {
+    aspect-ratio: 1;
+    inline-size: var(--size-3);
+    border-radius: var(--radius-round);
+    padding: 0;
+    flex-shrink: 0;
+    border: none;
+    box-shadow: var(--inner-shadow-0);
+    outline-offset: 8px;
+  }
+
+  .hint, .stop-wrap {
+    position: absolute;
+    max-inline-size: var(--size-5);
+    display: grid;
+    place-content: center;
+    place-items: center;
+    gap: var(--size-2);
+  }
+
+  .hint {
+    translate: -50% 50%;
+  }
+
+  .hint > svg {
+    max-inline-size: var(--size-5);
+    fill: white;
+    stroke-width: 0.5px;
+    stroke: hsl(0 0% 0% / 15%);
+  }
+
+  :is(.hint > svg, .stop) {
+    pointer-events: auto;
+    touch-action: manipulation;
+    cursor: grab;
+    user-select: none;
+  }
+
+  :is(.hint > svg, .stop):active {
+    cursor: grabbing;
+  }
+
+  .pie {
+    --line-1: hsl(0 0% 100% / 50%);
+    --line-2: hsl(0 0% 100% / 10%);
+
+    position: relative;
+    grid-area: 1/1;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .visual {
+    --ng: 0; 
+    --thickness: 3px;
+    --_inner: calc(70% - var(--thickness));
+    --_outer: calc(var(--_inner) + 1px); 
+    
+    mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
+    -webkit-mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
+    background-image: conic-gradient(var(--line-1), var(--line-1) var(--ng), #0000 0);
+
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .visual-vert {
+    --line-1: white;
+    block-size: var(--size-10);
+    inline-size: 3px;
+    background-image: linear-gradient(to bottom, var(--line-1) 50%, #0000 0);
+  }
+
+  .dot {
+    background: white;
+    inline-size: var(--size-2);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .invisible-rotator {
+    pointer-events: auto;
+    inline-size: var(--size-10);
+    aspect-ratio: var(--ratio-square);
+    border-radius: var(--radius-round);
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    cursor: ew-resize;
+  }
+</style>

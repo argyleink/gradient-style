@@ -28,6 +28,7 @@
 
   import LinearOverlay from './LinearOverlay.svelte'
   import RadialOverlay from './RadialOverlay.svelte'
+  import ConicOverlay from './ConicOverlay.svelte'
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Presets from './Presets.svelte'
@@ -341,6 +342,9 @@
           {/if}
           {#if $gradient_type === 'radial'}
             <RadialOverlay w={box_width} h={box_height} />
+          {/if}
+          {#if $gradient_type === 'conic'}
+            <ConicOverlay w={box_width} h={box_height} />
           {/if}
         </div>
       </section>
