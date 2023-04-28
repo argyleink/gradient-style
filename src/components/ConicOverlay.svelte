@@ -20,6 +20,7 @@
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
+    top: null,
     stop: null,
     target: null,
   }
@@ -156,8 +157,8 @@
     // always watch pointer move
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
-        let wpercent = w / 100
-        let hpercent = h / 100
+        let wpercent = w / 50
+        let hpercent = h / 50
         dragulaState.left += e.movementX / wpercent
         dragulaState.top += e.movementY / hpercent
         
@@ -192,6 +193,8 @@
       dragulaState.rotating = false
       dragulaState.stop = null
       dragulaState.target = null
+      dragulaState.left = null
+      dragulaState.top = null
       dragulaState.start.x = null
       dragulaState.start.y = null
 
