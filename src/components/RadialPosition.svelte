@@ -1,13 +1,16 @@
 <script>
   import {gradient_positions} from '../store/gradient.ts'
   import {radial_position, radial_named_position} from '../store/radial.ts'
+  import {namedPosToPercent} from '../utils/radial.ts'
+
   import RangeSlider from './RangeSlider.svelte'
   import NamedDirections from './NamedDirections.svelte'
 
-  function removeRadialPositions() {
-    $radial_position.x = null
-    $radial_position.y = null
-  }
+  radial_named_position.subscribe(value => {
+    const {x,y} = namedPosToPercent(value)
+    $radial_position.x = x
+    $radial_position.y = y
+  })
 
   function resetNamedPosition() {
     if ($radial_named_position !== '--')
@@ -23,8 +26,8 @@
 <fieldset class="control-set">
   <div class="label-select-combo">
     <label>Position</label>
-    <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" on:change={removeRadialPositions} />
-    <select name="radial-position" bind:value={$radial_named_position} on:change={removeRadialPositions}>
+    <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" />
+    <select name="radial-position" bind:value={$radial_named_position}>
       <option disabled>--</option>
       {#each gradient_positions as pos}
         <option value={pos}>{pos}</option>  
