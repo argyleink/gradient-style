@@ -5,6 +5,7 @@
   import {conic_angle, conic_named_position, conic_position} from '../store/conic.ts'
   import {picker_value} from '../store/colorpicker.ts'
 
+  import {namedPosToPercent} from '../utils/conic.ts'
   import {updateStops, removeStop} from '../utils/stops.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
@@ -46,57 +47,12 @@
     return percent / 100
   }
 
-  function namedPosToPercent() {
-    let x, y
-    
-    switch ($conic_named_position) {
-      case 'top':
-        x = 50
-        y = 0
-        break
-      case 'right':
-        x = 100
-        y = 50
-        break
-      case 'bottom':
-        x = 50
-        y = 100
-        break
-      case 'left':
-        x = 0
-        y = 50
-        break
-      case 'top right':
-        x = 100
-        y = 0
-        break
-      case 'bottom right':
-        x = 100
-        y = 100
-        break
-      case 'bottom left':
-        x = 0
-        y = 100
-        break
-      case 'top left':
-        x = 0
-        y = 0
-        break
-      default:
-        x = 50
-        y = 50
-        break
-    }
-
-    return {x,y}
-  }
-
   function determineAbsPosition() {
     let x = $conic_position.x
     let y = $conic_position.y
 
     if ($conic_named_position !== '--') {
-      let namedPos = namedPosToPercent()
+      let namedPos = namedPosToPercent($conic_named_position)
       x = namedPos.x
       y = namedPos.y
     }
@@ -142,7 +98,7 @@
       else {
         dragulaState.target = e.target
         if ($conic_named_position != '--') {
-          let pos = namedPosToPercent()
+          let pos = namedPosToPercent($conic_named_position)
           dragulaState.left = pos.x
           dragulaState.top = pos.y
           $conic_named_position = '--'

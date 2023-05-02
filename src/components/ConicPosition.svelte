@@ -1,13 +1,16 @@
 <script>
   import {gradient_positions} from '../store/gradient.ts'
   import {conic_position, conic_named_position} from '../store/conic.ts'
+  import {namedPosToPercent} from '../utils/conic.ts'
+
   import RangeSlider from './RangeSlider.svelte'
   import NamedDirections from './NamedDirections.svelte'
 
-  function removeConicPositions() {
-    $conic_position.x = null
-    $conic_position.y = null
-  }
+  conic_named_position.subscribe(value => {
+    const {x,y} = namedPosToPercent(value)
+    $conic_position.x = x
+    $conic_position.y = y
+  })
 
   function resetNamedPosition() {
     if ($conic_named_position !== '--')
@@ -23,8 +26,8 @@
 <fieldset class="control-set">
   <div class="label-select-combo">
     <label>Position</label>
-    <NamedDirections id="conic-position" bind:selected={$conic_named_position} mode="position" on:change={removeConicPositions} />
-    <select name="conic-position" bind:value={$conic_named_position} on:change={removeConicPositions}>
+    <NamedDirections id="conic-position" bind:selected={$conic_named_position} mode="position" />
+    <select name="conic-position" bind:value={$conic_named_position}>
       <option disabled>--</option>
       {#each gradient_positions as pos}
         <option value={pos}>{pos}</option>  
