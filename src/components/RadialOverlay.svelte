@@ -1,12 +1,17 @@
 <script>
   import { tooltip } from 'svooltip'
 
+  import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
   import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
+  import {picker_value} from '../store/colorpicker.ts'
+
   import {namedPosToPercent} from '../utils/radial.ts'
+  import {contrast_color_prefer_white} from '../utils/color.ts'
 
   export let w = null
   export let h = null
+  let dragYdelta = null
 
   const dragulaState = {
     moving: false,
@@ -156,12 +161,12 @@
       const isStop = e.target.closest('[data-stop-index]')
 
       if (isStop) {
-        // dragulaState.target = isStop
-        // dragulaState.start.x = e.screenX
-        // dragulaState.start.y = e.screenY
-        // dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
+        dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
+        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
-        // dragIt(isStop)
+        dragIt(isStop)
       }
       else {
         dragulaState.target = e.target
@@ -180,44 +185,51 @@
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
-      if (dragulaState.moving) {
-        let wpercent = w / 100
-        let hpercent = h / 100
+      if (dragulaState.moving && dragulaState.stop) {
+        let apercent = (size.w / 2) / 100
+        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
+
+        if (dragulaState.stop.kind === 'stop') {
+          if (dragulaState.stop.position1 === dragulaState.stop.position2)
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
+
+          if (dragulaState.target.dataset.position === "1")
+            dragulaState.stop.position1 = Math.round(dragulaState.left)
+          else
+            dragulaState.stop.position2 = Math.round(dragulaState.left)
+        }
+        else
+          dragulaState.stop.percentage = Math.round(dragulaState.left)
+
+        $gradient_stops = [...$gradient_stops]
+      }
+      else if (dragulaState.moving) {
+        let wpercent = (size.w / 2) / 100
+        let hpercent = (size.h / 2) / 100
         dragulaState.left += e.movementX / wpercent
         dragulaState.top += e.movementY / hpercent
-
-        // if (dragulaState.stop.kind === 'stop') {
-        //   if (dragulaState.stop.position1 === dragulaState.stop.position2)
-        //     dragulaState.stop.position2 = Math.round(dragulaState.left)
-
-        //   if (dragulaState.target.dataset.position === "1")
-        //     dragulaState.stop.position1 = Math.round(dragulaState.left)
-        //   else
-        //     dragulaState.stop.position2 = Math.round(dragulaState.left)
-        // }
-        // else
-          // dragulaState.stop.percentage = Math.round(dragulaState.left)
         
         $radial_position.x = Math.round(dragulaState.left)
         $radial_position.y = Math.round(dragulaState.top)
       }
       
-      // if (e.target.closest('[data-stop-index]'))
-      //   $active_stop_index = e.target
-      //     .closest('[data-stop-index]')
-      //     .dataset.stopIndex
+      if (e.target.closest('[data-stop-index]'))
+        $active_stop_index = e.target
+          .closest('[data-stop-index]')
+          .dataset.stopIndex
     })
 
     function stopWatching(e) {
       node.releasePointerCapture(e.pointerId)
 
       dragulaState.moving = false
+      dragulaState.rotating = false
       dragulaState.stop = null
       dragulaState.target = null
-      dragulaState.left = null
-      dragulaState.top = null
+      dragulaState.start.x = null
+      dragulaState.start.y = null
 
-      // $active_stop_index = null
+      $active_stop_index = null
     }
 
     window.addEventListener('pointerup', stopWatching)
@@ -227,11 +239,72 @@
   function dragIt(node) {
     dragulaState.moving = true
 
-    // if (dragulaState.stop.kind === 'hint')
-    //   dragulaState.left = parseInt(dragulaState.stop.percentage)
-    // else
-    dragulaState.left = $radial_position.x
-    dragulaState.top = $radial_position.y
+    if (dragulaState.stop) {
+      if (dragulaState.stop.kind === 'hint')
+        dragulaState.left = parseInt(dragulaState.stop.percentage)
+      else if (dragulaState.stop.kind === 'stop')
+        dragulaState.left = parseInt(node.dataset.position === "1" 
+          ? dragulaState.stop.position1 
+          : dragulaState.stop.position2) 
+    }
+    else {
+      dragulaState.left = $radial_position.x
+      dragulaState.top = $radial_position.y
+    }
+  }
+
+  function gradientLineLength() {
+    return size.w / 2 + 'px'
+  }
+
+  function mouseOut() {
+    $active_stop_index = null
+  }
+
+  function handleKeypress(e, stop, prop) {
+    if (e.target.classList.contains('stop-color')) return
+
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+      e.preventDefault()
+
+      if (['ArrowLeft','ArrowDown'].includes(e.key)) {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 -= 1
+        stop[prop] -= 1
+      }
+      else {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 += 1
+        stop[prop] += 1
+      }
+
+      $gradient_stops = $gradient_stops
+    }
+    else if (['Backspace','Delete'].includes(e.key)) {
+      deleteStop(stop)
+    }
+  }
+
+  function relinkStop(stop) {
+    stop.position2 = stop.position1
+    $gradient_stops = updateStops($gradient_stops)
+  }
+
+  function pickColor(stop, e) {
+    const picker = document.getElementById('color-picker')
+
+    picker.setAnchor(e.target)
+    picker.setColor(stop.color)
+    picker.showModal()
+
+    const unsub = picker_value.subscribe(value => {
+      stop.color = value
+      $gradient_stops = [...$gradient_stops]
+    })
+
+    picker.addEventListener('closing', () => {
+      unsub()
+    })
   }
 
   $: size = determineOverlaySize(h,w,
@@ -248,17 +321,69 @@
   )
 </script>
 
-<div class="overlay" style="
+<div class="overlay" use:dragula  style="
   left: {position.x}; 
   top: {position.y};
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
-  <div tabindex="0" class="dragzone" use:tooltip={{content: $radial_named_position == '--' ? `${position.x} ${position.y}` : $radial_named_position}} use:dragula style="max-inline-size: {size.w * .2}px"></div>
+  <div tabindex="0" class="dragzone" use:tooltip={{content: $radial_named_position == '--' ? `${position.x} ${position.y}` : $radial_named_position}} style="max-inline-size: {size.w * .2}px"></div>
   <div class="edge" style="
     width:{size.w}px; 
     height:{size.h}px;
   "></div>
+  <div class="line" style="width: {gradientLineLength(size)}">
+    {#each $gradient_stops as stop, i (stop)}
+      {#if stop.kind === 'stop'}
+        <div 
+          tabindex="0"
+          use:tooltip={{content: `${stop.position1}%`}}
+          class="stop-wrap" 
+          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
+          on:mouseleave={mouseOut} 
+          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
+          on:dblclick={()=>deleteStop(stop)}
+        >
+          <div class="stop" data-stop-index={i} data-position="1">
+            <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+          </div>
+        </div>
+        {#if stop.position1 !== stop.position2}
+          <div 
+            tabindex="0"
+            use:tooltip={{content: `${stop.position2}%`}}
+            class="stop-wrap" 
+            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
+            on:mouseleave={mouseOut} 
+            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
+            on:dblclick={()=>relinkStop(stop)}
+          >
+            <div class="stop" data-stop-index={i} data-position="2">
+              <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            </div>
+          </div>
+        {/if}
+      {/if}
+      {#if stop.kind === 'hint'}
+        <div 
+          class="hint" 
+          tabindex="0"
+          use:tooltip={{content: `${stop.percentage}%`}}
+          data-stop-index={i} 
+          style="
+            inset-inline-start: {stop.percentage}%; 
+            visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
+          " 
+          on:mouseleave={mouseOut}
+          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
+        >
+          <svg viewBox="0 0 256 256">
+            <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
+          </svg>
+        </div>
+      {/if}
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -293,6 +418,28 @@
     transform: translate(-50%, -50%);
   }
 
+  .line {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: grid;
+    grid-auto-flow: column;
+    place-items: center;
+    place-content: center space-between;
+    block-size: 2px;
+    inline-size: 100%;
+    background: var(--line-1);
+  }
+
+  .line::after {
+    content: "";
+    block-size: 2px;
+    position: absolute;
+    background: repeating-linear-gradient(to right, #0000 0 5px, var(--line-2) 0 10px);
+    inline-size: 150cqmax;
+    z-index: -1;
+  }
+
   .dragzone {
     cursor: move;
     pointer-events: auto;
@@ -311,5 +458,80 @@
 
   .dragzone:hover {
     --_shadow-size: var(--size-10);
+  }
+
+  .stop-wrap {
+    border-radius: var(--radius-round);
+    translate: -50% 0;
+  }
+
+  .stop-wrap:has(+ .stop-wrap) .stop {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .stop-wrap + .stop-wrap .stop {
+    clip-path: inset(0 0 0 50%);
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--contrast-fill, white);
+    aspect-ratio: 1;
+    inline-size: var(--size-5);
+    border-radius: var(--radius-round);
+    border: .5px solid hsl(0 0% 0% / 15%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stop {
+      animation: 
+        var(--animation-scale-up) reverse,
+        var(--animation-fade-out) reverse;
+      animation-duration: 250ms;
+    }
+  }
+
+  .stop > button {
+    aspect-ratio: 1;
+    inline-size: var(--size-3);
+    border-radius: var(--radius-round);
+    padding: 0;
+    flex-shrink: 0;
+    border: none;
+    box-shadow: var(--inner-shadow-0);
+    outline-offset: 8px;
+  }
+
+  .hint, .stop-wrap {
+    position: absolute;
+    max-inline-size: var(--size-5);
+    display: grid;
+    place-content: center;
+    place-items: center;
+    gap: var(--size-2);
+  }
+
+  .hint {
+    translate: -50% 50%;
+  }
+
+  .hint > svg {
+    max-inline-size: var(--size-5);
+    fill: white;
+    stroke-width: 0.5px;
+    stroke: hsl(0 0% 0% / 15%);
+  }
+
+  :is(.hint > svg, .stop) {
+    pointer-events: auto;
+    touch-action: manipulation;
+    cursor: grab;
+    user-select: none;
+  }
+
+  :is(.hint > svg, .stop):active {
+    cursor: grabbing;
   }
 </style>
