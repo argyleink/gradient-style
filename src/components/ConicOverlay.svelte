@@ -209,14 +209,14 @@
   </div>
   <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $conic_named_position == '--' ? `${position.x} ${position.y}` : $conic_named_position}} use:dragula style="max-inline-size: {w * .2}px"></div>
-  <div class="stops" style="rotate: -90deg">
+  <div class="stops" style="rotate: -90deg; translate: 0px -12px">
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
         <div 
           tabindex="0"
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
-          style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate({stop.position1 >= 50 && stop.position1 < 100 ? -50 : 50}%, 100px)"
+          style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 75px)"
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
