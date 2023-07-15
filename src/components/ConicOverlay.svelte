@@ -216,7 +216,7 @@
           tabindex="0"
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
-          style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 75px)"
+          style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 36px)"
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
