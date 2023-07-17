@@ -175,11 +175,38 @@
     $active_stop_index = null
   }
 
-  function gradientLineLength(a) {
-    if (!w && !h) return null
-    a = degToRad(a)
-    let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
-    return l + 'px'
+  function deleteStop(stop) {
+    if ($gradient_stops.length <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+  }
+
+  function handleKeypress(e, stop, prop) {
+    if (e.target.classList.contains('stop-color')) return
+
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+      e.preventDefault()
+
+      if (['ArrowLeft','ArrowDown'].includes(e.key)) {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 -= 1
+        stop[prop] -= 1
+      }
+      else {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 += 1
+        stop[prop] += 1
+      }
+
+      $gradient_stops = $gradient_stops
+    }
+    else if (['Backspace','Delete'].includes(e.key)) {
+      deleteStop(stop)
+    }
+  }
+
+  function relinkStop(stop) {
+    stop.position2 = stop.position1
+    $gradient_stops = updateStops($gradient_stops)
   }
 
   function gradientAngle(ng) {
@@ -218,6 +245,9 @@
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
           style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 59px)"
+          on:mouseleave={mouseOut} 
+          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
+          on:dblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
@@ -230,6 +260,8 @@
             class="stop-wrap" 
             style="transform: rotateZ({(360 * (parseInt(stop.position2) / 100))}deg) translate(0, 59px)"
             on:mouseleave={mouseOut} 
+            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
+            on:dblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2">
               <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
@@ -248,6 +280,7 @@
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
           on:mouseleave={mouseOut}
+          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>

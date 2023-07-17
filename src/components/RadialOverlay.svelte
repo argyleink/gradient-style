@@ -261,6 +261,11 @@
     $active_stop_index = null
   }
 
+  function deleteStop(stop) {
+    if ($gradient_stops.length <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+  }
+
   function handleKeypress(e, stop, prop) {
     if (e.target.classList.contains('stop-color')) return
 
