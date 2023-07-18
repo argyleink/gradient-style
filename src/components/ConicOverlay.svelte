@@ -152,6 +152,9 @@
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
 
+        if (typeof $conic_angle == 'string')
+          $conic_angle = parseInt($conic_angle)
+
         $conic_angle += e.movementX
         $conic_angle += e.movementY
 
@@ -432,7 +435,7 @@
   }
 
   .hint {
-    translate: -50% 50%;
+    translate: -50% 0%;
   }
 
   .hint > svg {
