@@ -18,12 +18,14 @@
 
   const dragulaState = {
     moving: false,
+    rotating: false,
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
     top: null,
     stop: null,
     target: null,
+    angle: null,
   }
 
   function pickColor(stop, e) {
@@ -83,17 +85,25 @@
     node.addEventListener('pointerdown', e => {
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
+      const isDrag = e.target.closest('.dragzone')
 
-      if (isStop) {
+      if (isDrag) {
+        dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
+
+        dragIt(isStop)
+      }
+      else if (isRotator) {
+        rotateIt(isRotator)
+      }
+      else if (isStop) {
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
         dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
         dragIt(isStop)
-      }
-      else if (isRotator) {
-        rotateIt(isRotator)
       }
       else {
         dragulaState.target = e.target
@@ -112,7 +122,25 @@
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
-      if (dragulaState.moving) {
+      if (dragulaState.moving && dragulaState.stop) {
+        let apercent = (w / 2) / 100
+        dragulaState.angle += (e.movementX || e.movementY * -1) / apercent
+
+        if (dragulaState.stop.kind === 'stop') {
+          if (dragulaState.stop.position1 === dragulaState.stop.position2)
+            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+
+          if (dragulaState.target.dataset.position === "1")
+            dragulaState.stop.position1 = Math.round(dragulaState.angle)
+          else
+            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+        }
+        else
+          dragulaState.stop.percentage = Math.round(dragulaState.angle)
+
+        $gradient_stops = [...$gradient_stops]
+      }
+      else if (dragulaState.moving) {
         let wpercent = w / 50
         let hpercent = h / 50
         dragulaState.left += e.movementX / wpercent
@@ -147,6 +175,7 @@
 
       dragulaState.moving = false
       dragulaState.rotating = false
+      dragulaState.angle = null
       dragulaState.stop = null
       dragulaState.target = null
       dragulaState.left = null
@@ -163,8 +192,19 @@
 
   function dragIt(node) {
     dragulaState.moving = true
-    dragulaState.left = $conic_position.x
-    dragulaState.top = $conic_position.y  
+
+    if (dragulaState.stop) {
+      if (dragulaState.stop.kind === 'hint')
+        dragulaState.angle = parseInt(dragulaState.stop.percentage)
+      else if (dragulaState.stop.kind === 'stop')
+        dragulaState.angle = parseInt(node.dataset.position === "1" 
+          ? dragulaState.stop.position1 
+          : dragulaState.stop.position2) 
+    }
+    else {
+      dragulaState.left = $conic_position.x
+      dragulaState.top = $conic_position.y
+    }
   }
 
   function rotateIt(node) {
@@ -276,7 +316,7 @@
           use:tooltip={{content: `${stop.percentage}%`}}
           data-stop-index={i} 
           style="
-            transform: rotateZ({(360 * (parseInt(stop.percentage) / 100))}deg) translate(0, 75px);
+            transform: rotateZ({(360 * (parseInt(stop.percentage) / 100))}deg) translate(0, 85px);
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
           on:mouseleave={mouseOut}
