@@ -18,12 +18,14 @@
 
   const dragulaState = {
     moving: false,
+    rotating: false,
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
     top: null,
     stop: null,
     target: null,
+    angle: null,
   }
 
   function pickColor(stop, e) {
@@ -83,17 +85,25 @@
     node.addEventListener('pointerdown', e => {
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
+      const isDrag = e.target.closest('.dragzone')
 
-      if (isStop) {
+      if (isDrag) {
+        dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
+
+        dragIt(isStop)
+      }
+      else if (isRotator) {
+        rotateIt(isRotator)
+      }
+      else if (isStop) {
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
         dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
         dragIt(isStop)
-      }
-      else if (isRotator) {
-        rotateIt(isRotator)
       }
       else {
         dragulaState.target = e.target
@@ -112,7 +122,25 @@
 
     // always watch pointer move
     window.addEventListener('pointermove', e => {
-      if (dragulaState.moving) {
+      if (dragulaState.moving && dragulaState.stop) {
+        let apercent = (w / 2) / 100
+        dragulaState.angle += (e.movementX || e.movementY * -1) / apercent
+
+        if (dragulaState.stop.kind === 'stop') {
+          if (dragulaState.stop.position1 === dragulaState.stop.position2)
+            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+
+          if (dragulaState.target.dataset.position === "1")
+            dragulaState.stop.position1 = Math.round(dragulaState.angle)
+          else
+            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+        }
+        else
+          dragulaState.stop.percentage = Math.round(dragulaState.angle)
+
+        $gradient_stops = [...$gradient_stops]
+      }
+      else if (dragulaState.moving) {
         let wpercent = w / 50
         let hpercent = h / 50
         dragulaState.left += e.movementX / wpercent
@@ -123,6 +151,9 @@
       }
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
+
+        if (typeof $conic_angle == 'string')
+          $conic_angle = parseInt($conic_angle)
 
         $conic_angle += e.movementX
         $conic_angle += e.movementY
@@ -147,6 +178,7 @@
 
       dragulaState.moving = false
       dragulaState.rotating = false
+      dragulaState.angle = null
       dragulaState.stop = null
       dragulaState.target = null
       dragulaState.left = null
@@ -163,8 +195,19 @@
 
   function dragIt(node) {
     dragulaState.moving = true
-    dragulaState.left = $conic_position.x
-    dragulaState.top = $conic_position.y  
+
+    if (dragulaState.stop) {
+      if (dragulaState.stop.kind === 'hint')
+        dragulaState.angle = parseInt(dragulaState.stop.percentage)
+      else if (dragulaState.stop.kind === 'stop')
+        dragulaState.angle = parseInt(node.dataset.position === "1" 
+          ? dragulaState.stop.position1 
+          : dragulaState.stop.position2) 
+    }
+    else {
+      dragulaState.left = $conic_position.x
+      dragulaState.top = $conic_position.y
+    }
   }
 
   function rotateIt(node) {
@@ -175,11 +218,38 @@
     $active_stop_index = null
   }
 
-  function gradientLineLength(a) {
-    if (!w && !h) return null
-    a = degToRad(a)
-    let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
-    return l + 'px'
+  function deleteStop(stop) {
+    if ($gradient_stops.length <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+  }
+
+  function handleKeypress(e, stop, prop) {
+    if (e.target.classList.contains('stop-color')) return
+
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+      e.preventDefault()
+
+      if (['ArrowLeft','ArrowDown'].includes(e.key)) {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 -= 1
+        stop[prop] -= 1
+      }
+      else {
+        if (stop.hasOwnProperty('position1') && stop.position1 === stop.position2)
+          stop.position2 += 1
+        stop[prop] += 1
+      }
+
+      $gradient_stops = $gradient_stops
+    }
+    else if (['Backspace','Delete'].includes(e.key)) {
+      deleteStop(stop)
+    }
+  }
+
+  function relinkStop(stop) {
+    stop.position2 = stop.position1
+    $gradient_stops = updateStops($gradient_stops)
   }
 
   function gradientAngle(ng) {
@@ -205,10 +275,63 @@
       <div class="visual-vert"></div>
     {/if}
     <div class="visual" style="--ng: {$conic_angle}deg"></div>
+    <div class="dotted visual"></div>
     <div class="dot"></div>
   </div>
   <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $conic_named_position == '--' ? `${position.x} ${position.y}` : $conic_named_position}} use:dragula style="max-inline-size: {w * .2}px"></div>
+  <div class="stops" style="rotate: -90deg; translate: 0px -12px">
+    {#each $gradient_stops as stop, i (stop)}
+      {#if stop.kind === 'stop'}
+        <div 
+          tabindex="0"
+          use:tooltip={{content: `${stop.position1}%`}}
+          class="stop-wrap" 
+          style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 59px)"
+          on:mouseleave={mouseOut} 
+          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
+          on:dblclick={()=>deleteStop(stop)}
+        >
+          <div class="stop" data-stop-index={i} data-position="1">
+            <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+          </div>
+        </div>
+        {#if stop.position1 !== stop.position2}
+          <div 
+            tabindex="0"
+            use:tooltip={{content: `${stop.position2}%`}}
+            class="stop-wrap" 
+            style="transform: rotateZ({(360 * (parseInt(stop.position2) / 100))}deg) translate(0, 59px)"
+            on:mouseleave={mouseOut} 
+            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
+            on:dblclick={()=>relinkStop(stop)}
+          >
+            <div class="stop" data-stop-index={i} data-position="2">
+              <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            </div>
+          </div>
+        {/if}
+      {/if}
+      {#if stop.kind === 'hint'}
+        <div 
+          class="hint" 
+          tabindex="0"
+          use:tooltip={{content: `${stop.percentage}%`}}
+          data-stop-index={i} 
+          style="
+            transform: rotateZ({(360 * (parseInt(stop.percentage) / 100))}deg) translate(0, 85px);
+            visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
+          " 
+          on:mouseleave={mouseOut}
+          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
+        >
+          <svg viewBox="0 0 256 256">
+            <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
+          </svg>
+        </div>
+      {/if}
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -264,11 +387,11 @@
   }
 
   .stop-wrap:has(+ .stop-wrap) .stop {
-    clip-path: inset(0 50% 0 0);
+    clip-path: inset(0 0 0 50%);
   }
 
   .stop-wrap + .stop-wrap .stop {
-    clip-path: inset(0 0 0 50%);
+    clip-path: inset(0 50% 0 0);
   }
 
   .stop {
@@ -312,7 +435,7 @@
   }
 
   .hint {
-    translate: -50% 50%;
+    translate: -50% 0%;
   }
 
   .hint > svg {
@@ -356,7 +479,7 @@
     -webkit-mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
     background-image: conic-gradient(var(--line-1), var(--line-1) var(--ng), #0000 0);
 
-    inline-size: var(--size-10);
+    inline-size: var(--size-11);
     aspect-ratio: var(--ratio-square);
     border-radius: var(--radius-round);
     position: absolute;
@@ -365,9 +488,20 @@
     transform: translate(-50%, -50%);
   }
 
+  .visual:not(.dotted) {
+    --line-1: white;
+  }
+
+  .dotted.visual {
+    background-image: repeating-conic-gradient(
+      var(--line-1), var(--line-1) 2%, 
+      #0000 0%, #0000 4%
+    );
+  }
+
   .visual-vert {
     --line-1: white;
-    block-size: var(--size-10);
+    block-size: var(--size-11);
     inline-size: 3px;
     background-image: linear-gradient(to bottom, var(--line-1) 50%, #0000 0);
   }
@@ -385,7 +519,7 @@
 
   .invisible-rotator {
     pointer-events: auto;
-    inline-size: var(--size-10);
+    inline-size: var(--size-11);
     aspect-ratio: var(--ratio-square);
     border-radius: var(--radius-round);
     position: absolute;
@@ -412,6 +546,15 @@
   }
 
   .dragzone:hover {
-    --_shadow-size: var(--size-10);
+    --_shadow-size: var(--size-11);
+  }
+
+  .stops {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: grid;
+    place-items: center;
+    place-content: center;
   }
 </style>

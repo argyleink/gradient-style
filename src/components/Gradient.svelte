@@ -334,7 +334,7 @@
           <div 
             bind:this={preview_resizer} 
             class="resizer" 
-            style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 50cqi;'}`}>
+            style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
               <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
           </div>  
           {#if $gradient_type === 'linear'}
@@ -458,7 +458,7 @@
 
   @media (min-width: 1024px) {
     .resizer {
-      block-size: 50vh;
+      block-size: 75vh;
     }
   }
 
