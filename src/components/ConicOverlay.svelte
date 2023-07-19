@@ -88,24 +88,6 @@
       const isDrag = e.target.closest('.dragzone')
 
       if (isDrag) {
-        dragulaState.target = isStop
-        dragulaState.start.x = e.screenX
-        dragulaState.start.y = e.screenY
-
-        dragIt(isStop)
-      }
-      else if (isRotator) {
-        rotateIt(isRotator)
-      }
-      else if (isStop) {
-        dragulaState.target = isStop
-        dragulaState.start.x = e.screenX
-        dragulaState.start.y = e.screenY
-        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
-
-        dragIt(isStop)
-      }
-      else {
         dragulaState.target = e.target
         if ($conic_named_position != '--') {
           let pos = namedPosToPercent($conic_named_position)
@@ -117,6 +99,17 @@
         }
         node.setPointerCapture(e.pointerId)
         dragIt(e.target)
+      }
+      else if (isRotator) {
+        rotateIt(isRotator)
+      }
+      else if (isStop) {
+        dragulaState.target = isStop
+        dragulaState.start.x = e.screenX
+        dragulaState.start.y = e.screenY
+        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
+
+        dragIt(isStop)
       }
     })
 
