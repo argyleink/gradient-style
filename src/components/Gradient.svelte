@@ -372,12 +372,12 @@
         <button class="global-actions">
           <select tabindex="-1" on:change={globalAction}>
             <option disabled selected>Actions</option>
-            <option disabled>--</option>
+            <hr>
             <option>Start new</option>
             <option disabled>Copy modern CSS</option>
             <option disabled>Copy classic CSS</option>
             <option disabled>Reset all stops to auto</option>
-            <option disabled>--</option>
+            <hr>
             <option disabled>Toggle light & dark</option>
             <option>Tips & tricks</option>
             <option>Help & feedback</option>

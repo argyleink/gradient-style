@@ -160,11 +160,11 @@
         <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
           <select tabindex="-1" on:change={(e) => colorAction(e,i)}>
             <option disabled selected>Color Actions</option>
-            <option disabled>--</option>
+            <hr>
             <option>Duplicate</option>
             <option>Copy CSS color</option>
             <option>Random color</option>
-            <option disabled>--</option>
+            <hr>
             <option>Reset</option>
             <option disabled={$gradient_stops.length == 1}>Remove</option>
           </select>
