@@ -49,7 +49,7 @@
 			stops: [
 				{color: 'oklch(55% .45 350)'},
 				{kind: 'hint', auto: null, percentage: null},
-				{color: 'oklch(100% .4 95)'},
+				{color: 'oklch(95% .4 95)'},
 			],
 		},
 		{
@@ -106,7 +106,7 @@
 			angle_name: 'bottom right',
 			space: 'oklab',
 			stops: [
-				{color: 'oklch(100% .5 109)'},
+				{color: 'oklch(950% .5 109)'},
 				{kind: 'hint', auto: null, percentage: null},
 				{color: 'oklch(72% .5 100)'},
 			],
@@ -175,7 +175,7 @@
 			named_position: 'top left',
 			space: 'oklch',
 			stops: [
-				{color: 'oklch(100% .25 160)', position1: null, position2: null},
+				{color: 'oklch(95% .25 160)', position1: null, position2: null},
 				{kind: 'hint', auto: null, percentage: '26'},
 				{color: 'oklch(75% .5 180)', position1: '0', position2: '0'},
 				{kind: 'hint', auto: null, percentage: '46'},
@@ -193,15 +193,15 @@
 			angle_name: 'bottom',
 			space: 'oklch',
 			stops: [
-				{color: 'oklch(100% .2 5)', position1: null, position2: null},
+				{color: 'oklch(95% .2 5)', position1: null, position2: null},
 				{kind: 'hint', auto: null, percentage: '10'},
-				{color: 'oklch(100% .25 5)', position1: '0', position2: '0'},
+				{color: 'oklch(95% .25 5)', position1: '0', position2: '0'},
 				{kind: 'hint', auto: null, percentage: '26'},
-				{color: 'oklch(100% .3 5)', position1: '0', position2: '0'},
+				{color: 'oklch(95% .3 5)', position1: '0', position2: '0'},
 				{kind: 'hint', auto: null, percentage: '46'},
-				{color: 'oklch(100% .35 5)', position1: '0', position2: '0'},
+				{color: 'oklch(95% .35 5)', position1: '0', position2: '0'},
 				{kind: 'hint', auto: null, percentage: '72'},
-				{color: 'oklch(100% .4 5)', position1: '0', position2: '0'},
+				{color: 'oklch(95% .4 5)', position1: '0', position2: '0'},
 			],
 		},
 		{
