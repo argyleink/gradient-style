@@ -57,7 +57,9 @@
       const [l,c,h] = parsedColor.coords
       $oklchL = (parse_coords(l) * 100).toFixed()
       $oklchC = c.toFixed(2).toString()
-      $oklchH = h.toFixed().toString()
+      $oklchH = isNaN(h)
+        ? 0
+        : h.toFixed().toString()
       $oklchAlpha = parsedColor.alpha * 100
     }
     else if ($colorspace === 'lab') {
