@@ -5,7 +5,7 @@
   import { tooltip } from 'svooltip'
   import 'svooltip/styles.css'
 
-  import {gradient_type, gradient_space, gradient_interpolation, 
+  import {gradient_type, gradient_space, gradient_interpolation,
           gradient_stops, gradient_positions
   } from '../store/gradient.ts'
   import {linear_named_angle, linear_angle
@@ -105,34 +105,34 @@
   })
 
   const gensyntax = {
-    'linear': () => 
+    'linear': () =>
       `linear-gradient(
-      ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()}, 
+      ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()},
       ${stopsToStrings({new_lines: false})}
     )`,
-    'radial': () => 
+    'radial': () =>
       `radial-gradient(
-      ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()}, 
+      ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()},
       ${stopsToStrings({new_lines: false})}
     )`,
-    'conic': () => 
+    'conic': () =>
       `conic-gradient(
-      from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()}, 
+      from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()},
       ${stopsToStrings({new_lines: false})}
     )`
   }
 
   const genClassicSyntax = {
-    'linear': () => 
+    'linear': () =>
       `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
-    'radial': () => 
+    'radial': () =>
       `radial-gradient(
-      ${$radial_size} ${$radial_shape} at ${radialPositionToString()}, 
+      ${$radial_size} ${$radial_shape} at ${radialPositionToString()},
       ${stopsToStrings({convert_colors: true, new_lines: false})}
     )`,
-    'conic': () => 
+    'conic': () =>
       `conic-gradient(
-      from ${$conic_angle}deg at ${conicPositionToString()}, 
+      from ${$conic_angle}deg at ${conicPositionToString()},
       ${stopsToStrings({convert_colors: true, new_lines: false})}
     )`
   }
@@ -161,7 +161,7 @@
       .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
-          if (s.position1 != null && s.position2 != null && s.position1 != s.position2) 
+          if (s.position1 != null && s.position2 != null && s.position1 != s.position2)
             return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
           else if (s.position1 == null && s.position2 != null) {
             s.position1 = '0'
@@ -175,7 +175,7 @@
             let stop2 = s.position2 != null
               ? ' ' + s.position2 + '%'
               : ''
-            
+
             return stop1 + stop2
           }
         }
@@ -231,7 +231,7 @@
         $gradient_type = 'linear'
         $gradient_space = 'oklab'
         $gradient_stops = [
-          {kind: 'stop', color: '#000', auto: '0', position1: '0', position2: '0'}, 
+          {kind: 'stop', color: '#000', auto: '0', position1: '0', position2: '0'},
           {kind: 'hint', auto: '50', percentage: '50'},
           {kind: 'stop', color: '#fff', auto: '100', position1: '100', position2: '100'},
         ]
@@ -307,7 +307,7 @@
       <Presets />
     </div>
   </contain-er>
-  
+
   <contain-er style="container: preview-panel / inline-size;">
     <div class="inline-snap-panels">
       <section class="preview-panel">
@@ -331,12 +331,12 @@
             {/if}
             <input bind:checked={preview_hd} type="checkbox" name="hd-gradient" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between high and standard gradient previews.<br><br>(HDR) high dynamic range.</span>'}}/>
           </label>
-          <div 
-            bind:this={preview_resizer} 
-            class="resizer" 
+          <div
+            bind:this={preview_resizer}
+            class="resizer"
             style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
               <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
-          </div>  
+          </div>
           {#if $gradient_type === 'linear'}
             <LinearOverlay w={box_width} h={box_height} />
           {/if}
@@ -426,6 +426,12 @@
     box-shadow: var(--shadow-3);
     overflow: hidden;
 	}
+
+	@media (prefers-color-scheme: light) {
+    .gradient-builder {
+      --link: var(--gray-6);
+    }
+  }
 
   @media (min-width: 1024px) {
     .gradient-builder {
@@ -699,7 +705,7 @@
     font-size: var(--font-size-0);
     justify-self: end;
   }
-  
+
 
   :global(.stack) {
     display: inline-grid;
@@ -707,7 +713,7 @@
   }
 
   :global(.percentage-value) {
-    min-inline-size: 4ch; 
+    min-inline-size: 4ch;
     text-align: end;
   }
 
@@ -759,7 +765,7 @@
     --_bg-dark: var(--surface-3);
     --_bg: var(--_bg-light);
     background-color: var(--_bg);
-    
+
     appearance: none;
     background-image: var(--icon-arrow-down);
     background-position: calc(100% - 1ch) center;
@@ -769,7 +775,7 @@
     padding-inline: 1.75ch 3ch;
     line-height: 1.5;
   }
-    
+
   :global(select):is(:hover,:focus) {
     background-color: var(--_bg);
   }
@@ -777,7 +783,7 @@
   :global(select:not([disabled])) {
     box-shadow: var(--shadow-3);
   }
-  
+
   :global(select:not([disabled])):is(:hover, :focus) {
     background-image: var(--icon-arrow-up);
   }
@@ -794,7 +800,7 @@
     white-space: nowrap;
     position: absolute;
   }
-  
+
   @media (prefers-color-scheme: dark) {
     :global(select) {
       --_bg: var(--_bg-dark);

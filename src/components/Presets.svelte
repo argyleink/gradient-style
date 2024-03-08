@@ -1,7 +1,7 @@
 <script>
 	import { tooltip } from 'svooltip'
 
-	import {gradient_type, gradient_space, gradient_interpolation, 
+	import {gradient_type, gradient_space, gradient_interpolation,
 	        gradient_stops, gradient_positions
 	} from '../store/gradient.ts'
 	import {linear_named_angle, linear_angle
@@ -42,7 +42,7 @@
 		},
 		{
 			name: 'Peaches',
-			gradient: 'linear-gradient(to bottom left in oklab, oklch(55% .45 350), oklch(100% .4 95))',
+			gradient: 'linear-gradient(to bottom left in oklab, oklch(55% .45 350), oklch(95% .4 95))',
 			type: 'linear',
 			angle_name: 'bottom left',
 			space: 'oklab',
@@ -95,20 +95,20 @@
 			named_position: 'top left',
 			stops: [
 				{color: 'oklch(75% 0.5 156)'},
-				{kind: 'hint', auto: '50', percentage: '50'},
+				{kind: 'hint', auto: null, percentage: null},
 				{color: 'oklch(70% 0.5 261)'},
 			],
 		},
 		{
 			name: 'Honeycomb',
-			gradient: 'linear-gradient(to bottom right in oklab, oklch(100% .5 109), oklch(72% .5 100))',
+			gradient: 'linear-gradient(to bottom right in oklab, oklch(95% .5 110), oklch(72% .5 90))',
 			type: 'linear',
 			angle_name: 'bottom right',
 			space: 'oklab',
 			stops: [
-				{color: 'oklch(950% .5 109)'},
+				{color: 'oklch(95% .5 110)'},
 				{kind: 'hint', auto: null, percentage: null},
-				{color: 'oklch(72% .5 100)'},
+				{color: 'oklch(72% .5 90)'},
 			],
 		},
 		{
@@ -168,7 +168,7 @@
 		},
 		{
 			name: 'Soundwave',
-			gradient: "radial-gradient(farthest-corner circle at top left in oklch, oklch(100% .25 160), 26%, oklch(77% 0.50 180) 0%, 46%, oklch(77% 0.50 210) 0%, 60%, oklch(77% 0.50 230) 0%, 82%, oklch(77% 0.50 260) 0%)",
+			gradient: "radial-gradient(farthest-corner circle at top left in oklch, oklch(95% .25 160), 26%, oklch(75% 0.50 180) 0%, 46%, oklch(75% 0.50 210) 0%, 60%, oklch(75% 0.50 230) 0%, 82%, oklch(75% 0.50 260) 0%)",
 			type: 'radial',
 			named_size: 'farthest-corner',
 			shape: 'circle',
@@ -188,7 +188,7 @@
 		},
 		{
 			name: 'Palette',
-			gradient: 'linear-gradient(to bottom in oklch, oklch(100% .2 5), 10%, oklch(100% .25 5) 0%, 26%, oklch(100% .3 5) 0%, 46%, oklch(100% .35 5) 0%, 72%, oklch(100% .4 5) 0%)',
+			gradient: 'linear-gradient(to bottom in oklch, oklch(95% .2 5), 10%, oklch(95% .25 5) 0%, 26%, oklch(95% .3 5) 0%, 46%, oklch(95% .35 5) 0%, 72%, oklch(95% .4 5) 0%)',
 			type: 'linear',
 			angle_name: 'bottom',
 			space: 'oklch',
@@ -234,7 +234,7 @@
 		$gradient_type = preset.type
 		$gradient_space = preset.space
 
-		if (preset.interpolation) 
+		if (preset.interpolation)
 			$gradient_interpolation = preset.interpolation
 		else
 			$gradient_interpolation = 'shorter'
@@ -242,10 +242,10 @@
 		const convertedStops = preset.stops.map(stop => {
 			if (stop.kind !== 'hint') {
 				return {
-						kind: 'stop', 
-						color: stop.color, 
-						auto: null, 
-						position1: stop.position1 || null, 
+						kind: 'stop',
+						color: stop.color,
+						auto: null,
+						position1: stop.position1 || null,
 						position2: stop.position2 || null,
 				}
 			}
