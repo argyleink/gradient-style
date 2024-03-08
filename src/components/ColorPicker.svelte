@@ -2,14 +2,14 @@
   import { onMount } from 'svelte'
   import Color from 'colorjs.io'
   import {
-    parse_coords, contrast_color, 
+    parse_coords, contrast_color,
     contrast_color_with_alpha
   } from '../utils/color.ts'
   import {copyToClipboard} from '../utils/clipboard.ts'
   import {whatsTheGamutDamnit, getColorJSspaceID, reverseColorJSspaceID} from '../utils/colorspace.ts'
 
   import {
-    picker_value, colorspace, 
+    picker_value, colorspace,
     oklabL, oklabA, oklabB, oklabAlpha,
     oklchL, oklchC, oklchH, oklchAlpha,
     labL, labA, labB, labAlpha,
@@ -45,7 +45,7 @@
     $colorspace = reverseColorJSspaceID(parsedColor.space.id)
 
     dialog.querySelector('.colorspace').value = $colorspace
-    
+
     if ($colorspace === 'oklab') {
       const [l,a,b] = parsedColor.coords
       $oklabL = (parse_coords(l) * 100).toFixed()
@@ -128,7 +128,7 @@
 
   const animationsComplete = element =>
     Promise.allSettled(
-      element.getAnimations().map(animation => 
+      element.getAnimations().map(animation =>
         animation.finished))
 
   const lightDismiss = ({target:dialog}) => {
@@ -212,7 +212,7 @@
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" on:change={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});"> 
+      <select class="colorspace" on:change={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});">
         <optgroup label="Standard">
           <option value="srgb">rgb</option>
           <option>srgb-linear</option>
@@ -225,7 +225,7 @@
         </optgroup>
         <optgroup label="Ultra HD">
           <option>lab</option>
-          <option>lch</option> 
+          <option>lch</option>
           <option selected>oklch</option>
           <option>oklab</option>
           <option>rec2020</option>
@@ -286,7 +286,7 @@
 
         <div class="control">
           <span class="control-channel">H</span>
-          <input class="control-input" type="range" min="0" max="360" bind:value={$oklchH} style="background-image: linear-gradient(to right in oklch longer hue, oklch(100% .5 0), oklch(100% .5 0))">
+          <input class="control-input" type="range" min="0" max="360" bind:value={$oklchH} style={`background-image: linear-gradient(to right in oklch longer hue, oklch(95% ${$oklchC} 0), oklch(95% ${$oklchC} 0))`}>
           <input type="number" bind:value={$oklchH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -479,8 +479,8 @@
 
   :global(html) {
     --gradient-checkerboard: repeating-conic-gradient(
-      var(--surface-3) 0% 25%, 
-      transparent 0% 50%) 
+      var(--surface-3) 0% 25%,
+      transparent 0% 50%)
       50% / 1rem 1rem;
   }
 
@@ -518,7 +518,7 @@
     justify-items: start;
     padding: var(--size-3);
     box-shadow: var(--inner-shadow-0);
-    background: 
+    background:
       linear-gradient(var(--user-color) 0 0),
       var(--gradient-checkerboard);
   }
@@ -589,16 +589,16 @@
 
   .control-input::-webkit-slider-thumb {
     --_border-size: 4px;
-    
+
     cursor: grab;
     appearance: none;
     border: 4px solid white;
     height: calc(1rem + (var(--_border-size) * 2));
     aspect-ratio: 1;
     border-radius: var(--radius-round);
-    box-shadow: var(--shadow-2), var(--inner-shadow-2);
+    box-shadow: var(--shadow-5), var(--inner-shadow-2);
   }
-  
+
   .control-input:active::-webkit-slider-thumb {
     cursor: grabbing;
   }
@@ -623,7 +623,7 @@
   }
 
   .color-meta {
-    display: flex; 
+    display: flex;
     justify-content: space-between;
     align-items: start;
   }
