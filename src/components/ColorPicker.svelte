@@ -338,7 +338,7 @@
 
         <div class="control">
           <span class="control-channel">H</span>
-          <input class="control-input" type="range" min="0" max="360" bind:value={$lchH} style="background-image: linear-gradient(to right in lch longer hue, lch(100% 230 0), lch(100% 230 0))">
+          <input class="control-input" type="range" min="0" max="360" bind:value={$lchH} style={`background-image: linear-gradient(to right in lch longer hue, lch(95% ${$lchC} 0), lch(95% ${$lchC} 0))`}>
           <input type="number" bind:value={$lchH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -352,7 +352,7 @@
       {#if $colorspace === 'hsl'}
         <div class="control">
           <span class="control-channel">H</span>
-          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hslH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hslH} style={`background-image: linear-gradient(to right in hsl longer hue, hsl(0 ${$hslS} 50%), hsl(0 ${$hslS} 50%))`}>
           <input type="number" bind:value={$hslH} min="0" max="360" class="slider-percentage">
         </div>
 
