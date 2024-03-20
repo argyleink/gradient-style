@@ -228,6 +228,18 @@
 				{color: '#fff', position1: '0', position2: '0'},
 			],
 		},
+		{
+			name: 'LearnUI',
+			gradient: 'linear-gradient(to right in lch, color(display-p3 25% 25% 100%), color(display-p3 100% 85% 30%))',
+			type: 'linear',
+			angle_name: 'right',
+			space: 'lch',
+			stops: [
+				{color: 'color(display-p3 25% 25% 100%)'},
+				{kind: 'hint', auto: null, percentage: null},
+				{color: 'color(display-p3 100% 85% 30%)'},
+			],
+		},
 	]
 
 	function presetClicked(preset) {
