@@ -57,12 +57,17 @@
     background-color: color-mix(in oklch, var(--color) 90%, transparent);
   }
 
+  .ping {
+    animation: var(--animation-ping);
+  }
+
   .hiding {
     opacity: 0;
     pointer-events: none;
-  }
+    animation: none;
 
-  .ping {
-    animation: var(--animation-ping);
+    & > .ping {
+      animation: none;
+    }
   }
 </style>
