@@ -41,7 +41,7 @@
     <AngleIcon angle={$linear_angle} />
     <RangeSlider bind:value={$linear_angle} on:change={blurNamedAngle} min="0" max="360" step="1" style="--accent-color: {$linear_angle === null ? 'var(--gray-5)' : 'var(--link)'}" />
     <div class="input-suffix">
-      <input type="number" bind:value={$linear_angle} on:input={blurNamedAngle} min="0" max="360" step="1"  class="slider-percentage">
+      <input type="number" bind:value={$linear_angle} oninput={blurNamedAngle} min="0" max="360" step="1"  class="slider-percentage">
       <sup>°</sup>
     </div>
   </div>

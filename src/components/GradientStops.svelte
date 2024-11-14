@@ -114,22 +114,22 @@
       <fieldset
         style="accent-color: {stop.color}; --brand: {stop.color}"
         class="stop control-set"
-        on:mouseenter={() => fieldsetInteractingStart(stop)}
-        on:focusin={() => fieldsetInteractingStart(stop)}
-        on:mouseleave={() => fieldsetInteractingEnd()}
-        on:focusout={() => fieldsetInteractingEnd()}
-        on:input={(e) => slidingPosition(e, stop)}
+        onmouseenter={() => fieldsetInteractingStart(stop)}
+        onfocusin={() => fieldsetInteractingStart(stop)}
+        onmouseleave={() => fieldsetInteractingEnd()}
+        onfocusout={() => fieldsetInteractingEnd()}
+        oninput={(e) => slidingPosition(e, stop)}
       >
         <h4>Color {i}</h4>
         {#if i === 0}
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
         {/if}
         <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
-          <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
+          <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)}></button>
           <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
         </div>
         <div class="positions-pair">
-          <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} on:click={() => stop.position2 = stop.position1}>
+          <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} onclick={() => stop.position2 = stop.position1}>
             {#if stop.position1 === stop.position2}
               <svg class="linked-on" width="32" height="32" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M7 17q-2.075 0-3.538-1.463T2 12q0-2.075 1.463-3.538T7 7h3q.425 0 .713.288T11 8q0 .425-.288.713T10 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17H7Zm2-4q-.425 0-.713-.288T8 12q0-.425.288-.713T9 11h6q.425 0 .713.288T16 12q0 .425-.288.713T15 13H9Zm5 4q-.425 0-.713-.288T13 16q0-.425.288-.713T14 15h3q1.25 0 2.125-.875T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.463T22 12q0 2.075-1.463 3.538T17 17h-3Z"/>
@@ -158,7 +158,7 @@
           </div>
         </div>
         <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
-          <select tabindex="-1" on:change={(e) => colorAction(e,i)}>
+          <select tabindex="-1" onchange={(e) => colorAction(e,i)}>
             <option disabled selected>Color Actions</option>
             <hr>
             <option>Duplicate</option>
@@ -174,11 +174,11 @@
     {#if stop.kind === 'hint'}
       <fieldset
         class="hint control-set"
-        on:mouseenter={() => fieldsetInteractingStart(stop)}
-        on:focusin={() => fieldsetInteractingStart(stop)}
-        on:mouseleave={() => fieldsetInteractingEnd()}
-        on:focusout={() => fieldsetInteractingEnd()}
-        on:input={() => fixIfEmptied(stop)}
+        onmouseenter={() => fieldsetInteractingStart(stop)}
+        onfocusin={() => fieldsetInteractingStart(stop)}
+        onmouseleave={() => fieldsetInteractingEnd()}
+        onfocusout={() => fieldsetInteractingEnd()}
+        oninput={() => fixIfEmptied(stop)}
       >
         <h4>Transition</h4>
         <div class="color-hint slider-set">
@@ -288,7 +288,7 @@
     transition: opacity .3s var(--ease-3);
   }
 
-  .chip.color-stop:is(:hover, :focus)::after {
+  .chip.color-stop:is(:global(:hover, :focus))::after {
     opacity: 1;
   }
 

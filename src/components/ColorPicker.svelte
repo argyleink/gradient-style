@@ -193,11 +193,8 @@
     copyToClipboard(user_color)
   }
 
-  $: text_overlay = contrast_color(user_color)
-  $: bg_overlay = contrast_color(text_overlay)
-  $: gamut = whatsTheGamutDamnit(user_color)
 
-  $: user_color = gencolor($colorspace,
+  let user_color = $derived(gencolor($colorspace,
     $oklabL, $oklabA, $oklabB, $oklabAlpha,
     $oklchL, $oklchC, $oklchH, $oklchAlpha,
     $labL, $labA, $labB, $labAlpha,
@@ -206,13 +203,16 @@
     $hwbH, $hwbW, $hwbB, $hwbAlpha,
     $rgbR, $rgbG, $rgbB, $rgbAlpha,
     $colorR, $colorG, $colorB, $colorAlpha
-  )
+  ))
+  let text_overlay = $derived(contrast_color(user_color))
+  let bg_overlay = $derived(contrast_color(text_overlay))
+  let gamut = $derived(whatsTheGamutDamnit(user_color))
 </script>
 
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${user_color}`}>
-      <select class="colorspace" on:change={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});">
+      <select class="colorspace" onchange={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});">
         <optgroup label="Standard">
           <option value="srgb">rgb</option>
           <option>srgb-linear</option>
@@ -236,7 +236,7 @@
         </optgroup>
       </select>
       <div class="gamut" title="Gamut">{gamut}</div>
-      <output class="color-information" on:click={copyColor}>
+      <output class="color-information" onclick={copyColor}>
         {user_color}
         <svg width="32" height="32" viewBox="0 0 24 24">
           <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Z"/>
@@ -504,7 +504,7 @@
     --_bg: color-mix(in oklch, var(--counter-contrast-color), transparent 90%);
   }
 
-  .colorspace:is(:hover,:focus) {
+  .colorspace:is(:global(:hover,:focus)) {
     border-color: color-mix(in oklch, var(--counter-contrast-color), transparent 50%);
     color: var(--counter-contrast-color);
   }
@@ -618,7 +618,7 @@
     transition: opacity .3s ease;
   }
 
-  .color-information:is(:hover, :focus) > svg {
+  .color-information:is(:global(:hover, :focus)) > svg {
     opacity: 1;
   }
 

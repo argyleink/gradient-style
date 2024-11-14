@@ -5,16 +5,22 @@
 
   const dispatch = createEventDispatcher()
 
-  export let id = 'named-directions'
-  export let selected = 'center'
-  export let mode = 'position'
+  /**
+   * @typedef {Object} Props
+   * @property {string} [id]
+   * @property {string} [selected]
+   * @property {string} [mode]
+   */
+
+  /** @type {Props} */
+  let { id = 'named-directions', selected = $bindable('center'), mode = 'position' } = $props();
 
   function dispatchChange() {
     dispatch('change', { selected })
   }
 </script>
 
-<fieldset id={id} class="angle-matrix" on:input={dispatchChange}>
+<fieldset id={id} class="angle-matrix" oninput={dispatchChange}>
   {#if mode === 'position'}
     {#each gradient_positions as d}
       <input type="radio" class="matrix-dot" name="{id}-group" value={d} title={d} bind:group={selected} use:tooltip={{content: d}}>
@@ -53,12 +59,12 @@
   }
   
   .matrix-dot[value="center"] { place-self: center }
-  .matrix-dot:is([value="top left"],[value="to top left"]) { place-self: start }
-  .matrix-dot:is([value="top"],[value="to top"]) { place-self: start center }
-  .matrix-dot:is([value="top right"],[value="to top right"]) { place-self: start end }
-  .matrix-dot:is([value="right"],[value="to right"]) { place-self: center end }
-  .matrix-dot:is([value="bottom right"],[value="to bottom right"]) { place-self: end }
-  .matrix-dot:is([value="bottom"], [value="to bottom"]) { place-self: end center }
-  .matrix-dot:is([value="bottom left"],[value="to bottom left"]) { place-self: end start }
-  .matrix-dot:is([value="left"],[value="to left"]) { place-self: center start }
+  .matrix-dot:is(:global([value="top left"],[value="to top left"])) { place-self: start }
+  .matrix-dot:is(:global([value="top"],[value="to top"])) { place-self: start center }
+  .matrix-dot:is(:global([value="top right"],[value="to top right"])) { place-self: start end }
+  .matrix-dot:is(:global([value="right"],[value="to right"])) { place-self: center end }
+  .matrix-dot:is(:global([value="bottom right"],[value="to bottom right"])) { place-self: end }
+  .matrix-dot:is(:global([value="bottom"], [value="to bottom"])) { place-self: end center }
+  .matrix-dot:is(:global([value="bottom left"],[value="to bottom left"])) { place-self: end start }
+  .matrix-dot:is(:global([value="left"],[value="to left"])) { place-self: center start }
 </style>

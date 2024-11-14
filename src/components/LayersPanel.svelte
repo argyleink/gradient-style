@@ -18,7 +18,8 @@
     visibility = !visibility
   }
   
-  $: visibility = false
+  let visibility = $state(false);
+  
 </script>
 
 <section class="layers {$gradient_type}">

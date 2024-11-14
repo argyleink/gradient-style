@@ -55,11 +55,11 @@
     background: var(--surface-1);
   }
 
-  .switch:has(:focus-visible) {
+  .switch:has(:global(:focus-visible)) {
     outline: 1px solid var(--link);
   }
 
-  .switch:has(:checked) {
+  .switch:has(:global(:checked)) {
     color: var(--text-1);
     background: var(--surface-2);
   }
@@ -69,7 +69,7 @@
       background: var(--surface-2);
     }
 
-    .switch:has(:checked) {
+    .switch:has(:global(:checked)) {
       background: var(--surface-2);
     }
   }
@@ -78,7 +78,7 @@
     grid-area: pile;
   }
 
-  .switch > :is(input, label) {
+  .switch > :is(:global(input, label)) {
     opacity: 0;
     inline-size: 0;
     block-size: 0;

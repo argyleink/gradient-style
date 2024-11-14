@@ -12,8 +12,14 @@
   import {contrast_color_prefer_white} from '../utils/color.ts'
   import {randomNumber} from '../utils/numbers.ts'
 
-  export let w = null
-  export let h = null
+  /**
+   * @typedef {Object} Props
+   * @property {any} [w]
+   * @property {any} [h]
+   */
+
+  /** @type {Props} */
+  let { w = null, h = null } = $props();
   let dragYdelta = null
 
   const dragulaState = {
@@ -249,14 +255,14 @@
     return ng - 90
   }
 
-  $: position = overlayPosition(
+  let position = $derived(overlayPosition(
     $conic_position,
     $conic_named_position,
     w, h
-  )
+  ))
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div use:dragula class="conic-overlay" style="
   rotate: {gradientAngle($conic_angle)}deg;
   left: {position.x}; 
@@ -281,12 +287,12 @@
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
           style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 59px)"
-          on:mouseleave={mouseOut} 
-          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
-          on:dblclick={()=>deleteStop(stop)}
+          onmouseleave={mouseOut} 
+          onkeydown={(e)=>handleKeypress(e,stop,'position1')}
+          ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
-            <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -295,12 +301,12 @@
             use:tooltip={{content: `${stop.position2}%`}}
             class="stop-wrap" 
             style="transform: rotateZ({(360 * (parseInt(stop.position2) / 100))}deg) translate(0, 59px)"
-            on:mouseleave={mouseOut} 
-            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
-            on:dblclick={()=>relinkStop(stop)}
+            onmouseleave={mouseOut} 
+            onkeydown={(e)=>handleKeypress(e,stop,'position2')}
+            ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2">
-              <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -315,8 +321,8 @@
             transform: rotateZ({(360 * (parseInt(stop.percentage) / 100))}deg) translate(0, 85px);
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
-          on:mouseleave={mouseOut}
-          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
+          onmouseleave={mouseOut}
+          onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
@@ -379,7 +385,7 @@
     translate: -50% 0;
   }
 
-  .stop-wrap:has(+ .stop-wrap) .stop {
+  .stop-wrap:has(:global(+ .stop-wrap)) .stop {
     clip-path: inset(0 0 0 50%);
   }
 
@@ -438,14 +444,14 @@
     stroke: hsl(0 0% 0% / 15%);
   }
 
-  :is(.hint > svg, .stop) {
+  :is(:global(.hint > svg, .stop)) {
     pointer-events: auto;
     touch-action: manipulation;
     cursor: grab;
     user-select: none;
   }
 
-  :is(.hint > svg, .stop):active {
+  :is(:global(.hint > svg, .stop)):active {
     cursor: grabbing;
   }
 

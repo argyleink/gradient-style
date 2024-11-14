@@ -36,10 +36,10 @@
 
   import Hint from './Hint.svelte'
 
-  let preview_resizer
-  let preview_hd = true
-  let box_width
-  let box_height
+  let preview_resizer = $state()
+  let preview_hd = $state(true)
+  let box_width = $state()
+  let box_height = $state()
   let metatag
   let svgicon
 
@@ -256,7 +256,7 @@
     event.target.selectedIndex = 0
   }
 
-  $: user_gradient = gensyntax[$gradient_type](
+  let user_gradient = $derived(gensyntax[$gradient_type](
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
@@ -269,9 +269,9 @@
     $conic_angle,
     $conic_position,
     $conic_named_position
-  )
+  ))
 
-  $: classic_gradient = genClassicSyntax[$gradient_type](
+  let classic_gradient = $derived(genClassicSyntax[$gradient_type](
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
@@ -284,7 +284,7 @@
     $conic_angle,
     $conic_position,
     $conic_named_position
-  )
+  ))
 </script>
 
 <div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
@@ -312,7 +312,7 @@
     <div class="inline-snap-panels">
       <section class="preview-panel">
         <div class="panel-actions">
-          <button on:click={e => showCodePane()} use:tooltip={{content: "Get the CSS"}}>
+          <button onclick={e => showCodePane()} use:tooltip={{content: "Get the CSS"}}>
             <span class="sr-only">Get the CSS code</span>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path fill="currentColor" d="M16.7 17.3q-.275.275-.688.275t-.712-.3q-.3-.3-.3-.712t.3-.713l3.875-3.875l-3.9-3.9Q15 7.8 15.012 7.388T15.3 6.7q.275-.275.7-.275t.7.275l4.6 4.6q.3.3.3.7t-.3.7l-4.6 4.6Zm-9.4 0l-4.6-4.6q-.3-.3-.3-.7t.3-.7l4.6-4.6q.275-.275.7-.287t.725.287q.3.3.3.713t-.3.712l-3.9 3.9l3.9 3.9q.275.275.263.688T8.7 17.3q-.275.275-.7.275t-.7-.275Z"/>
@@ -350,7 +350,7 @@
       </section>
       <section class="code-preview-panel">
         <div class="panel-actions">
-          <button on:click={e => showEditorPane()} use:tooltip={{content: "Back to the editor"}}>
+          <button onclick={e => showEditorPane()} use:tooltip={{content: "Back to the editor"}}>
             <span class="sr-only">Back to editor</span>
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="m10.875 19.3l-6.6-6.6q-.15-.15-.213-.325T4 12q0-.2.063-.375t.212-.325l6.6-6.6q.275-.275.688-.287t.712.287q.3.275.313.688T12.3 6.1L7.4 11h11.175q.425 0 .713.288t.287.712q0 .425-.287.713t-.713.287H7.4l4.9 4.9q.275.275.288.7t-.288.7q-.275.3-.7.3t-.725-.3Z"/>
@@ -370,7 +370,7 @@
     <section class="controls">
       <div class="menu-bar">
         <button class="global-actions">
-          <select tabindex="-1" on:change={globalAction}>
+          <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Actions</option>
             <hr>
             <option>Start new</option>
@@ -394,7 +394,7 @@
       <GradientStops />
 
       <footer class="end-of-stops">
-        <button class="add-color" on:click={() => addStop()}>
+        <button class="add-color" onclick={() => addStop()}>
           Add a random color
           <svg viewBox="0 0 24 24">
             <path fill="currentColor" d="m17 3l5.25 4.5L17 12l5.25 4.5L17 21v-3h-2.74l-2.82-2.82l2.12-2.12L15.5 15H17V9h-1.5l-9 9H2v-3h3.26l9-9H17V3M2 6h4.5l2.82 2.82l-2.12 2.12L5.26 9H2V6Z"/>
@@ -776,7 +776,7 @@
     line-height: 1.5;
   }
 
-  :global(select):is(:hover,:focus) {
+  :global(select):is(:global(:hover,:focus)) {
     background-color: var(--_bg);
   }
 
@@ -784,7 +784,7 @@
     box-shadow: var(--shadow-3);
   }
 
-  :global(select:not([disabled])):is(:hover, :focus) {
+  :global(select:not([disabled])):is(:global(:hover, :focus)) {
     background-image: var(--icon-arrow-up);
   }
 

@@ -308,7 +308,7 @@
 	<p>HD Examples</p>
 	<div class="scroller">
 		{#each presets as preset}
-			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} on:click={()=>presetClicked(preset)}></button>
+			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} onclick={()=>presetClicked(preset)}></button>
 		{/each}
 	</div>
 </section>
