@@ -1,17 +1,13 @@
 <script>
   import { onMount, afterUpdate } from 'svelte'
   import { copyToClipboard } from '../utils/clipboard.ts'
-  
+
   export let modern_gradient = 'none'
   export let classic_gradient = 'none'
   let loaded = false
-  
+
   onMount(() => {
     loaded = true
-    Prism.highlightAll()
-  })
-
-  afterUpdate(() => {
     Prism.highlightAll()
   })
 
@@ -23,13 +19,13 @@
     if (modern_gradient != 'none' && classic_gradient != 'none') {
       return `
 .modern-gradient {
-  background-image: 
+  background-image:
     ${modern_gradient}
   ;
 }
 
 .classic-gradient {
-  background-image: 
+  background-image:
     ${classic_gradient}
   ;
 }`.trim()
@@ -37,7 +33,7 @@
     else if (modern_gradient != 'none') {
       return `
 .modern-gradient {
-  background-image: 
+  background-image:
     ${modern_gradient}
   ;
 }`.trim()
@@ -45,7 +41,7 @@
     else if (classic_gradient != 'none') {
       return `
 .classic-gradient {
-  background-image: 
+  background-image:
     ${classic_gradient}
   ;
 }`.trim()
