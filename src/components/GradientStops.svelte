@@ -41,9 +41,9 @@
 
   function dupeStop(pos) {
     const clone = {
-      kind: 'stop', 
-      color: $gradient_stops[pos].color, 
-      position1: $gradient_stops[pos].position1, 
+      kind: 'stop',
+      color: $gradient_stops[pos].color,
+      position1: $gradient_stops[pos].position1,
       position2: $gradient_stops[pos].position2,
     }
 
@@ -58,7 +58,7 @@
 
     // spec fix, cant have 2nd position without the 1st one
     if (pos === 1 && $gradient_stops[index].position2 !== null)
-      $gradient_stops[index]['position2'] = null      
+      $gradient_stops[index]['position2'] = null
   }
 
   function pickColor(stop, e) {
@@ -111,12 +111,12 @@
   {#each $gradient_stops as stop, i (stop)}
     <div in:fade="{{duration: 450}}" out:scale animate:flip="{{duration: 350, delay: 120}}">
     {#if stop.kind === 'stop'}
-      <fieldset 
-        style="accent-color: {stop.color}; --brand: {stop.color}" 
+      <fieldset
+        style="accent-color: {stop.color}; --brand: {stop.color}"
         class="stop control-set"
-        on:mouseenter={() => fieldsetInteractingStart(stop)} 
-        on:focusin={() => fieldsetInteractingStart(stop)} 
-        on:mouseleave={() => fieldsetInteractingEnd()} 
+        on:mouseenter={() => fieldsetInteractingStart(stop)}
+        on:focusin={() => fieldsetInteractingStart(stop)}
+        on:mouseleave={() => fieldsetInteractingEnd()}
         on:focusout={() => fieldsetInteractingEnd()}
         on:input={(e) => slidingPosition(e, stop)}
       >
@@ -173,10 +173,10 @@
     {/if}
     {#if stop.kind === 'hint'}
       <fieldset
-        class="hint control-set" 
-        on:mouseenter={() => fieldsetInteractingStart(stop)} 
-        on:focusin={() => fieldsetInteractingStart(stop)} 
-        on:mouseleave={() => fieldsetInteractingEnd()} 
+        class="hint control-set"
+        on:mouseenter={() => fieldsetInteractingStart(stop)}
+        on:focusin={() => fieldsetInteractingStart(stop)}
+        on:mouseleave={() => fieldsetInteractingEnd()}
         on:focusout={() => fieldsetInteractingEnd()}
         on:input={() => fixIfEmptied(stop)}
       >
@@ -188,7 +188,7 @@
           <div use:tooltip={{html: true, content: '<span class="rich-tooltip">Transition hint<br>Adjusts the midpoint between 2 stops.<br><br>Delete value to reset.</span>', placement: 'top-start',}}>
             <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2c1.94 0 3.59.7 4.95 2.05C21.3 5.41 22 7.06 22 9c0 1.56-.5 2.96-1.42 4.2c-.94 1.23-2.14 2.07-3.61 2.5l.03-.32V15c0-2.19-.77-4.07-2.35-5.65S11.19 7 9 7h-.37l-.33.03c.43-1.47 1.27-2.67 2.5-3.61C12.04 2.5 13.44 2 15 2M9 8a7 7 0 0 1 7 7a7 7 0 0 1-7 7a7 7 0 0 1-7-7a7 7 0 0 1 7-7m0 2a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5Z"/></svg>
           </div>
-          <RangeSlider bind:value={stop.percentage} 
+          <RangeSlider bind:value={stop.percentage}
             style="--accent-color: {stop.percentage == stop.auto ? 'var(--track-color)' : 'var(--link)'}"/>
           <div class="input-suffix">
             <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">

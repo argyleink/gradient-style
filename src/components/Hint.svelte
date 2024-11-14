@@ -17,14 +17,14 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 {#if !seen}
-  <div 
-    class="hint hiding" 
+  <div
+    class="hint hiding"
     use:tooltip={{html: true, content: `
       <span class="rich-tooltip">
         <b>${title}</b><br>
         ${copy}
       </span>
-    `}} 
+    `}}
     on:mouseleave={hideMe}
     on:blur={hideMe}
     out:fade
