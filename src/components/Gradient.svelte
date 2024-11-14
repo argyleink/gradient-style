@@ -107,19 +107,19 @@
   const gensyntax = {
     'linear': () =>
       `linear-gradient(
-      ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()},
-      ${stopsToStrings({new_lines: false})}
-    )`,
+    ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()},
+    ${stopsToStrings({new_lines: false})}
+  )`,
     'radial': () =>
       `radial-gradient(
-      ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()},
-      ${stopsToStrings({new_lines: false})}
-    )`,
+    ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()},
+    ${stopsToStrings({new_lines: false})}
+  )`,
     'conic': () =>
       `conic-gradient(
-      from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()},
-      ${stopsToStrings({new_lines: false})}
-    )`
+    from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()},
+    ${stopsToStrings({new_lines: false})}
+  )`
   }
 
   const genClassicSyntax = {
@@ -127,14 +127,14 @@
       `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
     'radial': () =>
       `radial-gradient(
-      ${$radial_size} ${$radial_shape} at ${radialPositionToString()},
-      ${stopsToStrings({convert_colors: true, new_lines: false})}
-    )`,
+    ${$radial_size} ${$radial_shape} at ${radialPositionToString()},
+    ${stopsToStrings({convert_colors: true, new_lines: false})}
+  )`,
     'conic': () =>
       `conic-gradient(
-      from ${$conic_angle}deg at ${conicPositionToString()},
-      ${stopsToStrings({convert_colors: true, new_lines: false})}
-    )`
+    from ${$conic_angle}deg at ${conicPositionToString()},
+    ${stopsToStrings({convert_colors: true, new_lines: false})}
+  )`
   }
 
   function spaceToString() {
@@ -357,11 +357,8 @@
             </svg>
           </button>
         </div>
-        <h4>Modern HD gradient snippet</h4>
-        <Prism modern_gradient={user_gradient} />
-        <br>
-        <h4>Classic gradient snippet</h4>
-        <Prism classic_gradient={classic_gradient} />
+        <h4>Gradient CSS</h4>
+        <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
       </section>
     </div>
   </contain-er>
