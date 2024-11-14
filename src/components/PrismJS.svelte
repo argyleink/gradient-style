@@ -1,5 +1,5 @@
 <script>
-  import { onMount, afterUpdate } from 'svelte'
+  import { onMount } from 'svelte'
   import { copyToClipboard } from '../utils/clipboard.ts'
 
   export let modern_gradient = 'none'
