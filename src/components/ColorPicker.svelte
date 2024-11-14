@@ -156,7 +156,6 @@
     else if (isRGBcolor(colorspace))
       color = rgbColor()
 
-    $picker_value = color
     return color
   }
 
@@ -184,34 +183,38 @@
   }
 
   function spaceChange(e) {
-    const current = new Color(user_color)
+    const current = new Color($picker_value)
     setColor(current.to(getColorJSspaceID(e.target.value)).toGamut())
     $colorspace = e.target.value
   }
 
   function copyColor() {
-    copyToClipboard(user_color)
+    copyToClipboard($picker_value)
   }
 
+  $effect(() => {
+    // When Any of the values here change, we re-calculate the color, and update the picker_value. This will trigger the derived values to update.
+    $picker_value = gencolor($colorspace,
+      $oklabL, $oklabA, $oklabB, $oklabAlpha,
+      $oklchL, $oklchC, $oklchH, $oklchAlpha,
+      $labL, $labA, $labB, $labAlpha,
+      $lchL, $lchC, $lchH, $lchAlpha,
+      $hslH, $hslS, $hslL, $hslAlpha,
+      $hwbH, $hwbW, $hwbB, $hwbAlpha,
+      $rgbR, $rgbG, $rgbB, $rgbAlpha,
+      $colorR, $colorG, $colorB, $colorAlpha
+    )
+});
 
-  let user_color = $derived(gencolor($colorspace,
-    $oklabL, $oklabA, $oklabB, $oklabAlpha,
-    $oklchL, $oklchC, $oklchH, $oklchAlpha,
-    $labL, $labA, $labB, $labAlpha,
-    $lchL, $lchC, $lchH, $lchAlpha,
-    $hslH, $hslS, $hslL, $hslAlpha,
-    $hwbH, $hwbW, $hwbB, $hwbAlpha,
-    $rgbR, $rgbG, $rgbB, $rgbAlpha,
-    $colorR, $colorG, $colorB, $colorAlpha
-  ))
-  let text_overlay = $derived(contrast_color(user_color))
-  let bg_overlay = $derived(contrast_color(text_overlay))
-  let gamut = $derived(whatsTheGamutDamnit(user_color))
+let text_overlay = $derived(contrast_color($picker_value))
+let bg_overlay = $derived(contrast_color(text_overlay))
+let gamut = $derived(whatsTheGamutDamnit($picker_value))
+
 </script>
 
 <dialog id="color-picker">
-  <div class="hd-color-picker" style="accent-color: {user_color}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
-    <div class="preview" style={`--user-color:${user_color}`}>
+  <div class="hd-color-picker" style="accent-color: {$picker_value}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
+    <div class="preview" style={`--user-color:${$picker_value}`}>
       <select class="colorspace" onchange={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});">
         <optgroup label="Standard">
           <option value="srgb">rgb</option>
@@ -237,7 +240,7 @@
       </select>
       <div class="gamut" title="Gamut">{gamut}</div>
       <output class="color-information" onclick={copyColor}>
-        {user_color}
+        {$picker_value}
         <svg width="32" height="32" viewBox="0 0 24 24">
           <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Z"/>
         </svg>

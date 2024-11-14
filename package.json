@@ -30,5 +30,6 @@
 		"open-props": "^1.5.6",
 		"prism-themes": "^1.9.0",
 		"prismjs": "^1.29.0"
-	}
+	},
+	"packageManager": "pnpm@9.10.0+sha1.216899f511c8dfde183c7cb50b69009c779534a8"
 }
