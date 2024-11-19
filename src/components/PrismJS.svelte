@@ -20,36 +20,13 @@
   }
 
   function makeSnippet() {
-    if (modern_gradient != 'none' && classic_gradient != 'none') {
-      return `
-.modern-gradient {
-  background-image:
-    ${modern_gradient}
-  ;
-}
+    return `
+:root {
+  --hdr-gradient: ${modern_gradient};
+  --sdr-gradient: ${classic_gradient};
 
-.classic-gradient {
-  background-image:
-    ${classic_gradient}
-  ;
+  background: var(--hdr-gradient);
 }`.trim()
-    }
-    else if (modern_gradient != 'none') {
-      return `
-.modern-gradient {
-  background-image:
-    ${modern_gradient}
-  ;
-}`.trim()
-    }
-    else if (classic_gradient != 'none') {
-      return `
-.classic-gradient {
-  background-image:
-    ${classic_gradient}
-  ;
-}`.trim()
-    }
   }
 
   $: snippet = makeSnippet(modern_gradient, classic_gradient)
