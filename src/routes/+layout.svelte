@@ -1,10 +1,17 @@
 <script>
 	import "prismjs"
 	import "../utils/prism-css.js"
+	/**
+	 * @typedef {Object} Props
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props} */
+	let { children } = $props();
 </script>
 
 <div class="app">
-	<slot />
+	{@render children?.()}
 </div>
 
 <style>

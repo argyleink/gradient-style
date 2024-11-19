@@ -50,7 +50,7 @@
         resetNamedPosition()
       }} />
       <div class="input-suffix">
-        <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" on:change={ensurePositionPair}>
+        <input type="number" bind:value={$conic_position.y} min="-100" max="200" step="1" class="slider-percentage" onchange={ensurePositionPair}>
         <sup>%</sup>
       </div>
     </div>

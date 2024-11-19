@@ -62,7 +62,7 @@
         }}
       />
       <div class="input-suffix">
-        <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" on:input={ensureRadialPair} class="slider-percentage">
+        <input type="number" bind:value={$radial_position.y} min="-100" max="200" step="1" oninput={ensureRadialPair} class="slider-percentage">
         <sup>%</sup>
       </div>
     </div>

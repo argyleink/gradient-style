@@ -2,10 +2,16 @@
   import { tooltip } from 'svooltip'
   import { fade } from 'svelte/transition'
 
-  export let title = 'Hint title'
-  export let copy = 'this is some copy'
+  /**
+   * @typedef {Object} Props
+   * @property {string} [title]
+   * @property {string} [copy]
+   */
 
-	let seen = false
+  /** @type {Props} */
+  let { title = 'Hint title', copy = 'this is some copy' } = $props();
+
+	let seen = $state(false)
 
   function hideMe(e) {
     setTimeout(() => {
@@ -15,18 +21,18 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 {#if !seen}
-  <div 
-    class="hint hiding" 
+  <div
+    class="hint hiding"
     use:tooltip={{html: true, content: `
       <span class="rich-tooltip">
         <b>${title}</b><br>
         ${copy}
       </span>
-    `}} 
-    on:mouseleave={hideMe}
-    on:blur={hideMe}
+    `}}
+    onmouseleave={hideMe}
+    onblur={hideMe}
     out:fade
   >
     <div class="ping"></div>
