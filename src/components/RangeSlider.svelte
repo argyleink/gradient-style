@@ -4,12 +4,25 @@
 
   const dispatch = createEventDispatcher()
 
-  export let style = 'none'
-  export let value
-  export let min = 0
-  export let max = 100
-  export let step = 1
-  export let emptytrack = 'none'
+  /**
+   * @typedef {Object} Props
+   * @property {string} [style]
+   * @property {any} value
+   * @property {number} [min]
+   * @property {number} [max]
+   * @property {number} [step]
+   * @property {string} [emptytrack]
+   */
+
+  /** @type {Props} */
+  let {
+    style = 'none',
+    value = $bindable(),
+    min = 0,
+    max = 100,
+    step = 1,
+    emptytrack = 'none'
+  } = $props();
 
   function dispatchChange() {
     dispatch('change', { value })
@@ -21,7 +34,7 @@
   class="range-slider {emptytrack && 'no-track-fill'}" 
   style="{style!='none'?style:''}; --track-fill: {value / (max || 100) * 100}%"
   bind:value={value}
-  on:input={dispatchChange}
+  oninput={dispatchChange}
   min={min}
   max={max}
   step={step}
@@ -122,7 +135,7 @@
     }
   }
 
-  .range-slider:is(:hover, :active) {
+  .range-slider:is(:global(:hover, :active)) {
     --thumb-highlight-size: 8px;
   }
 </style>

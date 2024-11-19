@@ -41,9 +41,9 @@
 
   function dupeStop(pos) {
     const clone = {
-      kind: 'stop', 
-      color: $gradient_stops[pos].color, 
-      position1: $gradient_stops[pos].position1, 
+      kind: 'stop',
+      color: $gradient_stops[pos].color,
+      position1: $gradient_stops[pos].position1,
       position2: $gradient_stops[pos].position2,
     }
 
@@ -58,7 +58,7 @@
 
     // spec fix, cant have 2nd position without the 1st one
     if (pos === 1 && $gradient_stops[index].position2 !== null)
-      $gradient_stops[index]['position2'] = null      
+      $gradient_stops[index]['position2'] = null
   }
 
   function pickColor(stop, e) {
@@ -111,25 +111,25 @@
   {#each $gradient_stops as stop, i (stop)}
     <div in:fade="{{duration: 450}}" out:scale animate:flip="{{duration: 350, delay: 120}}">
     {#if stop.kind === 'stop'}
-      <fieldset 
-        style="accent-color: {stop.color}; --brand: {stop.color}" 
+      <fieldset
+        style="accent-color: {stop.color}; --brand: {stop.color}"
         class="stop control-set"
-        on:mouseenter={() => fieldsetInteractingStart(stop)} 
-        on:focusin={() => fieldsetInteractingStart(stop)} 
-        on:mouseleave={() => fieldsetInteractingEnd()} 
-        on:focusout={() => fieldsetInteractingEnd()}
-        on:input={(e) => slidingPosition(e, stop)}
+        onmouseenter={() => fieldsetInteractingStart(stop)}
+        onfocusin={() => fieldsetInteractingStart(stop)}
+        onmouseleave={() => fieldsetInteractingEnd()}
+        onfocusout={() => fieldsetInteractingEnd()}
+        oninput={(e) => slidingPosition(e, stop)}
       >
         <h4>Color {i}</h4>
         {#if i === 0}
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
         {/if}
         <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
-          <button class="round" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)}></button>
+          <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)}></button>
           <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
         </div>
         <div class="positions-pair">
-          <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} on:click={() => stop.position2 = stop.position1}>
+          <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} onclick={() => stop.position2 = stop.position1}>
             {#if stop.position1 === stop.position2}
               <svg class="linked-on" width="32" height="32" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M7 17q-2.075 0-3.538-1.463T2 12q0-2.075 1.463-3.538T7 7h3q.425 0 .713.288T11 8q0 .425-.288.713T10 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17H7Zm2-4q-.425 0-.713-.288T8 12q0-.425.288-.713T9 11h6q.425 0 .713.288T16 12q0 .425-.288.713T15 13H9Zm5 4q-.425 0-.713-.288T13 16q0-.425.288-.713T14 15h3q1.25 0 2.125-.875T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.463T22 12q0 2.075-1.463 3.538T17 17h-3Z"/>
@@ -158,7 +158,7 @@
           </div>
         </div>
         <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
-          <select tabindex="-1" on:change={(e) => colorAction(e,i)}>
+          <select tabindex="-1" onchange={(e) => colorAction(e,i)}>
             <option disabled selected>Color Actions</option>
             <hr>
             <option>Duplicate</option>
@@ -173,12 +173,12 @@
     {/if}
     {#if stop.kind === 'hint'}
       <fieldset
-        class="hint control-set" 
-        on:mouseenter={() => fieldsetInteractingStart(stop)} 
-        on:focusin={() => fieldsetInteractingStart(stop)} 
-        on:mouseleave={() => fieldsetInteractingEnd()} 
-        on:focusout={() => fieldsetInteractingEnd()}
-        on:input={() => fixIfEmptied(stop)}
+        class="hint control-set"
+        onmouseenter={() => fieldsetInteractingStart(stop)}
+        onfocusin={() => fieldsetInteractingStart(stop)}
+        onmouseleave={() => fieldsetInteractingEnd()}
+        onfocusout={() => fieldsetInteractingEnd()}
+        oninput={() => fixIfEmptied(stop)}
       >
         <h4>Transition</h4>
         <div class="color-hint slider-set">
@@ -188,7 +188,7 @@
           <div use:tooltip={{html: true, content: '<span class="rich-tooltip">Transition hint<br>Adjusts the midpoint between 2 stops.<br><br>Delete value to reset.</span>', placement: 'top-start',}}>
             <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M15 2c1.94 0 3.59.7 4.95 2.05C21.3 5.41 22 7.06 22 9c0 1.56-.5 2.96-1.42 4.2c-.94 1.23-2.14 2.07-3.61 2.5l.03-.32V15c0-2.19-.77-4.07-2.35-5.65S11.19 7 9 7h-.37l-.33.03c.43-1.47 1.27-2.67 2.5-3.61C12.04 2.5 13.44 2 15 2M9 8a7 7 0 0 1 7 7a7 7 0 0 1-7 7a7 7 0 0 1-7-7a7 7 0 0 1 7-7m0 2a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5Z"/></svg>
           </div>
-          <RangeSlider bind:value={stop.percentage} 
+          <RangeSlider bind:value={stop.percentage}
             style="--accent-color: {stop.percentage == stop.auto ? 'var(--track-color)' : 'var(--link)'}"/>
           <div class="input-suffix">
             <input type="number" placeholder={stop.auto} bind:value={stop.percentage} class="slider-percentage">
@@ -288,7 +288,7 @@
     transition: opacity .3s var(--ease-3);
   }
 
-  .chip.color-stop:is(:hover, :focus)::after {
+  .chip.color-stop:is(:global(:hover, :focus))::after {
     opacity: 1;
   }
 

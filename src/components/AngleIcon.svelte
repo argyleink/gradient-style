@@ -1,7 +1,13 @@
 <script>
   import { tooltip } from 'svooltip'
 
-  export let angle = 0;
+  /**
+   * @typedef {Object} Props
+   * @property {number} [angle]
+   */
+
+  /** @type {Props} */
+  let { angle = 0 } = $props();
 </script>
 
 <div class="angle-icon" style="--angle:{angle}deg" use:tooltip={{content: angle+'deg'}}></div>

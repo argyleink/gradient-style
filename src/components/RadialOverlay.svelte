@@ -9,11 +9,17 @@
   import {namedPosToPercent} from '../utils/radial.ts'
   import {contrast_color_prefer_white} from '../utils/color.ts'
 
-  export let w = null
-  export let h = null
+  /**
+   * @typedef {Object} Props
+   * @property {any} [w]
+   * @property {any} [h]
+   */
+
+  /** @type {Props} */
+  let { w = null, h = null } = $props();
   let dragYdelta = null
 
-  const dragulaState = {
+  const dragulaState = $state({
     moving: false,
     start: {x:null,y:null},
     delta: {x:null,y:null},
@@ -21,7 +27,7 @@
     top: null,
     stop: null,
     target: null,
-  }
+  })
 
   function determineOverlaySize() {
     const pos = determineAbsPosition()
@@ -312,18 +318,18 @@
     })
   }
 
-  $: size = determineOverlaySize(h,w,
+  let size = $derived(determineOverlaySize(h,w,
     $radial_position,
     $radial_named_position,
     $radial_shape,
     $radial_size
-  )
+  ))
 
-  $: position = overlayPosition(
+  let position = $derived(overlayPosition(
     $radial_position,
     $radial_named_position,
     w, h
-  )
+  ))
 </script>
 
 <div class="overlay" use:dragula  style="
@@ -345,12 +351,12 @@
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap" 
           style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
-          on:mouseleave={mouseOut} 
-          on:keydown={(e)=>handleKeypress(e,stop,'position1')}
-          on:dblclick={()=>deleteStop(stop)}
+          onmouseleave={mouseOut} 
+          onkeydown={(e)=>handleKeypress(e,stop,'position1')}
+          ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
-            <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -359,12 +365,12 @@
             use:tooltip={{content: `${stop.position2}%`}}
             class="stop-wrap" 
             style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
-            on:mouseleave={mouseOut} 
-            on:keydown={(e)=>handleKeypress(e,stop,'position2')}
-            on:dblclick={()=>relinkStop(stop)}
+            onmouseleave={mouseOut} 
+            onkeydown={(e)=>handleKeypress(e,stop,'position2')}
+            ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2">
-              <button class="stop-color" style="background-color: {stop.color}" on:click={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -379,8 +385,8 @@
             inset-inline-start: {stop.percentage}%; 
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
-          on:mouseleave={mouseOut}
-          on:keydown={(e)=>handleKeypress(e,stop,'percentage')}
+          onmouseleave={mouseOut}
+          onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>
@@ -470,7 +476,7 @@
     translate: -50% 0;
   }
 
-  .stop-wrap:has(+ .stop-wrap) .stop {
+  .stop-wrap:has(:global(+ .stop-wrap)) .stop {
     clip-path: inset(0 50% 0 0);
   }
 
@@ -529,14 +535,14 @@
     stroke: hsl(0 0% 0% / 15%);
   }
 
-  :is(.hint > svg, .stop) {
+  :is(:global(.hint > svg, .stop)) {
     pointer-events: auto;
     touch-action: manipulation;
     cursor: grab;
     user-select: none;
   }
 
-  :is(.hint > svg, .stop):active {
+  :is(:global(.hint > svg, .stop)):active {
     cursor: grabbing;
   }
 </style>
