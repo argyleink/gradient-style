@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
 
+  import anchorPolyfill from '@oddbird/css-anchor-positioning/fn'
   import Color from 'colorjs.io'
   import { tooltip } from 'svooltip'
   import 'svooltip/styles.css'
@@ -45,6 +46,7 @@
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
+    anchorPolyfill()
 
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
     const restore = restoreStateFromUrl()

@@ -107,15 +107,8 @@
   }
 
   function setAnchor(target, panel) {
-    const rect = target.getBoundingClientRect()
-    dialog.style.setProperty('--y', rect.y + 'px')
-    if (panel === 'right-panel')
-      dialog.style.setProperty('--x', `calc(100% - ${dialogWidth}px - 1rem)`)
-    else
-      dialog.style.setProperty('--x', rect.x + 12 - (dialogWidth / 2) + 'px')
-    dialog.style.setProperty('--anchor', rect.y > window.innerHeight / 2
-      ? '-105%'
-      : '10%')
+    console.log(target)
+    dialog.style.setProperty('--_dialog-anchor', target)
   }
 
   const dialogClose = async ({target:dialog}) => {
@@ -463,15 +456,53 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
 <style>
   dialog {
     padding: 0;
-    margin-inline: auto var(--size-3);
-    margin-block-start: var(--y, auto);
-    margin-inline-start: var(--x, auto);
-    transform: translateY(var(--anchor));
+    margin: 0;
+
+    position-anchor: var(--_dialog-anchor);
+    position-area: top left;
+    position-try-fallbacks: flip-block, flip-inline;
+    position-try-order: most-height;
+
+    &, &::backdrop {
+      --_dur: .4s;
+      transition: 
+        display var(--_dur) allow-discrete,
+        overlay var(--_dur) allow-discrete,
+        opacity var(--_dur),
+        transform var(--_dur) var(--ease-spring-2);
+
+      opacity: 0;
+    }
+
+    &[open] {
+      opacity: 1;
+      transform: translateY(0px);
+      
+      &::backdrop {
+        opacity: 0.8;
+      }
+    }
+
+    @starting-style {
+      &[open], 
+      &[open]::backdrop {
+        opacity: 0;
+      }
+      
+      &[open] {
+        transform: translateX(10px);
+      }
+    }
   }
 
   @media (max-width: 1024px) {
     dialog {
-      margin-inline: var(--size-3) auto;
+      position-try-order: most-width;
+      @starting-style {
+        &[open] {
+          transform: translateY(10px);
+        }
+      }
     }
   }
 
