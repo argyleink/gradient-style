@@ -1,10 +1,14 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, afterUpdate } from 'svelte'
   import { copyToClipboard } from '../utils/clipboard.ts'
 
   export let modern_gradient = 'none'
   export let classic_gradient = 'none'
   let loaded = false
+
+  afterUpdate(() => {
+    Prism.highlightAll()
+  })
 
   onMount(() => {
     loaded = true
