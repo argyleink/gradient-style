@@ -457,6 +457,8 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
   dialog {
     padding: 0;
     margin: 0;
+    max-width: initial;
+    max-height: initial;
 
     position-anchor: var(--_dialog-anchor);
     position-area: top left;
@@ -476,7 +478,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
 
     &[open] {
       opacity: 1;
-      transform: translateY(0px);
+      transform: scale(1);
       
       &::backdrop {
         opacity: 0.8;
@@ -490,7 +492,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       }
       
       &[open] {
-        transform: translateX(10px);
+        transform: scale(.95);
       }
     }
   }
@@ -498,11 +500,6 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
   @media (max-width: 1024px) {
     dialog {
       position-try-order: most-width;
-      @starting-style {
-        &[open] {
-          transform: translateY(10px);
-        }
-      }
     }
   }
 
@@ -541,6 +538,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
   .colorspace:is(:global(:hover,:focus)) {
     border-color: color-mix(in oklch, var(--counter-contrast-color), transparent 50%);
     color: var(--counter-contrast-color);
+    --_bg: color-mix(in oklch, var(--counter-contrast-color), transparent 100%);
   }
 
   .preview {

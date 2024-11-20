@@ -39,7 +39,9 @@
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
-    picker.setAnchor(e.target)
+    picker.setAnchor(
+      e.target.getAttribute('data-anchor-name')
+    )
     picker.setColor(stop.color)
     picker.showModal()
 
@@ -260,7 +262,13 @@
           ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
-            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button 
+              class="stop-color" 
+              style="background-color: {stop.color}; anchor-name: --linear-stop-{i}" 
+              data-anchor-name={`--linear-stop-`+i}
+              onclick={e => pickColor(stop,e)} 
+              use:tooltip={{content: stop.color}}>
+            </button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -274,7 +282,13 @@
             ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2">
-              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button 
+                class="stop-color" 
+                style="background-color: {stop.color}; anchor-name: --linear-stop-{i}-half" 
+                data-anchor-name={`--linear-stop-`+i+'-half'}
+                onclick={e => pickColor(stop,e)} 
+                use:tooltip={{content: stop.color}}>
+              </button>
             </div>
           </div>
         {/if}
