@@ -705,7 +705,7 @@
 
 
   :global(.stack) {
-    display: inline-grid;
+    display: grid;
     gap: var(--size-2);
   }
 
