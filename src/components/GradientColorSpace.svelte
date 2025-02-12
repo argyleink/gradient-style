@@ -31,6 +31,10 @@
         <option>srgb</option>
         <option>srgb-linear</option>
         <option>xyz</option>
+        <option>display-p3</option>
+        <option>a98-rgb</option>
+        <option>prophoto-rgb</option>
+        <option>rec2020</option>
       </optgroup>
     </select>
   </div>
