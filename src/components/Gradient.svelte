@@ -771,6 +771,10 @@
     padding-block: 0.75ch;
     padding-inline: 1.75ch 3ch;
     line-height: 1.5;
+
+    @supports (field-sizing: content) {
+      padding-inline: 1.75ch 4ch;
+    }
   }
 
   :global(select):is(:global(:hover,:focus)) {
