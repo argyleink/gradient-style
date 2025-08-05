@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte'
+  import { replaceState } from '$app/navigation'
 
   import Color from 'colorjs.io'
   import { tooltip } from 'svooltip'
@@ -76,7 +77,7 @@
     stateAsString.subscribe(state => {
       clearTimeout(window.syncStateTimer)
       window.syncStateTimer = setTimeout(() => {
-        state && window.history.replaceState({}, "", '#'+state)
+        state && replaceState('#'+state, {})
       }, 500)
     })
 
