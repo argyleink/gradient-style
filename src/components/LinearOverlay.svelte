@@ -23,11 +23,15 @@
 
   const dragulaState = $state({
     moving: false,
+    rotating: false,
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
     stop: null,
     target: null,
+    lastAngle: null,
+    centerX: null,
+    centerY: null,
   })
 
   linear_named_angle.subscribe(value => {
@@ -103,16 +107,31 @@
         node.setPointerCapture(e.pointerId)
         $linear_named_angle = '--'
 
-        // if ($linear_angle < 90 || $linear_angle > 270) $linear_angle += e.movementX
-        // else $linear_angle -= e.movementX
-        $linear_angle += e.movementX
-        $linear_angle += e.movementY
-
-        // if ($linear_angle < 180) $linear_angle += e.movementY
-        // else $linear_angle -= e.movementY
-
-        if ($linear_angle > 360) $linear_angle = 0
-        if ($linear_angle < 0) $linear_angle = 360
+        // Calculate angle from center to mouse position
+        const deltaX = e.clientX - dragulaState.centerX
+        const deltaY = e.clientY - dragulaState.centerY
+        let currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+        
+        // Normalize to 0-360 range
+        if (currentAngle < 0) currentAngle += 360
+        
+        if (dragulaState.lastAngle !== null) {
+          // Calculate the angular difference
+          let angleDiff = currentAngle - dragulaState.lastAngle
+          
+          // Handle wraparound (e.g., from 350° to 10°)
+          if (angleDiff > 180) angleDiff -= 360
+          if (angleDiff < -180) angleDiff += 360
+          
+          // Update the linear angle
+          $linear_angle += angleDiff
+          
+          // Keep angle in 0-360 range
+          if ($linear_angle >= 360) $linear_angle -= 360
+          if ($linear_angle < 0) $linear_angle += 360
+        }
+        
+        dragulaState.lastAngle = currentAngle
       }
       
       if (e.target.closest('[data-stop-index]'))
@@ -156,6 +175,13 @@
 
   function rotateIt(node) {
     dragulaState.rotating = true
+    // Get the center point of the preview area
+    const previewRect = node.closest('.preview')?.getBoundingClientRect()
+    if (previewRect) {
+      dragulaState.centerX = previewRect.left + previewRect.width / 2
+      dragulaState.centerY = previewRect.top + previewRect.height / 2
+      dragulaState.lastAngle = null
+    }
   }
 
   function mouseOut() {

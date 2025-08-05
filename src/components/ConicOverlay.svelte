@@ -32,6 +32,9 @@
     stop: null,
     target: null,
     angle: null,
+    lastAngle: null,
+    centerX: null,
+    centerY: null,
   }
 
   function pickColor(stop, e) {
@@ -100,8 +103,10 @@
           dragulaState.left = pos.x
           dragulaState.top = pos.y
           $conic_named_position = '--'
-          $conic_position.x = pos.x
-          $conic_position.y = pos.y
+          $conic_position = {
+            x: pos.x,
+            y: pos.y
+          }
         }
         node.setPointerCapture(e.pointerId)
         dragIt(e.target)
@@ -145,8 +150,10 @@
         dragulaState.left += e.movementX / wpercent
         dragulaState.top += e.movementY / hpercent
         
-        $conic_position.x = Math.round(dragulaState.left)
-        $conic_position.y = Math.round(dragulaState.top)
+        $conic_position = {
+          x: Math.round(dragulaState.left),
+          y: Math.round(dragulaState.top)
+        }
       }
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
@@ -154,11 +161,31 @@
         if (typeof $conic_angle == 'string')
           $conic_angle = parseInt($conic_angle)
 
-        $conic_angle += e.movementX
-        $conic_angle += e.movementY
-
-        if ($conic_angle > 360) $conic_angle = 0
-        if ($conic_angle < 0) $conic_angle = 360
+        // Calculate angle from center to mouse position
+        const deltaX = e.clientX - dragulaState.centerX
+        const deltaY = e.clientY - dragulaState.centerY
+        let currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+        
+        // Normalize to 0-360 range
+        if (currentAngle < 0) currentAngle += 360
+        
+        if (dragulaState.lastAngle !== null) {
+          // Calculate the angular difference
+          let angleDiff = currentAngle - dragulaState.lastAngle
+          
+          // Handle wraparound (e.g., from 350° to 10°)
+          if (angleDiff > 180) angleDiff -= 360
+          if (angleDiff < -180) angleDiff += 360
+          
+          // Update the conic angle
+          $conic_angle += angleDiff
+          
+          // Keep angle in 0-360 range
+          if ($conic_angle >= 360) $conic_angle -= 360
+          if ($conic_angle < 0) $conic_angle += 360
+        }
+        
+        dragulaState.lastAngle = currentAngle
       }
       
       if (e.target.closest('[data-stop-index]'))
@@ -211,6 +238,13 @@
 
   function rotateIt(node) {
     dragulaState.rotating = true
+    // Get the center point of the preview area
+    const previewRect = node.closest('.preview')?.getBoundingClientRect()
+    if (previewRect) {
+      dragulaState.centerX = previewRect.left + previewRect.width / 2
+      dragulaState.centerY = previewRect.top + previewRect.height / 2
+      dragulaState.lastAngle = null
+    }
   }
 
   function mouseOut() {
