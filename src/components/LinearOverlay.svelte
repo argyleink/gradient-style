@@ -43,18 +43,25 @@
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
+    // Start the picker from the current stop color to avoid stale values
+    $picker_value = stop.color
+
     picker.setAnchor(e.target)
     picker.setColor(stop.color)
     picker.showModal()
 
+    // Ignore the initial emission which may be the seeded value or a stale one
+    let isFirst = true
     const unsub = picker_value.subscribe(value => {
+      if (isFirst) { isFirst = false; return }
+      if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })
 
     picker.addEventListener('closing', () => {
       unsub()
-    })
+    }, { once: true })
   }
 
   function dragula(node) {
