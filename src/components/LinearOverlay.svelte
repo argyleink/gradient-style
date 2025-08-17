@@ -132,6 +132,9 @@
           // Keep angle in 0-360 range
           if ($linear_angle >= 360) $linear_angle -= 360
           if ($linear_angle < 0) $linear_angle += 360
+
+          // Round during drag to avoid fractional degrees
+          $linear_angle = Math.round($linear_angle)
         }
         
         dragulaState.lastAngle = currentAngle

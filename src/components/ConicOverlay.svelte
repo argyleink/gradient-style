@@ -191,6 +191,9 @@
           // Keep angle in 0-360 range
           if ($conic_angle >= 360) $conic_angle -= 360
           if ($conic_angle < 0) $conic_angle += 360
+
+          // Round during drag to avoid fractional degrees
+          $conic_angle = Math.round($conic_angle)
         }
         
         dragulaState.lastAngle = currentAngle
