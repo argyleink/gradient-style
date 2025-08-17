@@ -50,6 +50,22 @@
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
     const restore = restoreStateFromUrl()
 
+    // Track last known explicit positions to persist across type changes
+    let lastRadialPos = { x: null, y: null }
+    let lastConicPos = { x: null, y: null }
+
+    // Cache explicit positions when available
+    radial_position.subscribe(pos => {
+      if (pos && (pos.x ?? null) !== null && (pos.y ?? null) !== null) {
+        lastRadialPos = { x: pos.x, y: pos.y }
+      }
+    })
+    conic_position.subscribe(pos => {
+      if (pos && (pos.x ?? null) !== null && (pos.y ?? null) !== null) {
+        lastConicPos = { x: pos.x, y: pos.y }
+      }
+    })
+
     metatag = document.querySelector('#browsertheme')
     svgicon = document.querySelector('#svgicon')
 
@@ -115,6 +131,27 @@
     })
 
     resizeObserver.observe(preview_resizer)
+
+    // When switching gradient types, carry over the last known x/y between radial and conic
+    gradient_type.subscribe(type => {
+      if (type === 'radial') {
+        // Prefer explicit cached conic position if radial is missing
+        if (($radial_position?.x ?? null) === null || ($radial_position?.y ?? null) === null) {
+          if ((lastConicPos.x ?? null) !== null && (lastConicPos.y ?? null) !== null) {
+            $radial_named_position = '--'
+            $radial_position = { x: lastConicPos.x, y: lastConicPos.y }
+          }
+        }
+      }
+      else if (type === 'conic') {
+        if (($conic_position?.x ?? null) === null || ($conic_position?.y ?? null) === null) {
+          if ((lastRadialPos.x ?? null) !== null && (lastRadialPos.y ?? null) !== null) {
+            $conic_named_position = '--'
+            $conic_position = { x: lastRadialPos.x, y: lastRadialPos.y }
+          }
+        }
+      }
+    })
   })
 
   const gensyntax = {
