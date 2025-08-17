@@ -64,11 +64,18 @@
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
+    // Seed the picker with the current stop color to avoid stale value flashes
+    $picker_value = stop.color
+
     picker.setAnchor(e.target, 'right-panel')
     picker.setColor(stop.color)
     picker.showModal()
 
+    // Ignore the initial emission from the store and only update on real changes
+    let isFirst = true
     const unsub = picker_value.subscribe(value => {
+      if (isFirst) { isFirst = false; return }
+      if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })
