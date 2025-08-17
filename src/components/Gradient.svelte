@@ -43,6 +43,7 @@
   let box_height = $state()
   let metatag
   let svgicon
+  let restoring = $state(true)
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -100,6 +101,10 @@
 
       // last, to kickoff render
       if (restore.stops)              $gradient_stops = updateStops(restore.stops)
+      restoring = false
+    }
+    else {
+      restoring = false
     }
 
     stateAsString.subscribe(state => {
@@ -388,14 +393,16 @@
             style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
               <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
           </div>
-          {#if $gradient_type === 'linear'}
-            <LinearOverlay w={box_width} h={box_height} />
-          {/if}
-          {#if $gradient_type === 'radial'}
-            <RadialOverlay w={box_width} h={box_height} />
-          {/if}
-          {#if $gradient_type === 'conic'}
-            <ConicOverlay w={box_width} h={box_height} />
+          {#if !restoring}
+            {#if $gradient_type === 'linear'}
+              <LinearOverlay w={box_width} h={box_height} />
+            {/if}
+            {#if $gradient_type === 'radial'}
+              <RadialOverlay w={box_width} h={box_height} />
+            {/if}
+            {#if $gradient_type === 'conic'}
+              <ConicOverlay w={box_width} h={box_height} />
+            {/if}
           {/if}
         </div>
       </section>
@@ -439,7 +446,9 @@
         <HueInterpolation />
       {/if}
 
-      <GradientStops />
+      {#if !restoring}
+        <GradientStops />
+      {/if}
 
       <footer class="end-of-stops">
         <button class="add-color" onclick={() => addStop()}>
