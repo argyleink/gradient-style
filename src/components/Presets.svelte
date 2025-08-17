@@ -361,6 +361,7 @@
 		padding-block: var(--size-3);
 		padding-inline: var(--size-5);
 		scroll-padding-inline: var(--size-5);
+		scrollbar-width: thin;
 		border-block-start: 1px solid var(--surface-1);
 	}
 
