@@ -211,36 +211,57 @@
   }
 
   function stopsToStrings({convert_colors, new_lines} = {convert_colors: false, new_lines: true}) {
+    // Identify first/last stop indices in the full list (including hints)
+    const stopIndices = $gradient_stops
+      .map((s, i) => (s?.kind === 'stop' ? i : null))
+      .filter(i => i !== null)
+    const firstStopIdx = stopIndices.at(0)
+    const lastStopIdx = stopIndices.at(-1)
+
     return $gradient_stops
+      // Omit hints whose percentage equals their auto default
       .filter(s => !s?.auto || s?.percentage != s?.auto)
+      // Omit any item without a percentage (hints) entirely
       .filter(s => s?.percentage !== null)
-      .map(s => {
+      .map((s, i, arr) => {
         if (s.kind === 'stop') {
-          const p1 = s.position1
-          const p2 = s.position2
+          let p1 = s.position1
+          let p2 = s.position2
 
-          if (p1 != null && p2 != null && p1 != p2)
+          // Omit values equal to tool defaults
+          if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
+          if (p2 != null && s.auto != null && p2 == s.auto) p2 = null
+
+          // Omit values equal to browser defaults at edges
+          if (i === firstStopIdx && p1 != null && Number(p1) === 0) p1 = null
+          if (i === lastStopIdx && p2 != null && Number(p2) === 100) p2 = null
+
+          // If both positions exist and differ, keep both (after default pruning)
+          if (p1 != null && p2 != null && p1 != p2) {
             return maybeConvertColor(s.color, convert_colors) + ' ' + p1 + '% ' + p2 + '%'
-          else if (p1 == null && p2 != null) {
-            const start = '0'
-            const end = '100'
-            return maybeConvertColor(s.color, convert_colors) + ' ' + start + '% ' + end + '%'
           }
-          else {
-            let stop1 = p1 != null && p1 != s.auto
-              ? maybeConvertColor(s.color, convert_colors) + ' ' + p1 + '%'
-              : maybeConvertColor(s.color, convert_colors)
-            let stop2 = p2 != null
-              ? ' ' + p2 + '%'
-              : ''
 
-            return stop1 + stop2
+          // If only a second position existed originally, avoid forcing 0% 100% defaults
+          if ((s.position1 == null) && (s.position2 != null)) {
+            // After pruning, if p1/p2 are now null (i.e., both default), just return color
+            if (p1 == null && (i === lastStopIdx ? p2 == null : false))
+              return maybeConvertColor(s.color, convert_colors)
+            // Otherwise if p2 remains and is not a default boundary, include explicit span from 0%
+            if (p2 != null)
+              return maybeConvertColor(s.color, convert_colors) + ' 0% ' + p2 + '%'
           }
+
+          // Single stop or single position case
+          const base = maybeConvertColor(s.color, convert_colors)
+          if (p1 != null) return base + ' ' + p1 + '%'
+          if (p2 != null) return base + ' ' + p2 + '%'
+          return base
         }
         else if (s.kind === 'hint') {
           return s.percentage + '%'
         }
       })
+      .filter(Boolean)
       .join(new_lines == true ? ',\n      ' : ', ')
   }
 
