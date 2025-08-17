@@ -364,7 +364,7 @@
         <div 
           class="hint" 
           tabindex="0"
-          use:tooltip={{content: `${stop.percentage}%`}}
+          use:tooltip={{content: stop.percentage != null ? `${stop.percentage}%` : ''}}
           data-stop-index={i} 
           style="
             transform: rotateZ({(360 * (parseInt(stop.percentage) / 100))}deg) translate(0, 85px);

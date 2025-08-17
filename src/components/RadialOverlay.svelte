@@ -391,7 +391,7 @@
         <div 
           class="hint" 
           tabindex="0"
-          use:tooltip={{content: `${stop.percentage}%`}}
+          use:tooltip={{content: stop.percentage != null ? `${stop.percentage}%` : ''}}
           data-stop-index={i} 
           style="
             inset-inline-start: {stop.percentage}%; 
