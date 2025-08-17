@@ -376,6 +376,7 @@
           </button>
         </div>
         <div class="preview">
+          {#if $gradient_interpolation !== 'longer'}
           <label class="hd-switch">
             <Hint title="HDR" copy="This switch toggles between the SDR and HDR CSS gradients.<br><br>When off it shows the gradient with hex colors, which has always been in the sRGB colorspace.<br><br>When on, the gradient shown is using a newer color space and also using newer wide gamut colors.<br><br>This button helps you preview the classic gradient vs the HD gradient you're building in this tool." />
             <span class="sr-only">HD on or off?</span>
@@ -387,6 +388,7 @@
             {/if}
             <input bind:checked={preview_hd} type="checkbox" name="hd-gradient" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between high and standard gradient previews.<br><br>(HDR) high dynamic range.</span>'}}/>
           </label>
+          {/if}
           <div
             bind:this={preview_resizer}
             class="resizer"
