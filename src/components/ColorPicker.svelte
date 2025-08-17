@@ -22,6 +22,7 @@
 
   let dialog
   let dialogWidth
+  let dialogHeight
 
   const dialogClosingEvent = new Event('closing')
   const dialogClosedEvent  = new Event('closed')
@@ -37,6 +38,7 @@
 
     dialog.show()
     dialogWidth = dialog.clientWidth
+    dialogHeight = dialog.clientHeight
     dialog.close()
   })
 
@@ -108,14 +110,55 @@
 
   function setAnchor(target, panel) {
     const rect = target.getBoundingClientRect()
-    dialog.style.setProperty('--y', rect.y + 'px')
-    if (panel === 'right-panel')
-      dialog.style.setProperty('--x', `calc(100% - ${dialogWidth}px - 1rem)`)
-    else
-      dialog.style.setProperty('--x', rect.x + 12 - (dialogWidth / 2) + 'px')
-    dialog.style.setProperty('--anchor', rect.y > window.innerHeight / 2
-      ? '-105%'
-      : '10%')
+    const margin = 12
+
+    // Ensure measurements exist (in case of dynamic sizing)
+    if (!dialogWidth || !dialogHeight) {
+      dialog.show()
+      dialogWidth = dialog.clientWidth
+      dialogHeight = dialog.clientHeight
+      dialog.close()
+    }
+
+    const viewportW = window.innerWidth
+    const viewportH = window.innerHeight
+
+    // Compute X
+    let x
+    if (panel === 'right-panel') {
+      // Align dialog right edge to swatch right edge, clamped to viewport
+      const desiredX = rect.right - dialogWidth
+      const minX = margin
+      const maxX = viewportW - dialogWidth - margin
+      x = Math.min(Math.max(desiredX, minX), maxX)
+    } else {
+      const preferredX = rect.left + (rect.width / 2) - (dialogWidth / 2)
+      const minX = margin
+      const maxX = viewportW - dialogWidth - margin
+      x = Math.min(Math.max(preferredX, minX), maxX)
+    }
+
+    // Compute Y (prefer below, then above, otherwise center on trigger)
+    const spaceBelow = viewportH - rect.bottom
+    const spaceAbove = rect.top
+    let y
+
+    if (spaceBelow >= dialogHeight + margin) {
+      y = rect.bottom + margin
+    } else if (spaceAbove >= dialogHeight + margin) {
+      y = rect.top - dialogHeight - margin
+    } else {
+      // Center on the trigger vertically, clamped to viewport
+      const preferredY = rect.top + (rect.height / 2) - (dialogHeight / 2)
+      const minY = margin
+      const maxY = viewportH - dialogHeight - margin
+      y = Math.min(Math.max(preferredY, minY), maxY)
+    }
+
+    dialog.style.setProperty('--x', x + 'px')
+    dialog.style.setProperty('--y', y + 'px')
+    // No additional translate; place exactly at computed position
+    dialog.style.setProperty('--anchor', '0px')
   }
 
   const dialogClose = async ({target:dialog}) => {
@@ -466,7 +509,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
     margin-inline: auto var(--size-3);
     margin-block-start: var(--y, auto);
     margin-inline-start: var(--x, auto);
-    transform: translateY(var(--anchor));
+    transform: translateY(var(--anchor, 0));
   }
 
   @media (max-width: 1024px) {
