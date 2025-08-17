@@ -7,6 +7,7 @@
   import NamedDirections from './NamedDirections.svelte'
 
   conic_named_position.subscribe(value => {
+    if (value === '--') return
     const {x,y} = namedPosToPercent(value)
     $conic_position.x = x
     $conic_position.y = y

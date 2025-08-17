@@ -7,6 +7,7 @@
   import NamedDirections from './NamedDirections.svelte'
 
   radial_named_position.subscribe(value => {
+    if (value === '--') return
     const {x,y} = namedPosToPercent(value)
     $radial_position.x = x
     $radial_position.y = y

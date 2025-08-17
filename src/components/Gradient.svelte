@@ -73,8 +73,14 @@
       if (restore.radial_size)        $radial_size = restore.radial_size
 
       if (restore.conic_angle)        $conic_angle = restore.conic_angle
-      if (restore.conic_position)     $conic_position = restore.conic_position
-      if (restore.conic_named_position) $conic_named_position = restore.conic_named_position
+      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+      if (restore.conic_position) {
+        $conic_named_position = '--'
+        $conic_position = restore.conic_position
+      }
+      else if (restore.conic_named_position) {
+        $conic_named_position = restore.conic_named_position
+      }
 
       // last, to kickoff render
       if (restore.stops)              $gradient_stops = updateStops(restore.stops)
