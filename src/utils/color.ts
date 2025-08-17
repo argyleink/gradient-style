@@ -6,12 +6,25 @@ export function parse_coords(coords) {
 
 export function contrast_color(c) {
   try {
-  const color = new Color(c)
-  
-  const whContrast = color.contrastLstar('white')
-  const blContrast = color.contrastLstar('black')
+    const color = new Color(c)
 
-  return whContrast > blContrast ? 'white' : 'black'
+    // Prefer WCAG 2.1 contrast if available for best readability
+    let whContrast: number
+    let blContrast: number
+    try {
+      // Contrast ratios per WCAG 2.1
+      // ColorJS: contrast(reference, method?)
+      // Fall back to L* if the method isn't supported in the current environment
+      // @ts-ignore - method overloads
+      whContrast = color.contrast('white', 'WCAG21') ?? color.contrastLstar('white')
+      // @ts-ignore - method overloads
+      blContrast = color.contrast('black', 'WCAG21') ?? color.contrastLstar('black')
+    } catch {
+      whContrast = color.contrastLstar('white')
+      blContrast = color.contrastLstar('black')
+    }
+
+    return whContrast > blContrast ? 'white' : 'black'
   } catch {}
 }
 
