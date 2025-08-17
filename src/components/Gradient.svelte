@@ -581,6 +581,7 @@
     align-content: start;
     background: var(--surface-2);
     padding-block: 0 var(--size-fluid-5);
+    scrollbar-width: thin;
     accent-color: var(--surface-3);
   }
 
@@ -663,6 +664,7 @@
     overscroll-behavior: contain;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
+    scrollbar-width: thin;
     overflow: hidden;
   }
 
