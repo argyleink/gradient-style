@@ -30,12 +30,14 @@
       Angle
     </label>
     <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
-    <select name="named-directions" bind:value={$linear_named_angle}>
-      <option disabled>--</option>
-      {#each linear_directions as dir}
-        <option value={dir}>{dir}</option>  
-      {/each}
-    </select>
+    <div class="select-wrap">
+      <select name="named-directions" bind:value={$linear_named_angle}>
+        <option disabled>--</option>
+        {#each linear_directions as dir}
+          <option value={dir}>{dir}</option>
+        {/each}
+      </select>
+    </div>
   </div>
   <div class="slider-set">
     <AngleIcon angle={$linear_angle} />
@@ -50,5 +52,16 @@
 <style>
   .linear-angle {
     gap: var(--size-5);
+  }
+
+  .label-select-combo {
+    display: flex;
+    gap: var(--size-3);
+  }
+
+  .select-wrap {
+    display: flex;
+    flex: 1;
+    place-content: end;
   }
 </style>
