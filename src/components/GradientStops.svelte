@@ -14,6 +14,23 @@
   import RangeSlider from './RangeSlider.svelte'
   import Hint from './Hint.svelte'
 
+  // Drag-reorder state
+  let dragging = $state(false)
+  let dragStart = $state(null)       // start index of dragged unit (stop + optional hint)
+  let dragLen = $state(0)            // length of dragged unit (1 or 2)
+  let dropStart = $state(null)       // start index of target unit
+  let dropPos = $state(null)         // 'before' | 'after'
+
+  // ID helpers for stable keys
+  function genId(prefix = 'id') {
+    try { return (crypto?.randomUUID && crypto.randomUUID()) || `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}` }
+    catch { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}` }
+  }
+
+  function ensureIds(list) {
+    return list.map(item => item?.id ? item : ({ ...item, id: genId(item.kind) }))
+  }
+
   function colorAction(event, position) {
     switch (event.target.value) {
       case 'Remove':
@@ -41,16 +58,17 @@
 
   function dupeStop(pos) {
     const clone = {
+      id: genId('stop'),
       kind: 'stop',
       color: $gradient_stops[pos].color,
       position1: $gradient_stops[pos].position1,
       position2: $gradient_stops[pos].position2,
     }
 
-    $gradient_stops.splice(pos, 0, {kind: 'hint', percentage: null})
+    $gradient_stops.splice(pos, 0, {id: genId('hint'), kind: 'hint', percentage: null})
     $gradient_stops.splice(pos, 0, clone)
 
-    $gradient_stops = updateStops($gradient_stops)
+    $gradient_stops = updateStops(ensureIds($gradient_stops))
   }
 
   function removePositionByIndex(index, pos) {
@@ -100,6 +118,113 @@
     }
   }
 
+  function unitBoundsForIndex(i) {
+    // Drag units are a stop and its following hint (if present)
+    const isStop = $gradient_stops[i]?.kind === 'stop'
+    if (!isStop) return null
+    const hasFollowingHint = $gradient_stops[i+1]?.kind === 'hint'
+    return { start: i, length: hasFollowingHint ? 2 : 1 }
+  }
+
+  function beginDrag(e, i) {
+    // prevent dragging from inputs/buttons
+    if (e.target.closest('input, select, button')) return e.preventDefault()
+    const unit = unitBoundsForIndex(i)
+    if (!unit) return e.preventDefault()
+    dragging = true
+    dragStart = unit.start
+    dragLen = unit.length
+    try { e.dataTransfer.setData('text/plain', String(unit.start)) } catch {}
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function onDragOver(e, i) {
+    if (!dragging) return
+    e.preventDefault()
+    const target = unitBoundsForIndex(i)
+    if (!target) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const mid = rect.top + rect.height / 2
+    dropStart = target.start
+    dropPos = e.clientY < mid ? 'before' : 'after'
+  }
+
+  function onDragLeave(e) {
+    // keep indicator only when over a valid target
+  }
+
+  function interleaveHintsFromStops(stopsOnly) {
+    const out = []
+    for (let i = 0; i < stopsOnly.length; i++) {
+      // Reset positions to allow updateStops to redistribute; preserve id
+      const st = { ...stopsOnly[i], position1: null, position2: null }
+      out.push(st)
+      if (i < stopsOnly.length - 1) out.push({ id: genId('hint'), kind: 'hint', percentage: null })
+    }
+    return out
+  }
+
+  function performDrop(e, i) {
+    if (!dragging) return
+    e.preventDefault()
+    const target = unitBoundsForIndex(i)
+    if (!target) return
+
+    let insertAt = target.start + (dropPos === 'after' ? target.length : 0)
+
+    const list = [...$gradient_stops]
+    const dragged = list.splice(dragStart, dragLen)
+
+    // Adjust insert index if we removed items before it
+    if (insertAt > dragStart) insertAt -= dragLen
+
+    list.splice(insertAt, 0, ...dragged)
+
+    // Rebuild to ensure exactly one hint between each adjacent pair of stops
+    const stopsOnly = list.filter(s => s.kind === 'stop')
+    const normalized = interleaveHintsFromStops(stopsOnly)
+
+    $gradient_stops = updateStops(ensureIds(normalized))
+
+    // reset drag state
+    dragging = false
+    dragStart = null
+    dragLen = 0
+    dropStart = null
+    dropPos = null
+  }
+
+  function lastStopIndex() {
+    for (let i = $gradient_stops.length - 1; i >= 0; i--) {
+      if ($gradient_stops[i]?.kind === 'stop') return i
+    }
+    return null
+  }
+
+  function onDragOverEnd(e) {
+    if (!dragging) return
+    e.preventDefault()
+    const last = lastStopIndex()
+    if (last == null) return
+    dropStart = last
+    dropPos = 'after'
+  }
+
+  function dropAtEnd(e) {
+    if (!dragging) return
+    const last = lastStopIndex()
+    if (last == null) return
+    performDrop(e, last)
+  }
+
+  function endDrag() {
+    dragging = false
+    dragStart = null
+    dragLen = 0
+    dropStart = null
+    dropPos = null
+  }
+
   function slidingPosition(e, stop) {
     const range = [
       stop.position1 + 1,
@@ -115,10 +240,17 @@
 </script>
 
 <section class="gradient-stops">
-  {#each $gradient_stops as stop, i (stop)}
+  {#each $gradient_stops as stop, i (stop.id || i)}
     <div in:fade="{{duration: 450}}" out:scale animate:flip="{{duration: 350, delay: 120}}">
     {#if stop.kind === 'stop'}
-      <fieldset
+      					<fieldset
+        draggable="true"
+        ondragstart={(e) => beginDrag(e, i)}
+        ondragover={(e) => onDragOver(e, i)}
+        ondrop={(e) => performDrop(e, i)}
+        ondragend={endDrag}
+        class:drop-before={dragging && dropStart === i && dropPos === 'before'}
+        class:drop-after={dragging && dropStart === i && dropPos === 'after'}
         style="accent-color: {stop.color}; --brand: {stop.color}"
         class="stop control-set"
         onmouseenter={() => fieldsetInteractingStart(stop)}
@@ -206,6 +338,8 @@
     {/if}
     </div>
   {/each}
+  <!-- End drop zone to allow dropping after the last stop -->
+  <div class="end-dropzone" ondragover={(e)=> onDragOverEnd(e)} ondrop={(e)=> dropAtEnd(e)}></div>
 </section>
 
 <style>
@@ -223,6 +357,7 @@
   .stop {
     background: var(--surface-3);
     padding-inline: var(--size-3);
+    position: relative;
     margin-inline: var(--size-3);
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-2);
@@ -234,6 +369,26 @@
       background: white;
       border: 1px solid var(--surface-2);
     }
+  }
+
+  /* Drag-reorder indicators */
+  .control-set.drop-before::before,
+  .control-set.drop-after::after {
+    content: "";
+    position: absolute;
+    left: var(--size-3);
+    right: var(--size-3);
+    height: 4px;
+    background: color-mix(in oklch, var(--brand, var(--link)) 60%, transparent);
+    border-radius: 999px;
+  }
+  .control-set.drop-before::before {
+    top: 0;
+    transform: translateY(-6px);
+  }
+  .control-set.drop-after::after {
+    bottom: 0;
+    transform: translateY(6px);
   }
 
   .stop-actions {
@@ -332,6 +487,10 @@
     display: flex;
     align-items: center;
     gap: var(--size-2);
+  }
+
+  .end-dropzone {
+    height: var(--size-5);
   }
 
   .linked {
