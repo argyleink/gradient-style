@@ -77,17 +77,13 @@
     })
 
     // always watch pointer move
+    let lastActiveIndex = null
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
         node.setPointerCapture(e.pointerId)
         let apercent = w / 100
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
-
-        // if (Math.abs(dragulaState.start.y - e.screenY) > 50)
-        //   dragYdelta = dragulaState.start.y - e.screenY - 24
-        // else
-        //   dragYdelta = null
 
         if (dragulaState.stop.kind === 'stop') {
           if (dragulaState.stop.position1 === dragulaState.stop.position2)
@@ -134,10 +130,14 @@
         dragulaState.lastAngle = currentAngle
       }
       
-      if (e.target.closest('[data-stop-index]'))
-        $active_stop_index = e.target
-          .closest('[data-stop-index]')
-          .dataset.stopIndex
+      const target = e.target.closest('[data-stop-index]')
+      if (target) {
+        const idx = target.dataset.stopIndex
+        if (lastActiveIndex !== idx) {
+          $active_stop_index = idx
+          lastActiveIndex = idx
+        }
+      }
     })
 
     function stopWatching(e) {

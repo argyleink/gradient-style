@@ -62,8 +62,14 @@
       if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
 
       if (restore.radial_shape)       $radial_shape = restore.radial_shape
-      if (restore.radial_position)    $radial_position = restore.radial_position
-      if (restore.radial_named_position) $radial_named_position = restore.radial_named_position
+      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+      if (restore.radial_position) {
+        $radial_named_position = '--'
+        $radial_position = restore.radial_position
+      }
+      else if (restore.radial_named_position) {
+        $radial_named_position = restore.radial_named_position
+      }
       if (restore.radial_size)        $radial_size = restore.radial_size
 
       if (restore.conic_angle)        $conic_angle = restore.conic_angle
@@ -162,19 +168,22 @@
       .filter(s => s?.percentage !== null)
       .map(s => {
         if (s.kind === 'stop') {
-          if (s.position1 != null && s.position2 != null && s.position1 != s.position2)
-            return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
-          else if (s.position1 == null && s.position2 != null) {
-            s.position1 = '0'
-            s.position2 = '100'
-            return maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '% ' + s.position2 + '%'
+          const p1 = s.position1
+          const p2 = s.position2
+
+          if (p1 != null && p2 != null && p1 != p2)
+            return maybeConvertColor(s.color, convert_colors) + ' ' + p1 + '% ' + p2 + '%'
+          else if (p1 == null && p2 != null) {
+            const start = '0'
+            const end = '100'
+            return maybeConvertColor(s.color, convert_colors) + ' ' + start + '% ' + end + '%'
           }
           else {
-            let stop1 = s.position1 != null && s.position1 != s.auto
-              ? maybeConvertColor(s.color, convert_colors) + ' ' + s.position1 + '%'
+            let stop1 = p1 != null && p1 != s.auto
+              ? maybeConvertColor(s.color, convert_colors) + ' ' + p1 + '%'
               : maybeConvertColor(s.color, convert_colors)
-            let stop2 = s.position2 != null
-              ? ' ' + s.position2 + '%'
+            let stop2 = p2 != null
+              ? ' ' + p2 + '%'
               : ''
 
             return stop1 + stop2
@@ -189,9 +198,8 @@
 
   function radialPositionToString() {
     if ($radial_position.x != null) {
-      if ($radial_position.y == null)
-        $radial_position.y = '50'
-      return $radial_position.x + '% ' + $radial_position.y + '%'
+      const y = $radial_position.y ?? '50'
+      return $radial_position.x + '% ' + y + '%'
     }
     else {
       return $radial_named_position
@@ -200,9 +208,8 @@
 
   function conicPositionToString() {
     if ($conic_position.x != null) {
-      if ($conic_position.y == null)
-        $conic_position.y = '50'
-      return $conic_position.x + '% ' + $conic_position.y + '%'
+      const y = $conic_position.y ?? '50'
+      return $conic_position.x + '% ' + y + '%'
     }
     else {
       return $conic_named_position

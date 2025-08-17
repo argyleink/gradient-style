@@ -190,6 +190,7 @@
     })
 
     // always watch pointer move
+    let lastActiveIndex = null
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving && dragulaState.stop) {
         let apercent = (size.w / 2) / 100
@@ -219,10 +220,14 @@
         $radial_position.y = Math.round(dragulaState.top)
       }
       
-      if (e.target.closest('[data-stop-index]'))
-        $active_stop_index = e.target
-          .closest('[data-stop-index]')
-          .dataset.stopIndex
+      const target = e.target.closest('[data-stop-index]')
+      if (target) {
+        const idx = target.dataset.stopIndex
+        if (lastActiveIndex !== idx) {
+          $active_stop_index = idx
+          lastActiveIndex = idx
+        }
+      }
     })
 
     function stopWatching(e) {
@@ -447,7 +452,7 @@
     block-size: 2px;
     position: absolute;
     background: repeating-linear-gradient(to right, #0000 0 5px, var(--line-2) 0 10px);
-    inline-size: 150cqmax;
+    inline-size: 400cqmax;
     z-index: -1;
   }
 
