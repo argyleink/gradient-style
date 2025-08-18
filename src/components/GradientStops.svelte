@@ -244,8 +244,6 @@
     <div in:fade="{{duration: 450}}" out:scale animate:flip="{{duration: 350, delay: 120}}">
     {#if stop.kind === 'stop'}
       					<fieldset
-        draggable="true"
-        ondragstart={(e) => beginDrag(e, i)}
         ondragover={(e) => onDragOver(e, i)}
         ondrop={(e) => performDrop(e, i)}
         ondragend={endDrag}
@@ -259,6 +257,7 @@
         onfocusout={() => fieldsetInteractingEnd()}
         oninput={(e) => slidingPosition(e, stop)}
       >
+        <div class="drag-handle" draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder" title="Drag to reorder"></div>
         <h4>Color {i}</h4>
         {#if i === 0}
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
@@ -402,6 +401,27 @@
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+  }
+
+  /* Drag handle to initiate reordering */
+  .drag-handle {
+    position: absolute;
+    inset-inline-start: var(--size-3);
+    inset-block-start: var(--size-3);
+    inline-size: var(--size-5);
+    block-size: var(--size-5);
+    border-radius: var(--radius-round);
+    background: var(--surface-2);
+    box-shadow: var(--shadow-1);
+    cursor: grab;
+    background-image: url(https://api.iconify.design/material-symbols:drag-indicator-rounded.svg?color=%23adb5bd);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 70%;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
   }
 
   .stop-actions > select {
