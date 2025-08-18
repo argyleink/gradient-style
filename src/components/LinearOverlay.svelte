@@ -34,6 +34,10 @@
     centerY: null,
   })
 
+  // Ghost stop preview state for hover on the gradient line
+  let ghostPercent = $state(null)
+  let showGhost = $state(false)
+
   linear_named_angle.subscribe(value => {
     if (value === '--') return
     let ng = linear_keywords[value](w,h)
@@ -114,21 +118,21 @@
         const deltaX = e.clientX - dragulaState.centerX
         const deltaY = e.clientY - dragulaState.centerY
         let currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
-        
+
         // Normalize to 0-360 range
         if (currentAngle < 0) currentAngle += 360
-        
+
         if (dragulaState.lastAngle !== null) {
           // Calculate the angular difference
           let angleDiff = currentAngle - dragulaState.lastAngle
-          
+
           // Handle wraparound (e.g., from 350° to 10°)
           if (angleDiff > 180) angleDiff -= 360
           if (angleDiff < -180) angleDiff += 360
-          
+
           // Update the linear angle
           $linear_angle += angleDiff
-          
+
           // Keep angle in 0-360 range
           if ($linear_angle >= 360) $linear_angle -= 360
           if ($linear_angle < 0) $linear_angle += 360
@@ -136,10 +140,10 @@
           // Round during drag to avoid fractional degrees
           $linear_angle = Math.round($linear_angle)
         }
-        
+
         dragulaState.lastAngle = currentAngle
       }
-      
+
       const target = e.target.closest('[data-stop-index]')
       if (target) {
         const idx = target.dataset.stopIndex
@@ -178,9 +182,9 @@
     if (dragulaState.stop.kind === 'hint')
       dragulaState.left = parseInt(dragulaState.stop.percentage)
     else
-      dragulaState.left = parseInt(node.dataset.position === "1" 
-        ? dragulaState.stop.position1 
-        : dragulaState.stop.position2)        
+      dragulaState.left = parseInt(node.dataset.position === "1"
+        ? dragulaState.stop.position1
+        : dragulaState.stop.position2)
   }
 
   function rotateIt(node) {
@@ -209,32 +213,83 @@
     return ng - 90
   }
 
+  // Compute percent by projecting the mouse onto the rotated line axis to avoid drift
+  function computePercentFromPointer(e) {
+    // Find the visual line element and its center in screen space
+    const overlay = e.currentTarget.parentElement
+    const lineEl = overlay.querySelector('.line')
+    if (!lineEl) return 0
+    const lineRect = lineEl.getBoundingClientRect()
+    const cx = lineRect.left + lineRect.width / 2
+    const cy = lineRect.top + lineRect.height / 2
+
+    // Direction unit vector of the line in screen space
+    const rotDeg = ( $linear_angle - 90 )
+    const rot = rotDeg * Math.PI / 180
+    const ux = Math.cos(rot)
+    const uy = Math.sin(rot)
+
+    // Vector from center to pointer in screen space
+    const px = e.clientX - cx
+    const py = e.clientY - cy
+
+    // Signed distance along the line axis
+    const t = px * ux + py * uy
+
+    // Visual line length in px
+    const a = (Math.PI / 180) * $linear_angle
+    const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a))
+
+    // Map [-L/2, L/2] -> [0,100]
+    const percent = ((t + L / 2) / L) * 100
+    return Math.round(percent)
+  }
+
   function addStop(e) {
-    const bounds = e.target.getBoundingClientRect()
-    const distance = e.clientX - bounds.x
-    const percent = (distance / bounds.width * 100).toFixed()
-    
-    const upperLimit = $gradient_stops.findIndex(stop => 
-      stop.position1 > percent)
+    let percent = computePercentFromPointer(e)
+
+    // Determine insertion point among color stops
+    const colors = $gradient_stops.filter(s => s.kind === 'stop')
+    let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+    if (k === -1) k = colors.length // append at end
+
+    // Map color index to full array index (pattern: stop, hint, stop, hint, ...)
+    let arrIdx = k * 2
 
     const newStop = {
-      kind: 'stop', 
-      color: `oklch(80% 0.3 ${randomNumber(0,360)})`, 
-      auto: percent, 
-      position1: percent, 
+      kind: 'stop',
+      color: `oklch(80% 0.3 ${randomNumber(0,360)})`,
+      auto: percent,
+      position1: percent,
       position2: percent,
+      _manual: true,
     }
 
-    if (upperLimit > 1) {
-      $gradient_stops.splice(upperLimit, 0, {kind: 'hint', percentage: null})
-      $gradient_stops.splice(upperLimit, 0, newStop)
-    }
-    else {
-      $gradient_stops.splice(upperLimit, 0, newStop)
-      $gradient_stops.splice(upperLimit, 0, {kind: 'hint', percentage: null})
+    if (k === colors.length) {
+      // Appending after last color: need a hint between last and new
+      $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+    } else {
+      // Inserting before an existing color: keep existing hint between previous and new,
+      // and add a new hint between new and next
+      $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
     }
 
     $gradient_stops = updateStops($gradient_stops)
+  }
+
+  function onTrackMove(e) {
+    let percent = computePercentFromPointer(e)
+    ghostPercent = percent
+    showGhost = true
+  }
+
+  function onTrackEnter() {
+    showGhost = true
+  }
+
+  function onTrackLeave() {
+    showGhost = false
+    ghostPercent = null
   }
 
   function deleteStop(stop) {
@@ -282,16 +337,21 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
   <div class="invisible-rotator" use:tooltip={{content: $linear_named_angle == '--' ? `${$linear_angle}deg` : $linear_named_angle}}></div>
-  <div class="invisible-track" onclick={addStop}></div>
+  <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
   <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
+    {#if showGhost && ghostPercent !== null}
+      <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
+        <div class="ghost-stop"></div>
+      </div>
+    {/if}
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
-        <div 
+        <div
           tabindex="0"
           use:tooltip={{content: `${stop.position1}%`}}
-          class="stop-wrap" 
-          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
-          onmouseleave={mouseOut} 
+          class="stop-wrap"
+          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
+          onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
           ondblclick={()=>deleteStop(stop)}
         >
@@ -300,12 +360,12 @@
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
-          <div 
+          <div
             tabindex="0"
             use:tooltip={{content: `${stop.position2}%`}}
-            class="stop-wrap" 
-            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
-            onmouseleave={mouseOut} 
+            class="stop-wrap"
+            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};"
+            onmouseleave={mouseOut}
             onkeydown={(e)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
@@ -316,15 +376,15 @@
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div 
-          class="hint" 
+        <div
+          class="hint"
           tabindex="0"
           use:tooltip={{content: stop.percentage != null ? `${stop.percentage}%` : ''}}
-          data-stop-index={i} 
+          data-stop-index={i}
           style="
-            inset-inline-start: {stop.percentage}%; 
+            inset-inline-start: {stop.percentage}%;
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
-          " 
+          "
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
@@ -373,7 +433,8 @@
   }
 
   .invisible-track {
-    cursor: copy;
+    /* Remove the plus cursor; just use default */
+    cursor: default;
     pointer-events: auto;
     position: absolute;
     block-size: 1rem;
@@ -381,6 +442,26 @@
     inset-block-start: 50%;
     inset-inline-start: 0;
     transform: translateY(-50%);
+  }
+
+  .ghost-stop-wrap {
+    position: absolute;
+    inset-block-start: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .ghost-stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklch, var(--surface-1) 40%, transparent);
+    aspect-ratio: 1;
+    inline-size: var(--size-5);
+    border-radius: var(--radius-round);
+    border: .25rem solid var(--line-2);
+    box-shadow: none;
+    opacity: 0.8;
   }
 
   .stop-wrap {
@@ -409,7 +490,7 @@
 
   @media (prefers-reduced-motion: no-preference) {
     .stop {
-      animation: 
+      animation:
         var(--animation-scale-up) reverse,
         var(--animation-fade-out) reverse;
       animation-duration: 250ms;
@@ -471,11 +552,11 @@
   }
 
   .visual {
-    --ng: 0; 
+    --ng: 0;
     --thickness: 3px;
     --_inner: calc(70% - var(--thickness));
-    --_outer: calc(var(--_inner) + 1px); 
-    
+    --_outer: calc(var(--_inner) + 1px);
+
     mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
     -webkit-mask: radial-gradient(circle, #0000 var(--_inner), #000 var(--_outer));
     background-image: conic-gradient(var(--line-1), var(--line-1) var(--ng), #0000 0);

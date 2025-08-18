@@ -9,10 +9,12 @@ export function updateStops(stops) {
         stop.position1 = 0
         stop.position2 = 100 
       }
-      else if (!stop.position1 || stop.position1 === stop.auto) {
+      else if (!stop._manual && (!stop.position1 || stop.position1 === stop.auto)) {
         stop.position1 = autoVal
         stop.position2 = autoVal
       }
+      // Clear the manual flag after one normalization pass so future edits behave normally
+      if (stop._manual) delete stop._manual
     }
     // is a hint
     else {
