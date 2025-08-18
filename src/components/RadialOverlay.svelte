@@ -8,6 +8,8 @@
 
   import {namedPosToPercent} from '../utils/radial.ts'
   import {contrast_color_prefer_white} from '../utils/color.ts'
+  import {updateStops, removeStop} from '../utils/stops.ts'
+  import {randomNumber} from '../utils/numbers.ts'
 
   /**
    * @typedef {Object} Props
@@ -19,6 +21,10 @@
   let { w = null, h = null } = $props();
   let dragYdelta = null
 
+  // Ghost stop preview state for hover on the gradient line
+  let ghostPercent = $state(null)
+  let showGhost = $state(false)
+
   const dragulaState = $state({
     moving: false,
     start: {x:null,y:null},
@@ -27,6 +33,9 @@
     top: null,
     stop: null,
     target: null,
+    // simplified pull-away state for radial
+    removedStop: null,
+    removedIndex: null,
   })
 
   function determineOverlaySize() {
@@ -165,6 +174,7 @@
     // all clicks, match stops and forward
     node.addEventListener('pointerdown', e => {
       const isStop = e.target.closest('[data-stop-index]')
+      const isTrack = e.target.closest('.invisible-track')
 
       if (isStop) {
         dragulaState.target = isStop
@@ -173,6 +183,10 @@
         dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
 
         dragIt(isStop)
+      }
+      else if (isTrack) {
+        // Allow click-to-add without starting a drag move of the center
+        return
       }
       else {
         dragulaState.target = e.target
@@ -193,22 +207,55 @@
     let lastActiveIndex = null
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving && dragulaState.stop) {
+        node.setPointerCapture(e.pointerId)
         let apercent = (size.w / 2) / 100
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
-        if (dragulaState.stop.kind === 'stop') {
-          if (dragulaState.stop.position1 === dragulaState.stop.position2)
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
+        // Pull-away removal based on vertical distance from the line (no rotation)
+        const lineEl = node.querySelector('.line')
+        if (lineEl) {
+          const rect = lineEl.getBoundingClientRect()
+          const cy = rect.top + rect.height / 2
+          const perp = e.clientY - cy
+          const absPerp = Math.abs(perp)
+          const armThresh = 75
 
-          if (dragulaState.target.dataset.position === "1")
-            dragulaState.stop.position1 = Math.round(dragulaState.left)
-          else
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
+          if (absPerp >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
+            const pos = $gradient_stops.indexOf(dragulaState.stop)
+            if (pos !== -1) {
+              dragulaState.removedStop = dragulaState.stop
+              dragulaState.removedIndex = pos
+              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
+            }
+          } else if (absPerp < armThresh && dragulaState.removedStop) {
+            const idx = dragulaState.removedIndex ?? $gradient_stops.length
+            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
+            $gradient_stops = updateStops($gradient_stops)
+            dragulaState.stop = dragulaState.removedStop
+            dragulaState.removedStop = null
+            dragulaState.removedIndex = null
+          }
         }
-        else
-          dragulaState.stop.percentage = Math.round(dragulaState.left)
 
-        $gradient_stops = [...$gradient_stops]
+        // Update positions for the active or removed stop
+        const targetStop = dragulaState.removedStop ?? dragulaState.stop
+        if (targetStop) {
+          if (targetStop.kind === 'stop') {
+            if (targetStop.position1 === targetStop.position2)
+              targetStop.position2 = Math.round(dragulaState.left)
+
+            if (dragulaState.target?.dataset.position === "1")
+              targetStop.position1 = Math.round(dragulaState.left)
+            else
+              targetStop.position2 = Math.round(dragulaState.left)
+          } else {
+            targetStop.percentage = Math.round(dragulaState.left)
+          }
+        }
+
+        if (!dragulaState.removedStop) {
+          $gradient_stops = [...$gradient_stops]
+        }
       }
       else if (dragulaState.moving) {
         let wpercent = (size.w / 2) / 100
@@ -234,11 +281,12 @@
       node.releasePointerCapture(e.pointerId)
 
       dragulaState.moving = false
-      dragulaState.rotating = false
       dragulaState.stop = null
       dragulaState.target = null
       dragulaState.start.x = null
       dragulaState.start.y = null
+      dragulaState.removedStop = null
+      dragulaState.removedIndex = null
 
       $active_stop_index = null
     }
@@ -266,6 +314,64 @@
 
   function gradientLineLength() {
     return size.w / 2 + 'px'
+  }
+
+  // Map a pointer event to a percent along the horizontal line
+  function computePercentFromPointer(e) {
+    const overlay = e.currentTarget.closest('.overlay')
+    const lineEl = overlay?.querySelector('.line')
+    if (!lineEl) return 0
+    const rect = lineEl.getBoundingClientRect()
+    const t = (e.clientX - rect.left) / rect.width
+    const percent = Math.max(0, Math.min(100, Math.round(t * 100)))
+    return percent
+  }
+
+  function addStop(e) {
+    let percent = computePercentFromPointer(e)
+
+    // Determine insertion point among color stops
+    const colors = $gradient_stops.filter(s => s.kind === 'stop')
+    let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+    if (k === -1) k = colors.length // append at end
+
+    // Map color index to full array index (pattern: stop, hint, stop, hint, ...)
+    let arrIdx = k * 2
+
+    const newStop = {
+      kind: 'stop',
+      color: `oklch(80% 0.3 ${randomNumber(0,360)})`,
+      auto: percent,
+      position1: percent,
+      position2: percent,
+      _manual: true,
+    }
+
+    if (k === colors.length) {
+      // Appending after last color: need a hint between last and new
+      $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+    } else {
+      // Inserting before an existing color: keep existing hint between previous and new,
+      // and add a new hint between new and next
+      $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
+    }
+
+    $gradient_stops = updateStops($gradient_stops)
+  }
+
+  function onTrackMove(e) {
+    let percent = computePercentFromPointer(e)
+    ghostPercent = percent
+    showGhost = true
+  }
+
+  function onTrackEnter() {
+    showGhost = true
+  }
+
+  function onTrackLeave() {
+    showGhost = false
+    ghostPercent = null
   }
 
   function mouseOut() {
@@ -355,7 +461,13 @@
     width:{size.w}px; 
     height:{size.h}px;
   "></div>
+  <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
   <div class="line" style="width: {gradientLineLength(size)}">
+    {#if showGhost && ghostPercent !== null}
+      <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
+        <div class="ghost-stop"></div>
+      </div>
+    {/if}
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
         <div 
@@ -452,6 +564,7 @@
     block-size: 2px;
     inline-size: 100%;
     background: var(--line-1);
+    transform: translate(-50%, -50%);
   }
 
   .line::after {
@@ -477,6 +590,7 @@
     transition: box-shadow .5s var(--ease-3);
     --_shadow-size: 0px;
     box-shadow: inset 0 0 0 var(--_shadow-size) hsl(0 0% 100% / 25%);
+    z-index: 1;
   }
 
   .dragzone:hover {
@@ -486,6 +600,38 @@
   .stop-wrap {
     border-radius: var(--radius-round);
     translate: -50% 0;
+  }
+
+.invisible-track {
+    pointer-events: auto;
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline: 0;
+    block-size: 1rem;
+    transform: translateY(-50%);
+    cursor: default;
+    z-index: 0;
+  }
+
+  .ghost-stop-wrap {
+    position: absolute;
+    inset-block-start: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ghost-stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklch, var(--surface-1) 40%, transparent);
+    aspect-ratio: 1;
+    inline-size: var(--size-5);
+    border-radius: var(--radius-round);
+    border: .25rem solid var(--line-2);
+    box-shadow: none;
+    opacity: 0.8;
   }
 
   .stop-wrap:has(:global(+ .stop-wrap)) .stop {
@@ -534,6 +680,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
+    z-index: 3; /* ensure stops/hints hover over track/ghost */
   }
 
   .hint {
