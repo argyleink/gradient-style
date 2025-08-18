@@ -32,6 +32,9 @@
     lastAngle: null,
     centerX: null,
     centerY: null,
+    // simplified pull-away state
+    removedStop: null,
+    removedIndex: null,
   })
 
   // Ghost stop preview state for hover on the gradient line
@@ -96,19 +99,66 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
-        if (dragulaState.stop.kind === 'stop') {
-          if (dragulaState.stop.position1 === dragulaState.stop.position2)
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
+        // compute perpendicular distance to the rotated line
+        const lineEl = node.querySelector('.line')
+        if (lineEl) {
+          const rect = lineEl.getBoundingClientRect()
+          const cx = rect.left + rect.width / 2
+          const cy = rect.top + rect.height / 2
+          const rot = (($linear_angle - 90) * Math.PI) / 180
+          const ux = Math.cos(rot), uy = Math.sin(rot)
+          const nx = -uy, ny = ux
+          const vx = e.clientX - cx
+          const vy = e.clientY - cy
+          const perp = vx * nx + vy * ny
+          const absPerp = Math.abs(perp)
 
-          if (dragulaState.target.dataset.position === "1")
-            dragulaState.stop.position1 = Math.round(dragulaState.left)
-          else
-            dragulaState.stop.position2 = Math.round(dragulaState.left)
+          const armThresh = 75
+
+          // Pull-away removal
+          if (absPerp >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
+            const pos = $gradient_stops.indexOf(dragulaState.stop)
+            if (pos !== -1) {
+              // keep a working reference so we can update its position while removed
+              dragulaState.removedStop = dragulaState.stop
+              dragulaState.removedIndex = pos
+              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
+            }
+          }
+          // Return to line: add back if previously removed
+          else if (absPerp < armThresh && dragulaState.removedStop) {
+            const idx = dragulaState.removedIndex ?? $gradient_stops.length
+            // restore stop and a hint placeholder after it to keep pattern
+            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
+            $gradient_stops = updateStops($gradient_stops)
+            // clear removed markers so we continue editing the live stop
+            dragulaState.stop = dragulaState.removedStop
+            dragulaState.removedStop = null
+            dragulaState.removedIndex = null
+          }
         }
-        else
-          dragulaState.stop.percentage = Math.round(dragulaState.left)
 
-        $gradient_stops = [...$gradient_stops]
+        // Update positions: if removed, keep updating the temp stop so it comes back at the right place
+        const targetStop = dragulaState.removedStop ?? dragulaState.stop
+        if (targetStop) {
+          if (targetStop.kind === 'stop') {
+            if (targetStop.position1 === targetStop.position2)
+              targetStop.position2 = Math.round(dragulaState.left)
+
+            if (dragulaState.target?.dataset.position === "1")
+              targetStop.position1 = Math.round(dragulaState.left)
+            else
+              targetStop.position2 = Math.round(dragulaState.left)
+          }
+          else {
+            targetStop.percentage = Math.round(dragulaState.left)
+          }
+        }
+
+        // if we're actively editing a stop still in the list, push changes
+        if (!dragulaState.removedStop) {
+          $gradient_stops = [...$gradient_stops]
+        }
       }
       else if (dragulaState.rotating) {
         node.setPointerCapture(e.pointerId)
@@ -157,17 +207,16 @@
     function stopWatching(e) {
       node.releasePointerCapture(e.pointerId)
 
-      // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
-      //   dragYdelta = null
-      //   $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(dragulaState.stop)))
-      // }
-
+      // If we ended with the stop removed, keep it removed. If it was reattached already, nothing to do.
       dragulaState.moving = false
       dragulaState.rotating = false
       dragulaState.stop = null
       dragulaState.target = null
       dragulaState.start.x = null
       dragulaState.start.y = null
+      dragYdelta = null
+      dragulaState.removedStop = null
+      dragulaState.removedIndex = null
 
       $active_stop_index = null
     }
@@ -350,7 +399,7 @@
           tabindex="0"
           use:tooltip={{content: `${stop.position1}%`}}
           class="stop-wrap"
-          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
+          style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
           ondblclick={()=>deleteStop(stop)}
@@ -364,7 +413,7 @@
             tabindex="0"
             use:tooltip={{content: `${stop.position2}%`}}
             class="stop-wrap"
-            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};"
+            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
             onmouseleave={mouseOut}
             onkeydown={(e)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
@@ -462,6 +511,10 @@
     border: .25rem solid var(--line-2);
     box-shadow: none;
     opacity: 0.8;
+  }
+
+.stop-wrap {
+    transition: none;
   }
 
   .stop-wrap {
