@@ -294,7 +294,7 @@
             </div>
           </div>
         </div>
-        <button class="stop-actions" use:tooltip={{content: "Actions", delay: [1000, 0], offset: 15}}>
+        <button class="stop-actions" use:tooltip={{content: "Actions", offset: 15}}>
           <select tabindex="-1" onchange={(e) => colorAction(e,i)}>
             <option disabled selected>Color Actions</option>
             <hr>
