@@ -22,6 +22,10 @@
   let { w = null, h = null } = $props();
   let dragYdelta = null
 
+  // Ghost stop preview state for hover on the ring
+  let ghostPercent = $state(null)
+  let showGhost = $state(false)
+
   const dragulaState = {
     moving: false,
     rotating: false,
@@ -35,6 +39,9 @@
     lastAngle: null,
     centerX: null,
     centerY: null,
+    // simplified pull-away state
+    removedStop: null,
+    removedIndex: null,
   }
 
   function pickColor(stop, e) {
@@ -102,6 +109,12 @@
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
       const isDrag = e.target.closest('.dragzone')
+      const isRing = e.target.closest('.invisible-ring')
+
+      if (isRing) {
+        // Allow click-to-add without initiating any drag
+        return
+      }
 
       if (isDrag) {
         dragulaState.target = e.target
@@ -138,19 +151,64 @@
         let apercent = (w / 2) / 100
         dragulaState.angle += (e.movementX || e.movementY * -1) / apercent
 
-        if (dragulaState.stop.kind === 'stop') {
-          if (dragulaState.stop.position1 === dragulaState.stop.position2)
-            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+        // Pull-away removal based on radial distance from the ring
+        const stopsEl = node.querySelector('.stops')
+        if (stopsEl) {
+          const rect = stopsEl.getBoundingClientRect()
+          const cx = rect.left + rect.width / 2
+          const cy = rect.top + rect.height / 2
+          const dx = e.clientX - cx
+          const dy = e.clientY - cy
+          const dist = Math.hypot(dx, dy)
+          // Estimate the ring radius: sample an existing stop or fallback
+          let ringRadius = 59
+          const sampleStop = node.querySelector('.stops .stop')
+          if (sampleStop) {
+            const srect = sampleStop.getBoundingClientRect()
+            const sx = srect.left + srect.width / 2
+            const sy = srect.top + srect.height / 2
+            ringRadius = Math.hypot(sx - cx, sy - cy)
+          }
+          const radialDelta = Math.abs(dist - ringRadius)
+          const armThresh = 75
 
-          if (dragulaState.target.dataset.position === "1")
-            dragulaState.stop.position1 = Math.round(dragulaState.angle)
-          else
-            dragulaState.stop.position2 = Math.round(dragulaState.angle)
+          if (radialDelta >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
+            const pos = $gradient_stops.indexOf(dragulaState.stop)
+            if (pos !== -1) {
+              dragulaState.removedStop = dragulaState.stop
+              dragulaState.removedIndex = pos
+              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
+            }
+          } else if (radialDelta < armThresh && dragulaState.removedStop) {
+            const idx = dragulaState.removedIndex ?? $gradient_stops.length
+            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
+            $gradient_stops = updateStops($gradient_stops)
+            dragulaState.stop = dragulaState.removedStop
+            dragulaState.removedStop = null
+            dragulaState.removedIndex = null
+          }
         }
-        else
-          dragulaState.stop.percentage = Math.round(dragulaState.angle)
 
-        $gradient_stops = [...$gradient_stops]
+        // Update positions on active or removed stop
+        const targetStop = dragulaState.removedStop ?? dragulaState.stop
+        if (targetStop) {
+          if (targetStop.kind === 'stop') {
+            if (targetStop.position1 === targetStop.position2)
+              targetStop.position2 = Math.round(dragulaState.angle)
+
+            if (dragulaState.target?.dataset.position === "1")
+              targetStop.position1 = Math.round(dragulaState.angle)
+            else
+              targetStop.position2 = Math.round(dragulaState.angle)
+          }
+          else {
+            targetStop.percentage = Math.round(dragulaState.angle)
+          }
+        }
+
+        if (!dragulaState.removedStop) {
+          $gradient_stops = [...$gradient_stops]
+        }
       }
       else if (dragulaState.moving) {
         let wpercent = w / 50
@@ -226,6 +284,8 @@
       dragulaState.top = null
       dragulaState.start.x = null
       dragulaState.start.y = null
+      dragulaState.removedStop = null
+      dragulaState.removedIndex = null
 
       $active_stop_index = null
     }
@@ -304,6 +364,99 @@
     return ng - 90
   }
 
+  function normalizeDeg(a) {
+    a = a % 360
+    if (a < 0) a += 360
+    return a
+  }
+
+  function computeVisualOffsetDeg(root) {
+    try {
+      const stopsEl = root?.querySelector('.stops')
+      const sample = root?.querySelector('.stops .stop')
+      if (!stopsEl || !sample) return null
+      const rect = stopsEl.getBoundingClientRect()
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2
+      const srect = sample.getBoundingClientRect()
+      const sx = srect.left + srect.width / 2
+      const sy = srect.top + srect.height / 2
+      let screenDeg = Math.atan2(sy - cy, sx - cx) * (180 / Math.PI)
+      if (screenDeg < 0) screenDeg += 360
+
+      // Read declared percent from the first stop element
+      const idx = parseInt(sample.dataset.stopIndex)
+      const pos = sample.dataset.position === '2' ? 'position2' : 'position1'
+      const declared = ($gradient_stops?.[idx]?.[pos] ?? 0)
+      const declaredDeg = (parseFloat(declared) / 100) * 360
+
+      const offset = normalizeDeg(screenDeg - declaredDeg)
+      return offset
+    } catch { return null }
+  }
+
+  // Compute percent around the ring from pointer position
+  function computePercentFromPointer(e) {
+    const root = e.currentTarget.closest('.conic-overlay')
+    const stopsEl = root?.querySelector('.stops')
+    if (!stopsEl) return 0
+    const rect = stopsEl.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
+    if (deg < 0) deg += 360
+
+    // Prefer dynamic visual offset derived from an existing stop; fall back to theoretical base
+    const dynamicOffset = computeVisualOffsetDeg(root)
+    const baseOffset = normalizeDeg($conic_angle - 180)
+    const offset = dynamicOffset ?? baseOffset
+
+    const localDeg = normalizeDeg(deg - offset)
+    const percent = Math.round((localDeg / 360) * 100)
+    return percent
+  }
+
+  function addStop(e) {
+    const percent = computePercentFromPointer(e)
+
+    const colors = $gradient_stops.filter(s => s.kind === 'stop')
+    let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+    if (k === -1) k = colors.length
+
+    const arrIdx = k * 2
+    const newStop = {
+      kind: 'stop',
+      color: `oklch(80% 0.3 ${randomNumber(0,360)})`,
+      auto: percent,
+      position1: percent,
+      position2: percent,
+      _manual: true,
+    }
+
+    if (k === colors.length) {
+      $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+    } else {
+      $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
+    }
+
+    $gradient_stops = updateStops($gradient_stops)
+  }
+
+  function onRingMove(e) {
+    const percent = computePercentFromPointer(e)
+    ghostPercent = percent
+    showGhost = true
+  }
+
+  function onRingEnter() {
+    showGhost = true
+  }
+
+  function onRingLeave() {
+    showGhost = false
+    ghostPercent = null
+  }
+
   let position = $derived(overlayPosition(
     $conic_position,
     $conic_named_position,
@@ -328,7 +481,13 @@
   </div>
   <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $conic_named_position == '--' ? `${position.x} ${position.y}` : $conic_named_position}} use:dragula style="max-inline-size: {w * .2}px"></div>
+  <div class="invisible-ring" onclick={addStop} onmousemove={onRingMove} onmouseenter={onRingEnter} onmouseleave={onRingLeave}></div>
   <div class="stops" style="rotate: -90deg; translate: 0px -12px">
+    {#if showGhost && ghostPercent !== null}
+      <div class="ghost-stop-wrap" style="transform: rotateZ({(360 * (parseInt(ghostPercent) / 100))}deg) translate(0, 59px)">
+        <div class="ghost-stop"></div>
+      </div>
+    {/if}
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
         <div 
@@ -429,9 +588,39 @@
     transform: translateY(-50%);
   }
 
+  .invisible-ring {
+    pointer-events: auto;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 0;
+  }
+
   .stop-wrap {
     border-radius: var(--radius-round);
     translate: -50% 0;
+    z-index: 3;
+  }
+
+  .ghost-stop-wrap {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    translate: -50% 0;
+  }
+
+  .ghost-stop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklch, var(--surface-1) 40%, transparent);
+    aspect-ratio: 1;
+    inline-size: var(--size-5);
+    border-radius: var(--radius-round);
+    border: .25rem solid var(--line-2);
+    box-shadow: none;
+    opacity: 0.8;
   }
 
   .stop-wrap:has(:global(+ .stop-wrap)) .stop {
@@ -480,6 +669,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
+    z-index: 3;
   }
 
   .hint {
