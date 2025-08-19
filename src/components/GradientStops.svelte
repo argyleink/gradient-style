@@ -361,6 +361,7 @@
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-2);
     gap: var(--size-3);
+    cursor: auto;
   }
 
   @media (prefers-color-scheme: light) {
