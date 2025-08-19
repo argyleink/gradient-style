@@ -257,7 +257,6 @@
         onfocusout={() => fieldsetInteractingEnd()}
         oninput={(e) => slidingPosition(e, stop)}
       >
-        <div class="drag-handle" draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder" title="Drag to reorder"></div>
         <h4>Color {i}</h4>
         {#if i === 0}
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
@@ -269,12 +268,12 @@
         <div class="positions-pair">
           <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} onclick={() => stop.position2 = stop.position1}>
             {#if stop.position1 === stop.position2}
-              <svg class="linked-on" width="32" height="32" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M7 17q-2.075 0-3.538-1.463T2 12q0-2.075 1.463-3.538T7 7h3q.425 0 .713.288T11 8q0 .425-.288.713T10 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17H7Zm2-4q-.425 0-.713-.288T8 12q0-.425.288-.713T9 11h6q.425 0 .713.288T16 12q0 .425-.288.713T15 13H9Zm5 4q-.425 0-.713-.288T13 16q0-.425.288-.713T14 15h3q1.25 0 2.125-.875T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.463T22 12q0 2.075-1.463 3.538T17 17h-3Z"/>
+              <svg class="linked-on" width="32" height="32" viewBox="0 0 24 24"
+                ><path fill="currentColor" d="M7 17q-2.075 0-3.538-1.463T2 12q0-2.075 1.463-3.538T7 7h3q.425 0 .713.288T11 8q0 .425-.288.713T10 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17H7Zm2-4q-.425 0-.713-.288T8 12q0-.425.288-.713T9 11h6q.425 0 .713.288T16 12q0 .425-.288.713T15 13H9Zm5 4q-.425 0-.713-.288T13 16q0-.425.288-.713T14 15h3q1.25 0 2.125-.875T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.463T22 12q0 2.075-1.463 3.538T17 17h-3Z"/>
               </svg>
             {:else}
-              <svg class="linked-off" width="32" height="32" viewBox="0 0 24 24">
-                <path fill="currentColor" d="m15.825 13l-2-2h2q.425 0 .713.288t.287.712q0 .425-.288.713t-.712.287Zm3.425 3.45l-1.5-1.55q.975-.275 1.613-1.063T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.438T22 12q0 1.425-.75 2.638t-2 1.812Zm-.15 5.45l-17-17q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l17 17q.275.275.275.7t-.275.7q-.275.275-.7.275t-.7-.275ZM10 17H7q-2.075 0-3.538-1.463T2 12q0-1.75 1.063-3.088T5.75 7.15L7.6 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17Zm1.6-4H8.175q-.425 0-.713-.288T7.176 12q0-.425.288-.713T8.175 11h1.45l1.975 2Z"/>
+              <svg class="linked-off" width="32" height="32" viewBox="0 0 24 24"
+                ><path fill="currentColor" d="m15.825 13l-2-2h2q.425 0 .713.288t.287.712q0 .425-.288.713t-.712.287Zm3.425 3.45l-1.5-1.55q.975-.275 1.613-1.063T20 12q0-1.25-.875-2.125T17 9h-3q-.425 0-.713-.288T13 8q0-.425.288-.713T14 7h3q2.075 0 3.538 1.438T22 12q0 1.425-.75 2.638t-2 1.812Zm-.15 5.45l-17-17q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l17 17q.275.275.275.7t-.275.7q-.275.275-.7.275t-.7-.275ZM10 17H7q-2.075 0-3.538-1.463T2 12q0-1.75 1.063-3.088T5.75 7.15L7.6 9H7q-1.25 0-2.125.875T4 12q0 1.25.875 2.125T7 15h3q.425 0 .713.288T11 16q0 .425-.288.713T10 17Zm1.6-4H8.175q-.425 0-.713-.288T7.176 12q0-.425.288-.713T8.175 11h1.45l1.975 2Z"/>
               </svg>
             {/if}
           </button>
@@ -307,6 +306,7 @@
             <option disabled={$gradient_stops.length == 1}>Remove</option>
           </select>
         </button>
+        <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder"></div>
       </fieldset>
     {/if}
     {#if stop.kind === 'hint'}
@@ -392,7 +392,8 @@
 
   .stop-actions {
     position: absolute;
-    inset-inline-end: var(--size-3);
+    /* shift left to make room for the drag handle on the far right */
+    inset-inline-end: calc(var(--size-3) + var(--size-5) + var(--size-2));
     inset-block-start: var(--size-3);
     inline-size: var(--size-5);
     overflow: hidden;
@@ -406,23 +407,35 @@
   /* Drag handle to initiate reordering */
   .drag-handle {
     position: absolute;
-    inset-inline-start: var(--size-3);
+    inset-inline-end: var(--size-3);
     inset-block-start: var(--size-3);
     inline-size: var(--size-5);
     block-size: var(--size-5);
     border-radius: var(--radius-round);
-    background: var(--surface-2);
+    /* no solid background, just lines */
     box-shadow: var(--shadow-1);
     cursor: grab;
-    background-image: url(https://api.iconify.design/material-symbols:drag-indicator-rounded.svg?color=%23adb5bd);
+    /* three horizontal lines centered in the handle */
+    background-image:
+      linear-gradient(currentColor, currentColor),
+      linear-gradient(currentColor, currentColor),
+      linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
-    background-position: center;
-    background-size: 70%;
+    background-size: 70% 2px, 70% 2px, 70% 2px;
+    background-position:
+      50% calc(50% - 5px),
+      50% 50%,
+      50% calc(50% + 5px);
+    color: var(--surface-4);
   }
 
   .drag-handle:active {
     cursor: grabbing;
   }
+
+  /* ensure the handle stays clickable above other elements */
+  .drag-handle { z-index: 2; }
+  .stop-actions { z-index: 2; }
 
   .stop-actions > select {
     --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
