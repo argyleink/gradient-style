@@ -33,7 +33,8 @@
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Presets from './Presets.svelte'
-  import Prism from './PrismJS.svelte'
+import Prism from './PrismJS.svelte'
+import GradientImportDialog from './GradientImportDialog.svelte'
 
   import Hint from './Hint.svelte'
 
@@ -44,6 +45,7 @@
   let metatag
   let svgicon
   let restoring = $state(true)
+  let importRef
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -159,6 +161,10 @@
     })
   })
 
+  function openImport() {
+    importRef?.show()
+  }
+
   const gensyntax = {
     'linear': () =>
       `linear-gradient(
@@ -218,41 +224,67 @@
     const firstStopIdx = stopIndices.at(0)
     const lastStopIdx = stopIndices.at(-1)
 
+    function fmtPos(p) {
+      if (p == null) return null
+      const str = String(p)
+      // If already has a unit (includes any letter) or %, keep as-is
+      if (/[a-z%]/i.test(str)) return str
+      // Otherwise default to percentage unit
+      return str + '%'
+    }
+
+    function isPctZero(p) {
+      if (p == null) return false
+      const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
+      return !!(m && Number(m[1]) === 0)
+    }
+
+    function isPctHundred(p) {
+      if (p == null) return false
+      const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
+      return !!(m && Number(m[1]) === 100)
+    }
+
     return $gradient_stops
       .map((s, i) => {
         if (s.kind === 'stop') {
           let p1 = s.position1
           let p2 = s.position2
 
-          // Omit values equal to tool defaults for the first position only.
-          // Do not prune p2 based on auto; users often set p2 to the auto position intentionally (e.g., stripes).
+          // Omit values equal to tool defaults only if explicitly stored in stop.auto
           if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
 
-          // Omit values equal to browser defaults at edges using original indices
-          if (i === firstStopIdx && p1 != null && Number(p1) === 0) p1 = null
-          if (i === lastStopIdx && p2 != null && Number(p2) === 100) p2 = null
+          // Omit browser default edges only when explicitly percentages
+          if (i === firstStopIdx && isPctZero(p1)) p1 = null
+          if (i === lastStopIdx && isPctHundred(p2)) p2 = null
 
-          // If both positions exist and differ, keep both
-          if (p1 != null && p2 != null && p1 != p2) {
-            return maybeConvertColor(s.color, convert_colors) + ' ' + p1 + '% ' + p2 + '%'
+          // If both positions exist
+          if (p1 != null && p2 != null) {
+            const a = fmtPos(p1)
+            const b = fmtPos(p2)
+            if (a !== b) return maybeConvertColor(s.color, convert_colors) + ' ' + a + ' ' + b
+            // equal -> single position once
+            return maybeConvertColor(s.color, convert_colors) + ' ' + a
           }
 
-          // If only a second position existed originally, avoid forcing 0%/100% defaults
-          if ((s.position1 == null) && (s.position2 != null)) {
-            if (p2 != null) return maybeConvertColor(s.color, convert_colors) + ' 0% ' + p2 + '%'
+          // Only second position exists (do not synthesize 0%)
+          if (p1 == null && p2 != null) {
+            const b = fmtPos(p2)
+            return maybeConvertColor(s.color, convert_colors) + ' ' + b
           }
 
-          // Single stop or single position case
-          const base = maybeConvertColor(s.color, convert_colors)
-          if (p1 != null && p2 != null) return base + ' ' + p1 + '%'
-          if (p1 != null) return base + ' ' + p1 + '%'
-          if (p2 != null) return base + ' ' + p2 + '%'
-          return base
+          // Only first position exists
+          if (p1 != null && p2 == null) {
+            const a = fmtPos(p1)
+            return maybeConvertColor(s.color, convert_colors) + ' ' + a
+          }
+
+          // No positions provided
+          return maybeConvertColor(s.color, convert_colors)
         }
         else if (s.kind === 'hint') {
-          // Include hints only if they have an explicit percentage and it differs from auto
           if (s.percentage == null) return null
-          if (s.auto != null && s.percentage == s.auto) return null
+          // s.percentage is unitless; add % here
           return s.percentage + '%'
         }
         return null
@@ -309,6 +341,9 @@
           {kind: 'stop', color: '#fff', auto: '100', position1: '100', position2: '100'},
         ]
         $linear_named_angle = 'to right'
+        break
+      case 'Import gradient':
+        openImport()
         break
       case 'Tips & tricks':
         let delay = 0
@@ -448,6 +483,7 @@
             <option disabled selected>Actions</option>
             <hr>
             <option>Start new</option>
+            <option>Import gradient</option>
             <option disabled>Copy modern CSS</option>
             <option disabled>Copy classic CSS</option>
             <option disabled>Reset all stops to auto</option>
@@ -480,10 +516,12 @@
 
     </section>
   </contain-er>
+  <GradientImportDialog bind:this={importRef} />
 </main>
 </div>
 
 <style>
+  .import-btn { align-self: start; }
   .color-wrap {
     background: Canvas;
     padding: var(--size-3);
