@@ -493,7 +493,7 @@
             onkeydown={(e)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
-            <div class="stop" data-stop-index={i} data-position="2">
+            <div class="stop" data-stop-index={i} data-position="2" style="opacity: {Number(stop.position2) < Number(stop.position1) ? 0.5 : 1}">
               <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
