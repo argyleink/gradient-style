@@ -781,6 +781,8 @@
     transition: box-shadow .5s var(--ease-3);
     --_shadow-size: 0px;
     box-shadow: inset 0 0 0 var(--_shadow-size) hsl(0 0% 100% / 25%);
+    /* Ensure the position control is above ghost/hint/stop elements */
+    z-index: 5;
   }
 
   .dragzone:hover {
@@ -794,5 +796,7 @@
     display: grid;
     place-items: center;
     place-content: center;
+    /* Let pointer events fall through unless on interactive children */
+    pointer-events: none;
   }
 </style>
