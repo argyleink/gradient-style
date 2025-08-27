@@ -262,11 +262,11 @@
         let hpercent = (size.h / 2) / 100
         dragulaState.left += e.movementX / wpercent
         dragulaState.top += e.movementY / hpercent
-        
+
         $radial_position.x = Math.round(dragulaState.left)
         $radial_position.y = Math.round(dragulaState.top)
       }
-      
+
       const target = e.target.closest('[data-stop-index]')
       if (target) {
         const idx = target.dataset.stopIndex
@@ -302,9 +302,9 @@
       if (dragulaState.stop.kind === 'hint')
         dragulaState.left = parseInt(dragulaState.stop.percentage)
       else if (dragulaState.stop.kind === 'stop')
-        dragulaState.left = parseInt(node.dataset.position === "1" 
-          ? dragulaState.stop.position1 
-          : dragulaState.stop.position2) 
+        dragulaState.left = parseInt(node.dataset.position === "1"
+          ? dragulaState.stop.position1
+          : dragulaState.stop.position2)
     }
     else {
       dragulaState.left = $radial_position.x
@@ -451,14 +451,14 @@
 </script>
 
 <div class="overlay" use:dragula  style="
-  left: {position.x}; 
+  left: {position.x};
   top: {position.y};
   {position.x && 'translate: -50% -50%;'}
 ">
   <div class="dot"></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $radial_named_position == '--' ? `${position.x} ${position.y}` : $radial_named_position}} style="max-inline-size: {size.w * .2}px"></div>
   <div class="edge" style="
-    width:{size.w}px; 
+    width:{size.w}px;
     height:{size.h}px;
   "></div>
   <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
@@ -470,12 +470,12 @@
     {/if}
     {#each $gradient_stops as stop, i (stop)}
       {#if stop.kind === 'stop'}
-        <div 
+        <div
           tabindex="0"
           use:tooltip={{content: `${stop.position1}%`}}
-          class="stop-wrap" 
-          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}" 
-          onmouseleave={mouseOut} 
+          class="stop-wrap"
+          style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
+          onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
           ondblclick={()=>deleteStop(stop)}
         >
@@ -484,12 +484,12 @@
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
-          <div 
+          <div
             tabindex="0"
             use:tooltip={{content: `${stop.position2}%`}}
-            class="stop-wrap" 
-            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};" 
-            onmouseleave={mouseOut} 
+            class="stop-wrap"
+            style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};"
+            onmouseleave={mouseOut}
             onkeydown={(e)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
@@ -500,15 +500,15 @@
         {/if}
       {/if}
       {#if stop.kind === 'hint'}
-        <div 
-          class="hint" 
+        <div
+          class="hint"
           tabindex="0"
           use:tooltip={{content: stop.percentage != null ? `${stop.percentage}%` : ''}}
-          data-stop-index={i} 
+          data-stop-index={i}
           style="
-            inset-inline-start: {stop.percentage}%; 
+            inset-inline-start: {stop.percentage}%;
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
-          " 
+          "
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
         >
@@ -564,7 +564,7 @@
     block-size: 2px;
     inline-size: 100%;
     background: var(--line-1);
-    transform: translate(-50%, -50%);
+    transform: translate(0%, -50%);
   }
 
   .line::after {
@@ -655,7 +655,7 @@
 
   @media (prefers-reduced-motion: no-preference) {
     .stop {
-      animation: 
+      animation:
         var(--animation-scale-up) reverse,
         var(--animation-fade-out) reverse;
       animation-duration: 250ms;
