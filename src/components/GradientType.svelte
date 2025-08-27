@@ -1,17 +1,40 @@
 <script>
-  import {gradient_type} from '../store/gradient.ts'
   import { tooltip } from 'svooltip'
   import Hint from './Hint.svelte'
+  import { createEventDispatcher } from 'svelte'
+
+  // The currently selected type for this instance (e.g. layer)
+  export let value = 'linear'
+  // Unique base to scope input ids and radio group name per instance
+  export let idBase = 'gradient'
 
   const gradient_types = ['linear','radial','conic']
+  const name = `${idBase}-gradient-type`
+  const dispatch = createEventDispatcher()
+
+  // Local selection to reflect immediate UI before parent/store updates
+  let selected = value
+  $: selected = value
+
+  function onChange(t) {
+    selected = t
+    dispatch('change', t)
+  }
 </script>
 
 <fieldset class="switch-group">
   <Hint title="Gradient types" copy="Here you can change between linear, radial and conic types." />
   {#each gradient_types as t}
     <div class="switch" title={t} use:tooltip={{content: "You're looking beautiful today!"}}>
-      <input type="radio" name="gradient-type" id="{t}-gradient" value={t} bind:group={$gradient_type}>
-      <label for="{t}-gradient">{t}</label>
+      <input
+        type="radio"
+        name={`${idBase}-${t}-${name}`}
+        id={`${idBase}-${t}-gradient`}
+        value={t}
+        checked={selected === t}
+        on:change={() => onChange(t)}
+      >
+      <label for={`${idBase}-${t}-gradient`}>{t}</label>
       {#if t === 'linear'}
         <svg viewBox="0 0 24 24">
           <path d="M9 13v-2h2v2m0 2v-2h2v2m-2-4V9h2v2M9 9V7h2v2m-2 8v-2h2v2M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2m15 10v2h-2v-2m2-4v2h-2v-2m2-4v2h-2V7m-5-2v2h2V5h2v2h-2v2h2v2h-2v2h2v2h-2v2h2v2h-2v-2h-2v2H5V5Z"/>
@@ -56,11 +79,11 @@
     background: var(--surface-1);
   }
 
-  .switch:has(:global(:focus-visible)) {
+.switch:has(input:focus-visible) {
     outline: 1px solid var(--link);
   }
 
-  .switch:has(:global(:checked)) {
+  .switch:has(input:checked) {
     color: var(--text-1);
     background: var(--surface-2);
     border-color: var(--surface-4);
@@ -71,7 +94,7 @@
       background: var(--surface-2);
     }
 
-    .switch:has(:global(:checked)) {
+    .switch:has(input:checked) {
       background: var(--surface-2);
     }
   }
@@ -80,7 +103,7 @@
     grid-area: pile;
   }
 
-  .switch > :is(:global(input, label)) {
+.switch > :is(input, label) {
     opacity: 0;
     inline-size: 0;
     block-size: 0;

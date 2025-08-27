@@ -1,8 +1,9 @@
 <script>
   import { tooltip } from 'svooltip'
+  import { tick } from 'svelte'
 
   import {gradient_type} from '../store/gradient.ts'
-import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLayerDown, moveLayerToTop, moveLayerToBottom, toggleLayerVisibility, deleteLayer } from '../store/layers.ts'
+  import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLayerDown, moveLayerToTop, moveLayerToBottom, toggleLayerVisibility, deleteLayer } from '../store/layers.ts'
 
   import GradientType from './GradientType.svelte'
   import LinearAngle from './LinearAngle.svelte'
@@ -13,11 +14,29 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
   import ConicPosition from './ConicPosition.svelte'
   import Hint from './Hint.svelte'
 
+  // Track which layer detail panels are open, keyed by layer id
+  let openById = {}
+
+  // Ensure new layers default to open, preserve existing open states
+  $: if ($layers) {
+    const copy = { ...openById }
+    for (const l of $layers) {
+      if (!(l.id in copy)) copy[l.id] = true
+    }
+    // Remove entries for layers that no longer exist
+    for (const id in copy) {
+      if (!$layers.find(l => l.id === id)) delete copy[id]
+    }
+    openById = copy
+  }
+
   function onAddLayer() {
     addLayer({ seed: 'duplicate', position: 'top' })
   }
 
-  function onToggle(e, i) {
+  function onDetailsToggle(e, i, id) {
+    // allow multiple open; just persist this panel's state
+    openById = { ...openById, [id]: e.currentTarget.open }
     // select the layer when expanded
     if (e.currentTarget.open) selectLayer(i)
   }
@@ -27,6 +46,14 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
     selectLayer(i)
   }
 
+  function onTypeChange(i, t) {
+    // Fix regression: defer store update until after selectLayer finishes applying stores
+    selectLayer(i)
+    // wait for the microtask that clears the guard in applyLayerToStores
+    tick().then(() => {
+      gradient_type.set(t)
+    })
+  }
 
   function onToggleVisibility(i) {
     toggleLayerVisibility(i)
@@ -39,11 +66,17 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
 
 <section class="layers {$gradient_type}">
   {#each $layers as layer, i}
-<details class="layer" open={i === $active_layer_index} ontoggle={(e)=>onToggle(e,i)} onfocusin={()=>onFocusIn(i)}>
-<summary class="layer-toggle">
+    <details class="layer" class:active={i === $active_layer_index} ontoggle={(e)=>onDetailsToggle(e,i,layer.id)} onfocusin={()=>onFocusIn(i)}>
+      <summary class="layer-toggle">
         <div class="row">
           <!-- <span class="layer-name">{$layers.length - i}</span> -->
-          <div class="inline-type"><GradientType /></div>
+          <div class="inline-type">
+            <GradientType
+              idBase={`layer-${layer.id}`}
+              value={layer.type}
+              on:change={(e) => onTypeChange(i, e.detail)}
+            />
+          </div>
           <button class="layer-actions" aria-label="Layer actions">
             <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
               <option disabled selected>Layer Actions</option>
@@ -128,8 +161,9 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
     gap: var(--size-2);
     box-shadow: var(--shadow-2);
     margin: 0;
-    padding-inline-start: var(--size-5);
+    padding-inline-start: var(--size-8);
     border-radius: 0;
+    border-inline-start: 5px solid transparent;
     --icon-arrow-down: url(https://api.iconify.design/ci:caret-down.svg?color=%23adb5bd);
     --icon-arrow-down-hover-light: url(https://api.iconify.design/ci:caret-down.svg?color=%23111111);
     --icon-arrow-down-hover-dark: url(https://api.iconify.design/ci:caret-down.svg?color=%23ffffff);
@@ -137,7 +171,7 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
     --icon-arrow-right-hover-light: url(https://api.iconify.design/ci:caret-right.svg?color=%23111111);
     --icon-arrow-right-hover-dark: url(https://api.iconify.design/ci:caret-right.svg?color=%23ffffff);
     background-image: var(--icon-arrow-right);
-    background-position: -1px center;
+    background-position: var(--size-2) center;
     background-size: 3ex;
     background-repeat: no-repeat;
   }
@@ -159,6 +193,7 @@ import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLay
   }
 
   .layer[open] > summary {background-image: var(--icon-arrow-down)}
+  .layer.active > summary { border-inline-start-color: var(--link); }
 
   .layer-toggle:hover {--icon-arrow-right: var(--icon-arrow-right-hover-light)}
   .layer[open] > summary:hover {--icon-arrow-down: var(--icon-arrow-down-hover-light)}

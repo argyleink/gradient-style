@@ -15,8 +15,9 @@
   } from '../store/radial.ts'
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
-  import {layers} from '../store/layers.ts'
+  import {layers, active_layer_index, selectLayer} from '../store/layers.ts'
   import {stateAsString, deserializeUrl, restoreStateFromUrl} from '../store/url.ts'
+  import { buildGradientStrings } from '../utils/gradientString'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -73,37 +74,73 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     svgicon = document.querySelector('#svgicon')
 
     if (restore) {
-      if (restore.type)               $gradient_type = restore.type
-      if (restore.space)              $gradient_space = restore.space
-      if (restore.interpolation)      $gradient_interpolation = restore.interpolation
-
-      if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
-      if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
-
-      if (restore.radial_shape)       $radial_shape = restore.radial_shape
-      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
-      if (restore.radial_position) {
-        $radial_named_position = '--'
-        $radial_position = restore.radial_position
+      // Multi-layer restore path
+      if (restore.layers && Array.isArray(restore.layers)) {
+        try {
+          const restored = restore.layers.map((l) => {
+            const layer = {
+              id: crypto?.randomUUID?.() ?? `layer-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              name: l.name ?? 'Layer',
+              visible: l.visible ?? true,
+              type: l.type ?? 'linear',
+              space: l.space ?? 'oklab',
+              interpolation: l.interpolation ?? 'shorter',
+              stops: Array.isArray(l.stops) ? l.stops : [],
+              linear: l.linear ?? { named_angle: 'to right', angle: null },
+              radial: l.radial ?? { shape: 'circle', size: 'farthest-corner', named_position: 'center', position: { x: null, y: null } },
+              conic: l.conic ?? { angle: '0', named_position: 'center', position: { x: null, y: null } },
+            }
+            layer.cachedCss = buildGradientStrings(layer)
+            return layer
+          })
+          layers.set(restored)
+          const idx = Number.isFinite(restore.active) ? restore.active : 0
+          const boundIdx = Math.max(0, Math.min(restored.length - 1, idx))
+          active_layer_index.set(boundIdx)
+          // Apply selected layer to single-stores to keep UI in sync
+          selectLayer(boundIdx)
+          restoring = false
+        } catch (e) {
+          // Fallback to single-layer path if parsing fails
+          // eslint-disable-next-line no-console
+          console.warn('Failed to restore layers from URL, falling back to single-layer restore:', e)
+        }
       }
-      else if (restore.radial_named_position) {
-        $radial_named_position = restore.radial_named_position
-      }
-      if (restore.radial_size)        $radial_size = restore.radial_size
 
-      if (restore.conic_angle)        $conic_angle = restore.conic_angle
-      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
-      if (restore.conic_position) {
-        $conic_named_position = '--'
-        $conic_position = restore.conic_position
-      }
-      else if (restore.conic_named_position) {
-        $conic_named_position = restore.conic_named_position
-      }
+      if (restoring) {
+        // Single-layer legacy restore path
+        if (restore.type)               $gradient_type = restore.type
+        if (restore.space)              $gradient_space = restore.space
+        if (restore.interpolation)      $gradient_interpolation = restore.interpolation
 
-      // last, to kickoff render
-      if (restore.stops)              $gradient_stops = updateStops(restore.stops)
-      restoring = false
+        if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
+        if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
+
+        if (restore.radial_shape)       $radial_shape = restore.radial_shape
+        // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+        if (restore.radial_position) {
+          $radial_named_position = '--'
+          $radial_position = restore.radial_position
+        }
+        else if (restore.radial_named_position) {
+          $radial_named_position = restore.radial_named_position
+        }
+        if (restore.radial_size)        $radial_size = restore.radial_size
+
+        if (restore.conic_angle)        $conic_angle = restore.conic_angle
+        // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+        if (restore.conic_position) {
+          $conic_named_position = '--'
+          $conic_position = restore.conic_position
+        }
+        else if (restore.conic_named_position) {
+          $conic_named_position = restore.conic_named_position
+        }
+
+        // last, to kickoff render
+        if (restore.stops)              $gradient_stops = updateStops(restore.stops)
+        restoring = false
+      }
     }
     else {
       restoring = false
