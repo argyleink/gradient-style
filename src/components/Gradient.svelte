@@ -364,7 +364,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     event.target.selectedIndex = 0
   }
 
-  let user_gradient = $derived(gensyntax[$gradient_type](
+let user_gradient = $derived(gensyntax[$gradient_type](
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
@@ -393,15 +393,19 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     $conic_position,
     $conic_named_position
   ))
+
+  // Multi-layer joined strings for preview and output
+  let user_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.modern || '').filter(Boolean).join(', '))
+  let classic_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.classic || '').filter(Boolean).join(', '))
 </script>
 
-<div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
+<div class="color-wrap" style={`--user-classic: ${classic_layers_joined || classic_gradient}; --user-modern: ${user_layers_joined || user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <div class="primary-sidebar">
       <header class="brand">
-        <div class="gradient-logo" style="background:{preview_hd ? user_gradient : classic_gradient}"></div>
+<div class="gradient-logo" style="background:{preview_hd ? (user_layers_joined || user_gradient) : (classic_layers_joined || classic_gradient)}"></div>
         <h1 class="brand-name">
           HD G<b>rad</b>ients
           <sup class="brand-name-badge">
@@ -444,7 +448,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           <div
             bind:this={preview_resizer}
             class="resizer"
-            style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
+            style={`background: ${classic_layers_joined || classic_gradient};  ${preview_hd == true ? `background: ${user_layers_joined || user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
               <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
           </div>
           {#if !restoring}
@@ -470,7 +474,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           </button>
         </div>
         <h4>Gradient CSS</h4>
-        <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
+<Prism modern_gradient={user_layers_joined || user_gradient} classic_gradient={classic_layers_joined || classic_gradient} />
       </section>
     </div>
   </contain-er>
