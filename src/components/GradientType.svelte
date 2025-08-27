@@ -46,6 +46,7 @@
     display: grid;
     grid: [pile] 1fr / [pile] 1fr;
     border-radius: var(--radius-round);
+    border: 1px solid transparent;
     padding: var(--size-2);
     place-content: center;
     color: var(--text-2);
@@ -62,6 +63,7 @@
   .switch:has(:global(:checked)) {
     color: var(--text-1);
     background: var(--surface-2);
+    border-color: var(--surface-4);
   }
 
   @media (prefers-color-scheme: light) {

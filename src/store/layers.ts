@@ -137,6 +137,24 @@ export function moveLayer(from: number, to: number) {
   active_layer_index.set(Math.max(0, Math.min(list.length - 1, nextActive)))
 }
 
+export function moveLayerUp(index: number) {
+  moveLayer(index, Math.max(0, index - 1))
+}
+
+export function moveLayerDown(index: number) {
+  const list = get(layers)
+  moveLayer(index, Math.min(list.length - 1, index + 1))
+}
+
+export function moveLayerToTop(index: number) {
+  moveLayer(index, 0)
+}
+
+export function moveLayerToBottom(index: number) {
+  const list = get(layers)
+  moveLayer(index, list.length - 1)
+}
+
 export function toggleLayerVisibility(index: number) {
   updateActiveLayerList((copy) => {
     if (!copy[index]) return
