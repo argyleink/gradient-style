@@ -148,15 +148,17 @@
     let lastActiveIndex = null
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving && dragulaState.stop) {
-        let apercent = (w / 2) / 100
-        dragulaState.angle += (e.movementX || e.movementY * -1) / apercent
+        // Capture pointer to avoid losing events during fast drags
+        node.setPointerCapture(e.pointerId)
 
-        // Pull-away removal based on radial distance from the ring
+        // Determine ring center from the stops container
         const stopsEl = node.querySelector('.stops')
         if (stopsEl) {
           const rect = stopsEl.getBoundingClientRect()
           const cx = rect.left + rect.width / 2
           const cy = rect.top + rect.height / 2
+
+          // Pull-away removal based on radial distance from the ring
           const dx = e.clientX - cx
           const dy = e.clientY - cy
           const dist = Math.hypot(dx, dy)
@@ -187,27 +189,43 @@
             dragulaState.removedStop = null
             dragulaState.removedIndex = null
           }
-        }
 
-        // Update positions on active or removed stop
-        const targetStop = dragulaState.removedStop ?? dragulaState.stop
-        if (targetStop) {
-          if (targetStop.kind === 'stop') {
-            if (targetStop.position1 === targetStop.position2)
-              targetStop.position2 = Math.round(dragulaState.angle)
+          // Compute the angle under the pointer in screen space [0,360)
+          let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
+          if (deg < 0) deg += 360
 
-            if (dragulaState.target?.dataset.position === "1")
-              targetStop.position1 = Math.round(dragulaState.angle)
-            else
-              targetStop.position2 = Math.round(dragulaState.angle)
+          // Align to the visual orientation of the overlay and stops
+          const dynamicOffset = computeVisualOffsetDeg(node)
+          const baseOffset = normalizeDeg($conic_angle - 180)
+          const offset = dynamicOffset ?? baseOffset
+
+          const localDeg = normalizeDeg(deg - offset)
+          // Map degrees to percent [0,100]
+          const percent = Math.max(0, Math.min(100, Math.round((localDeg / 360) * 100)))
+
+          // Track for UI feedback/tooltips
+          dragulaState.angle = percent
+
+          // Update positions on active or removed stop
+          const targetStop = dragulaState.removedStop ?? dragulaState.stop
+          if (targetStop) {
+            if (targetStop.kind === 'stop') {
+              if (targetStop.position1 === targetStop.position2)
+                targetStop.position2 = percent
+
+              if (dragulaState.target?.dataset.position === "1")
+                targetStop.position1 = percent
+              else
+                targetStop.position2 = percent
+            }
+            else {
+              targetStop.percentage = percent
+            }
           }
-          else {
-            targetStop.percentage = Math.round(dragulaState.angle)
-          }
-        }
 
-        if (!dragulaState.removedStop) {
-          $gradient_stops = [...$gradient_stops]
+          if (!dragulaState.removedStop) {
+            $gradient_stops = [...$gradient_stops]
+          }
         }
       }
       else if (dragulaState.moving) {
