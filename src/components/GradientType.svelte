@@ -25,7 +25,7 @@
 <fieldset class="switch-group">
   <Hint title="Gradient types" copy="Here you can change between linear, radial and conic types." />
   {#each gradient_types as t}
-    <div class="switch" title={t} use:tooltip={{content: "You're looking beautiful today!"}}>
+    <div class="switch" title={t + ' gradient'} use:tooltip={{content: "You're looking beautiful today!"}}>
       <input
         type="radio"
         name={`${idBase}-${t}-${name}`}

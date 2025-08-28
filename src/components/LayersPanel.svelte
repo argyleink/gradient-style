@@ -14,31 +14,8 @@
   import ConicPosition from './ConicPosition.svelte'
   import Hint from './Hint.svelte'
 
-  // Track which layer detail panels are open, keyed by layer id
-  let openById = {}
-
-  // Ensure new layers default to open, preserve existing open states
-  $: if ($layers) {
-    const copy = { ...openById }
-    for (const l of $layers) {
-      if (!(l.id in copy)) copy[l.id] = true
-    }
-    // Remove entries for layers that no longer exist
-    for (const id in copy) {
-      if (!$layers.find(l => l.id === id)) delete copy[id]
-    }
-    openById = copy
-  }
-
   function onAddLayer() {
     addLayer({ seed: 'duplicate', position: 'top' })
-  }
-
-  function onDetailsToggle(e, i, id) {
-    // allow multiple open; just persist this panel's state
-    openById = { ...openById, [id]: e.currentTarget.open }
-    // select the layer when expanded
-    if (e.currentTarget.open) selectLayer(i)
   }
 
   function onFocusIn(i) {
@@ -66,51 +43,44 @@
 
 <section class="layers {$gradient_type}">
   {#each $layers as layer, i}
-    <details class="layer" class:active={i === $active_layer_index} ontoggle={(e)=>onDetailsToggle(e,i,layer.id)} onfocusin={()=>onFocusIn(i)}>
-      <summary class="layer-toggle">
-        <div class="row">
-          <!-- <span class="layer-name">{$layers.length - i}</span> -->
-          <div class="inline-type">
-            <GradientType
-              idBase={`layer-${layer.id}`}
-              value={layer.type}
-              on:change={(e) => onTypeChange(i, e.detail)}
-            />
-          </div>
-          <button class="layer-actions" aria-label="Layer actions">
-            <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
-              <option disabled selected>Layer Actions</option>
-              <hr>
-              <option>Move up</option>
-              <option>Move down</option>
-              <option>Move to top</option>
-              <option>Move to bottom</option>
-              <hr>
-              <option>Toggle visibility</option>
-              <option disabled={$layers.length<=1}>Remove</option>
-            </select>
-          </button>
-        </div>
-      </summary>
-
-      {#if i === $active_layer_index}
-        {#if $gradient_type === 'linear'}
-          <LinearAngle />
-        {/if}
-
-        {#if $gradient_type === 'radial'}
-          <RadialSize />
-          <RadialShape />
-          <RadialPosition />
-        {/if}
-
-        {#if $gradient_type === 'conic'}
-          <ConicAngle />
-          <ConicPosition />
-        {/if}
-
+  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1">
+    <div class="layer-header">
+      <GradientType
+        idBase={`layer-${layer.id}`}
+        value={layer.type}
+        on:change={(e) => onTypeChange(i, e.detail)}
+      />
+      <button class="layer-actions" aria-label="Layer actions" use:tooltip={{content: "Layer Actions"}}>
+        <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
+          <option disabled selected>Layer Actions</option>
+          <hr>
+          <option>Move up</option>
+          <option>Move down</option>
+          <option>Move to top</option>
+          <option>Move to bottom</option>
+          <hr>
+          <option>Toggle visibility</option>
+          <option disabled={$layers.length<=1}>Remove</option>
+        </select>
+      </button>
+    </div>
+    <div class="layer-body">
+      {#if $gradient_type === 'linear'}
+        <LinearAngle />
       {/if}
-    </details>
+
+      {#if $gradient_type === 'radial'}
+        <RadialSize />
+        <RadialShape />
+        <RadialPosition />
+      {/if}
+
+      {#if $gradient_type === 'conic'}
+        <ConicAngle />
+        <ConicPosition />
+      {/if}
+    </div>
+  </div>
   {/each}
 
   <div class="end-of-layers">
@@ -130,7 +100,7 @@
     grid-template-rows: auto 1fr;
     align-content: start;
     align-items: start;
-    gap: var(--size-1);
+    gap: var(--size-2);
     padding-block: var(--size-1);
     accent-color: var(--text-2);
   }
@@ -144,7 +114,7 @@
     }
   }
 
-  .layers > :global(.control-set) {
+   :global(.layers .control-set) {
     gap: var(--size-4);
     padding-block: var(--size-2);
   }
@@ -152,55 +122,44 @@
   .layer {
     display: grid;
     padding: 0;
+    position: relative;
   }
 
-  .layer-toggle {
+  .layer::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 5px;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .layer-header {
+    background: var(--surface-3);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--size-2);
     box-shadow: var(--shadow-2);
     margin: 0;
-    padding-inline-start: var(--size-8);
+    padding-inline: var(--size-3);
+    padding-block: var(--size-2);
     border-radius: 0;
-    border-inline-start: 5px solid transparent;
-    --icon-arrow-down: url(https://api.iconify.design/ci:caret-down.svg?color=%23adb5bd);
-    --icon-arrow-down-hover-light: url(https://api.iconify.design/ci:caret-down.svg?color=%23111111);
-    --icon-arrow-down-hover-dark: url(https://api.iconify.design/ci:caret-down.svg?color=%23ffffff);
-    --icon-arrow-right: url(https://api.iconify.design/ci:caret-right.svg?color=%23adb5bd);
-    --icon-arrow-right-hover-light: url(https://api.iconify.design/ci:caret-right.svg?color=%23111111);
-    --icon-arrow-right-hover-dark: url(https://api.iconify.design/ci:caret-right.svg?color=%23ffffff);
-    background-image: var(--icon-arrow-right);
-    background-position: var(--size-2) center;
-    background-size: 3ex;
-    background-repeat: no-repeat;
+
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--size-2);
-    inline-size: 100%;
+  .layer-body {
+    transition: opacity .1s ease;
+    padding-block: var(--size-3);
   }
 
-  .layer-toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .layer-toggle {
-    outline-offset: -2px;
-  }
-
-  .layer[open] > summary {background-image: var(--icon-arrow-down)}
-  .layer.active > summary { border-inline-start-color: var(--link); }
-
-  .layer-toggle:hover {--icon-arrow-right: var(--icon-arrow-right-hover-light)}
-  .layer[open] > summary:hover {--icon-arrow-down: var(--icon-arrow-down-hover-light)}
-
-  @media (prefers-color-scheme: dark) {
-    .layer-toggle:hover {--icon-arrow-right: var(--icon-arrow-right-hover-dark)}
-    .layer[open] > summary:hover {--icon-arrow-down: var(--icon-arrow-down-hover-dark)}
+  /* Active layer animated border */
+  .layer:not(:hover):not(.active) .layer-body {
+    opacity: .25;
   }
 
   .layer-name {
@@ -252,6 +211,7 @@
     margin: var(--size-3);
     border-radius: var(--radius-round);
     aspect-ratio: var(--ratio-square);
+    border: 1px solid oklch(from var(--surface-4) l c h / 25%);
 
     --_bg: var(--surface-3);
     --_icon-size: var(--size-6);
