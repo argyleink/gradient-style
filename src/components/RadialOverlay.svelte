@@ -211,31 +211,14 @@
         let apercent = (size.w / 2) / 100
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
-        // Pull-away removal based on vertical distance from the line (no rotation)
-        const lineEl = node.querySelector('.line')
-        if (lineEl) {
-          const rect = lineEl.getBoundingClientRect()
-          const cy = rect.top + rect.height / 2
-          const perp = e.clientY - cy
-          const absPerp = Math.abs(perp)
-          const armThresh = 75
-
-          if (absPerp >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
-            const pos = $gradient_stops.indexOf(dragulaState.stop)
-            if (pos !== -1) {
-              dragulaState.removedStop = dragulaState.stop
-              dragulaState.removedIndex = pos
-              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
-            }
-          } else if (absPerp < armThresh && dragulaState.removedStop) {
-            const idx = dragulaState.removedIndex ?? $gradient_stops.length
-            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
-            $gradient_stops = updateStops($gradient_stops)
-            dragulaState.stop = dragulaState.removedStop
-            dragulaState.removedStop = null
-            dragulaState.removedIndex = null
+          // Pull-away removal disabled
+          const lineEl = node.querySelector('.line')
+          if (lineEl) {
+            const rect = lineEl.getBoundingClientRect()
+            const cy = rect.top + rect.height / 2
+            const perp = e.clientY - cy
+            void perp
           }
-        }
 
         // Update positions for the active or removed stop
         const targetStop = dragulaState.removedStop ?? dragulaState.stop
@@ -379,8 +362,8 @@
   }
 
   function deleteStop(stop) {
-    if ($gradient_stops.length <= 1) return
-    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+    // Deletion disabled
+    return
   }
 
   function handleKeypress(e, stop, prop) {
@@ -403,7 +386,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      deleteStop(stop)
+      // Deletion disabled
+      return
     }
   }
 
@@ -477,7 +461,6 @@
           style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
-          ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>

@@ -174,21 +174,7 @@
           const radialDelta = Math.abs(dist - ringRadius)
           const armThresh = 75
 
-          if (radialDelta >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
-            const pos = $gradient_stops.indexOf(dragulaState.stop)
-            if (pos !== -1) {
-              dragulaState.removedStop = dragulaState.stop
-              dragulaState.removedIndex = pos
-              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
-            }
-          } else if (radialDelta < armThresh && dragulaState.removedStop) {
-            const idx = dragulaState.removedIndex ?? $gradient_stops.length
-            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
-            $gradient_stops = updateStops($gradient_stops)
-            dragulaState.stop = dragulaState.removedStop
-            dragulaState.removedStop = null
-            dragulaState.removedIndex = null
-          }
+          // Pull-away removal disabled
 
           // Compute the angle under the pointer in screen space [0,360)
           let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
@@ -345,8 +331,8 @@
   }
 
   function deleteStop(stop) {
-    if ($gradient_stops.length <= 1) return
-    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+    // Deletion disabled
+    return
   }
 
   function handleKeypress(e, stop, prop) {
@@ -369,7 +355,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      deleteStop(stop)
+      // Deletion disabled
+      return
     }
   }
 

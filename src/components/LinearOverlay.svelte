@@ -100,7 +100,8 @@
         apercent = $linear_angle >= 180 ? -apercent : apercent
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
-        // compute perpendicular distance to the rotated line
+        // compute perpendicular distance to the rotated line (removals disabled)
+        // Retain math for potential future features, but do not remove stops when pulling away
         const lineEl = node.querySelector('.line')
         if (lineEl) {
           const rect = lineEl.getBoundingClientRect()
@@ -112,31 +113,7 @@
           const vx = e.clientX - cx
           const vy = e.clientY - cy
           const perp = vx * nx + vy * ny
-          const absPerp = Math.abs(perp)
-
-          const armThresh = 75
-
-          // Pull-away removal
-          if (absPerp >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
-            const pos = $gradient_stops.indexOf(dragulaState.stop)
-            if (pos !== -1) {
-              // keep a working reference so we can update its position while removed
-              dragulaState.removedStop = dragulaState.stop
-              dragulaState.removedIndex = pos
-              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
-            }
-          }
-          // Return to line: add back if previously removed
-          else if (absPerp < armThresh && dragulaState.removedStop) {
-            const idx = dragulaState.removedIndex ?? $gradient_stops.length
-            // restore stop and a hint placeholder after it to keep pattern
-            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
-            $gradient_stops = updateStops($gradient_stops)
-            // clear removed markers so we continue editing the live stop
-            dragulaState.stop = dragulaState.removedStop
-            dragulaState.removedStop = null
-            dragulaState.removedIndex = null
-          }
+          void perp // calculated but intentionally unused for removals
         }
 
         // Update positions: if removed, keep updating the temp stop so it comes back at the right place
@@ -372,7 +349,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      deleteStop(stop)
+      // Deletion disabled
+      return
     }
   }
 </script>
@@ -403,7 +381,6 @@
           style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
-          ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
