@@ -146,11 +146,44 @@ import GradientImportDialog from './GradientImportDialog.svelte'
       restoring = false
     }
 
-    stateAsString.subscribe(state => {
+    // Debounced URL syncing that pauses during active user interaction
+    let isInteracting = false
+    let pendingUrlState = null
+
+    function scheduleUrlWrite(state, delay = 350) {
       clearTimeout(window.syncStateTimer)
       window.syncStateTimer = setTimeout(() => {
-        state && replaceState('#'+state, {})
-      }, 500)
+        state && replaceState('#' + state, {})
+      }, delay)
+    }
+
+    const startInteract = () => {
+      isInteracting = true
+      clearTimeout(window.syncStateTimer)
+    }
+    const endInteract = () => {
+      isInteracting = false
+      if (pendingUrlState != null) {
+        // Write as soon as the interaction ends
+        scheduleUrlWrite(pendingUrlState, 0)
+        pendingUrlState = null
+      }
+    }
+
+    // Global listeners to detect interaction windows
+    window.addEventListener('pointerdown', startInteract, { passive: true })
+    window.addEventListener('pointerup', endInteract, { passive: true })
+    window.addEventListener('pointercancel', endInteract, { passive: true })
+    window.addEventListener('keydown', startInteract)
+    window.addEventListener('keyup', endInteract)
+
+    stateAsString.subscribe(state => {
+      if (isInteracting) {
+        // Defer writing until after the interaction ends
+        pendingUrlState = state
+        return
+      }
+      scheduleUrlWrite(state, 350)
     })
 
     gradient_stops.subscribe(state => {
