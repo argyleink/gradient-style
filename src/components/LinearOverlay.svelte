@@ -96,9 +96,18 @@
     window.addEventListener('pointermove', e => {
       if (dragulaState.moving) {
         node.setPointerCapture(e.pointerId)
-        let apercent = w / 100
-        apercent = $linear_angle >= 180 ? -apercent : apercent
-        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
+        // Project pointer movement onto the line axis for natural dragging in any orientation
+        const rot = (visualAngleDeg - 90) * Math.PI / 180
+        const ux = Math.cos(rot)
+        const uy = Math.sin(rot)
+        const dot = (e.movementX || 0) * ux + (e.movementY || 0) * uy
+        const a = visualAngleDeg * Math.PI / 180
+        const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)) || 1
+        const deltaPercent = (dot / L) * 100
+        dragulaState.left += deltaPercent
+        // Clamp within 0-100
+        if (dragulaState.left < 0) dragulaState.left = 0
+        if (dragulaState.left > 100) dragulaState.left = 100
 
         // compute perpendicular distance to the rotated line (removals disabled)
         // Retain math for potential future features, but do not remove stops when pulling away
@@ -251,7 +260,7 @@
     const cy = lineRect.top + lineRect.height / 2
 
     // Direction unit vector of the line in screen space
-    const rotDeg = ( $linear_angle - 90 )
+    const rotDeg = ( visualAngleDeg - 90 )
     const rot = rotDeg * Math.PI / 180
     const ux = Math.cos(rot)
     const uy = Math.sin(rot)
@@ -264,7 +273,7 @@
     const t = px * ux + py * uy
 
     // Visual line length in px
-    const a = (Math.PI / 180) * $linear_angle
+    const a = (Math.PI / 180) * visualAngleDeg
     const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a))
 
     // Map [-L/2, L/2] -> [0,100]
