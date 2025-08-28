@@ -3,6 +3,8 @@
   import { tick } from 'svelte'
   import { get } from 'svelte/store'
   import { flip } from 'svelte/animate'
+  import { scale } from 'svelte/transition'
+  import { quintOut } from 'svelte/easing'
 
   import {gradient_type} from '../store/gradient.ts'
   import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLayerDown, moveLayerToTop, moveLayerToBottom, toggleLayerVisibility, deleteLayer } from '../store/layers.ts'
@@ -16,7 +18,7 @@
   import ConicPosition from './ConicPosition.svelte'
   import Hint from './Hint.svelte'
   function onAddLayer() {
-    addLayer({ seed: 'duplicate', position: 'top' })
+    addLayer({ seed: 'new', position: 'top' })
   }
 
   function onFocusIn(i) {
@@ -44,8 +46,9 @@
 
 <section class="layers {$gradient_type}">
   {#each $layers as layer, i (layer.id)}
-  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1" animate:flip>
+  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1" animate:flip={{duration: 180, easing: quintOut}} in:scale={{start: 0.8, duration: 150, easing: quintOut}}>
     <div class="layer-header">
+      <div class="layer-thumb" style={`background-image: ${layer?.cachedCss?.modern ? `${layer.cachedCss.modern}, var(--conic-checkerboard)` : (layer?.cachedCss?.classic ? `${layer.cachedCss.classic}, var(--gradient-checkerboard)` : 'var(--gradient-checkerboard)')}`}></div>
       <GradientType
         idBase={`layer-${layer.id}`}
         value={layer.type}
@@ -99,10 +102,8 @@
 
 <style>
   .layers {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    align-content: start;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
     gap: var(--size-1);
     padding-block: var(--size-1);
     accent-color: var(--text-2);
@@ -124,25 +125,15 @@
   .layer {
     display: grid;
     padding: 0;
-    position: relative;
-  }
-
-  .layer::before {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    inline-size: 5px;
-    background: transparent;
-    border-radius: 0;
   }
 
   .layer-header {
     background: light-dark(white, var(--surface-3));
-    display: flex;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content 1fr max-content;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--size-2);
+    gap: var(--size-3);
     box-shadow: var(--shadow-2);
     margin: 0;
     padding-inline: var(--size-3);
@@ -152,6 +143,14 @@
     position: sticky;
     top: 0;
     z-index: 1;
+  }
+
+  .layer-thumb {
+    inline-size: var(--size-7);
+    block-size: var(--size-7);
+    background-size: cover, 12px 12px;
+    background-repeat: no-repeat, repeat;
+    box-shadow: var(--shadow-2) inset;
   }
 
   .layer-body {

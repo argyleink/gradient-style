@@ -109,6 +109,22 @@ function updateActiveLayer(mutator: (l: GradientLayer) => void) {
 export function addLayer({ seed = 'duplicate', position = 'top' as 'top' | 'bottom' } = {}) {
   const base = seed === 'duplicate' ? snapshotFromStores() : defaultLayer()
 
+  // If explicitly creating a new layer, replace stops with two random semi-transparent colors
+  if (seed === 'new') {
+    function rand(min: number, max: number) { return Math.random() * (max - min) + min }
+    function randomOKLCH() {
+      const L = Math.round(rand(60, 85))
+      const C = rand(0.20, 0.35).toFixed(2)
+      const H = Math.round(rand(0, 360))
+      return `oklch(${L}% ${C} ${H})`
+    }
+    base.stops = [
+      { kind: 'stop', color: randomOKLCH(), auto: '0', position1: '0', position2: '0' },
+      { kind: 'hint', auto: '50', percentage: '50' },
+      { kind: 'stop', color: randomOKLCH(), auto: '100', position1: '100', position2: '100' },
+    ]
+  }
+
   // Set opacity of each stop color to 50% for the new layer
   function withAlpha(color: string, alpha: number) {
     const a = Math.max(0, Math.min(1, alpha))

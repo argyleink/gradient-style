@@ -902,6 +902,9 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     padding: var(--size-3);
     margin-block-start: var(--size-fluid-4);
     text-align: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
   }
 
   .gradient-logo {
