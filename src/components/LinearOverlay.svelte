@@ -27,7 +27,7 @@
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
-    stop: null,
+    stopIndex: null,
     target: null,
     lastAngle: null,
     centerX: null,
@@ -73,29 +73,35 @@
   }
 
   function dragula(node) {
-    // all clicks, match stops and forward
-    node.addEventListener('pointerdown', e => {
+    // Define handlers so we can clean them up on destroy
+    const onPointerDown = (e) => {
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
 
       if (isStop) {
+        e.preventDefault()
+        e.stopPropagation()
+        const idx = Number(isStop.dataset.stopIndex)
+        $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
-        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
-
+        dragulaState.stopIndex = idx
+        // Capture immediately to keep move events flowing to this node
+        try { isStop.setPointerCapture(e.pointerId) } catch {}
+        try { node.setPointerCapture(e.pointerId) } catch {}
         dragIt(isStop)
       }
       else if (isRotator) {
+        try { node.setPointerCapture(e.pointerId) } catch {}
         rotateIt(isRotator)
       }
-    })
+    }
 
-    // always watch pointer move
     let lastActiveIndex = null
-    window.addEventListener('pointermove', e => {
+    const onPointerMove = (e) => {
       if (dragulaState.moving) {
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
         // Project pointer movement onto the line axis for natural dragging in any orientation
         const rot = (visualAngleDeg - 90) * Math.PI / 180
         const ux = Math.cos(rot)
@@ -125,8 +131,9 @@
           void perp // calculated but intentionally unused for removals
         }
 
-        // Update positions: if removed, keep updating the temp stop so it comes back at the right place
-        const targetStop = dragulaState.removedStop ?? dragulaState.stop
+        // Update positions by current index from the store to avoid stale references
+        const idx = dragulaState.stopIndex
+        const targetStop = $gradient_stops?.[idx]
         if (targetStop) {
           if (targetStop.kind === 'stop') {
             if (targetStop.position1 === targetStop.position2)
@@ -136,19 +143,14 @@
               targetStop.position1 = Math.round(dragulaState.left)
             else
               targetStop.position2 = Math.round(dragulaState.left)
-          }
-          else {
+          } else {
             targetStop.percentage = Math.round(dragulaState.left)
           }
-        }
-
-        // if we're actively editing a stop still in the list, push changes
-        if (!dragulaState.removedStop) {
           $gradient_stops = [...$gradient_stops]
         }
       }
       else if (dragulaState.rotating) {
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
         $linear_named_angle = '--'
 
         // Calculate angle from center to mouse position
@@ -189,15 +191,15 @@
           lastActiveIndex = idx
         }
       }
-    })
+    }
 
-    function stopWatching(e) {
-      node.releasePointerCapture(e.pointerId)
+    const stopWatching = (e) => {
+      try { node.releasePointerCapture(e.pointerId) } catch {}
 
       // If we ended with the stop removed, keep it removed. If it was reattached already, nothing to do.
       dragulaState.moving = false
       dragulaState.rotating = false
-      dragulaState.stop = null
+      dragulaState.stopIndex = null
       dragulaState.target = null
       dragulaState.start.x = null
       dragulaState.start.y = null
@@ -208,19 +210,33 @@
       $active_stop_index = null
     }
 
+    node.addEventListener('pointerdown', onPointerDown, { passive: false })
+    window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', stopWatching)
     window.addEventListener('dragleave', stopWatching)
+
+    return {
+      destroy() {
+        node.removeEventListener('pointerdown', onPointerDown)
+        window.removeEventListener('pointermove', onPointerMove)
+        window.removeEventListener('pointerup', stopWatching)
+        window.removeEventListener('dragleave', stopWatching)
+      }
+    }
   }
 
   function dragIt(node) {
     dragulaState.moving = true
 
-    if (dragulaState.stop.kind === 'hint')
-      dragulaState.left = parseInt(dragulaState.stop.percentage)
+    const idx = dragulaState.stopIndex
+    const s = $gradient_stops?.[idx]
+    if (!s) return
+    if (s.kind === 'hint')
+      dragulaState.left = parseInt(s.percentage)
     else
       dragulaState.left = parseInt(node.dataset.position === "1"
-        ? dragulaState.stop.position1
-        : dragulaState.stop.position2)
+        ? s.position1
+        : s.position2)
   }
 
   function rotateIt(node) {
@@ -381,7 +397,7 @@
         <div class="ghost-stop"></div>
       </div>
     {/if}
-    {#each $gradient_stops as stop, i (stop)}
+    {#each $gradient_stops as stop, i (stop.id || i)}
       {#if stop.kind === 'stop'}
         <div
           tabindex="0"
