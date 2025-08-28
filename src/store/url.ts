@@ -99,29 +99,39 @@ export function serializeUrl(state) {
 }
 
 export function deserializeUrl(hash) {
-	let state = new URLSearchParams(hash)
+  const raw = typeof hash === 'string' ? hash.replace(/^#/, '') : ''
+  const params = new URLSearchParams(raw)
+  const out = {}
 
-  for (const [key, value] of state.entries()) {
-  	if (key == 'stops')
-  		state[key] = state.getAll(key).map(JSON.parse)
-  	else if (key == 'radial_position' || key == 'conic_position')
-  		state[key] = JSON.parse(value)
-    else if (key == 'layers')
-      state[key] = JSON.parse(value)
-    else if (key == 'active')
-      state[key] = Number(value)
-  	else if (key == '#type')
-  		state.type = value
-  	else
-	    state[key] = value
+  for (const [k, value] of params.entries()) {
+    const key = k.startsWith('#') ? k.slice(1) : k
+
+    if (key === 'stops') {
+      out[key] = params.getAll(k).map(JSON.parse)
+    }
+    else if (key === 'radial_position' || key === 'conic_position') {
+      try { out[key] = JSON.parse(value) } catch { out[key] = null }
+    }
+    else if (key === 'layers') {
+      try { out[key] = JSON.parse(value) } catch { out[key] = null }
+    }
+    else if (key === 'active') {
+      out[key] = Number(value)
+    }
+    else if (key === 'type') {
+      out[key] = value
+    }
+    else {
+      out[key] = value
+    }
   }
 
-  return state
+  return out
 }
 
 export function restoreStateFromUrl() {
-	if (window.location.hash) {
-		return deserializeUrl(window.location.hash)
-	}
-	else return null
+  if (window.location.hash) {
+    return deserializeUrl(window.location.hash)
+  }
+  return null
 }
