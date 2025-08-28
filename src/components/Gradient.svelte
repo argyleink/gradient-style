@@ -445,10 +445,6 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 <div class="gradient-logo" style="background:{preview_hd ? (user_layers_joined || user_gradient) : (classic_layers_joined || classic_gradient)}"></div>
         <h1 class="brand-name">
           HD G<b>rad</b>ients
-          <sup class="brand-name-badge">
-            <Hint title="Beta?" copy="The app is still changing rapidly! Still needs:<br>- more unit types<br>- conic overlay gui<br>- be a PWA<br>- unit tests<br>- and much more 🤓"/>
-            beta
-          </sup>
         </h1>
       </header>
       <ColorPicker />
@@ -653,9 +649,9 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   .controls {
     display: grid;
     gap: var(--size-1);
-    align-content: start;
+    grid-template-rows: auto auto auto 1fr;
     background: var(--surface-2);
-    padding-block: 0 var(--size-fluid-5);
+    padding-block: 0;
     scrollbar-width: thin;
     accent-color: var(--surface-3);
   }
@@ -899,8 +895,9 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   }
 
   .end-of-stops {
+    place-content: end;
     padding: var(--size-3);
-    margin-block-start: var(--size-fluid-4);
+    margin-block-end: var(--size-fluid-2);
     text-align: center;
     position: sticky;
     bottom: 0;
@@ -995,44 +992,6 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   .brand-name:hover > b {
     color: cyan;
     color: color(display-p3 0 1 1);
-  }
-
-  .brand-name-badge {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    transform: translate(-37%, 100%) rotateZ(-45deg);
-    display: inline-flex;
-    place-items: center;
-    text-transform: uppercase;
-    font-size: var(--font-size-00);
-    background: var(--surface-4);
-    line-height: 1;
-    padding-inline: var(--size-10);
-    padding-block: var(--size-1);
-    box-shadow: var(--shadow-2);
-  }
-
-  .footer-links {
-    display: flex;
-    gap: var(--size-2);
-    background: var(--surface-3);
-    padding: var(--size-3);
-  }
-
-  @media (prefers-color-scheme: light) {
-    .footer-links {
-      background: white;
-    }
-  }
-
-  .footer-links > .icon-button {
-    border-radius: var(--radius-round);
-    aspect-ratio: var(--ratio-square);
-    padding: var(--size-2);
-/*     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight); */
-    --_bg: none;
-    --_border: none;
   }
 
   .hd-switch {

@@ -527,7 +527,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
     --conic-checkerboard: repeating-conic-gradient(
       var(--surface-3) 0% 25%,
       transparent 0% 50%);
-    --gradient-checkerboard: var(--repeating-conic-gradient) 50% / 1rem 1rem;
+    --gradient-checkerboard: var(--conic-checkerboard) 50% / 1rem 1rem;
   }
 
   .hd-color-picker {

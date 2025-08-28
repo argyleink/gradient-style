@@ -102,8 +102,8 @@
 
 <style>
   .layers {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr;
     gap: var(--size-1);
     padding-block: var(--size-1);
     accent-color: var(--text-2);
@@ -123,6 +123,7 @@
   }
 
   .layer {
+    place-self: start stretch;
     display: grid;
     padding: 0;
   }
@@ -202,7 +203,9 @@
 
   .end-of-layers {
     place-self: end;
+    place-content: end;
     position: sticky;
+    z-index: 1;
     inset-block-end: 0;
   }
 
