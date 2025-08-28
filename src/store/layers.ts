@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store'
 
-import { gradient_type, gradient_space, gradient_interpolation, gradient_stops } from './gradient'
+import { gradient_type, gradient_space, gradient_interpolation, gradient_stops, gradient_angles } from './gradient'
 import { linear_angle, linear_named_angle } from './linear'
 import { radial_shape, radial_position, radial_named_position, radial_size } from './radial'
 import { conic_angle, conic_position, conic_named_position } from './conic'
@@ -123,6 +123,12 @@ export function addLayer({ seed = 'duplicate', position = 'top' as 'top' | 'bott
       { kind: 'hint', auto: '50', percentage: '50' },
       { kind: 'stop', color: randomOKLCH(), auto: '100', position1: '100', position2: '100' },
     ]
+    // Assign random named angle
+    try {
+      const idx = Math.floor(rand(0, gradient_angles.length))
+      base.linear.named_angle = gradient_angles[idx]
+      base.linear.angle = null
+    } catch {}
   }
 
   // Set opacity of each stop color to 50% for the new layer
@@ -168,8 +174,10 @@ export function addLayer({ seed = 'duplicate', position = 'top' as 'top' | 'bott
   const list = get(layers)
   const next = position === 'top' ? [base, ...list] : [...list, base]
   layers.set(next)
-  active_layer_index.set(position === 'top' ? 0 : next.length - 1)
-  // No need to apply; new active layer equals current stores when duplicating
+  const newIndex = position === 'top' ? 0 : next.length - 1
+  active_layer_index.set(newIndex)
+  // Apply the newly active layer to sync single-value stores (especially for fresh "new" layers)
+  applyLayerToStores(base)
 }
 
 export function selectLayer(index: number) {

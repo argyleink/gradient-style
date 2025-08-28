@@ -558,6 +558,10 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 </div>
 
 <style>
+  :global(html) {
+    scrollbar-color: var(--surface-4) #0000;
+  }
+
   .import-btn { align-self: start; }
   .color-wrap {
     background: Canvas;

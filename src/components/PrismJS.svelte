@@ -57,6 +57,7 @@
   .code-block {
     opacity: 0;
     max-inline-size: 90cqi;
+    max-block-size: 65cqb;
     background-color: var(--gray-10);
     border-radius: var(--radius-3);
     cursor: auto;

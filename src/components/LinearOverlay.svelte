@@ -41,11 +41,12 @@
   let ghostPercent = $state(null)
   let showGhost = $state(false)
 
-  linear_named_angle.subscribe(value => {
-    if (value === '--') return
-    let ng = linear_keywords[value](w,h)
-    $linear_angle = radToDeg(ng)
-  })
+  // Keep the visual angle in sync with named directions and preview size without mutating the store
+  let visualAngleDeg = $derived(
+    ($linear_named_angle !== '--' && w != null && h != null)
+      ? Math.round(radToDeg(linear_keywords[$linear_named_angle](w, h)))
+      : $linear_angle
+  )
 
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
@@ -380,14 +381,14 @@
   {#if $linear_angle > 0}
     <div class="visual-vert"></div>
   {/if}
-  <div class="visual" style="--ng: {$linear_angle}deg"></div>
+<div class="visual" style="--ng: {visualAngleDeg}deg"></div>
   <div class="dot"></div>
 </div>
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
+<div use:dragula class="linear-overlay" style="rotate: {gradientAngle(visualAngleDeg)}deg">
   <div class="invisible-rotator" use:tooltip={{content: $linear_named_angle == '--' ? `${$linear_angle}deg` : $linear_named_angle}}></div>
   <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
-  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
+  <div class="line" style="width: {gradientLineLength(visualAngleDeg)}">
     {#if showGhost && ghostPercent !== null}
       <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
         <div class="ghost-stop"></div>

@@ -3,7 +3,7 @@
   import { tick } from 'svelte'
   import { get } from 'svelte/store'
   import { flip } from 'svelte/animate'
-  import { scale } from 'svelte/transition'
+  import { scale, slide } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
 
   import {gradient_type} from '../store/gradient.ts'
@@ -44,50 +44,52 @@
   }
 </script>
 
-<section class="layers {$gradient_type}">
-  {#each $layers as layer, i (layer.id)}
-  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1" animate:flip={{duration: 180, easing: quintOut}} in:scale={{start: 0.8, duration: 150, easing: quintOut}}>
-    <div class="layer-header">
-      <div class="layer-thumb" style={`background-image: ${layer?.cachedCss?.modern ? `${layer.cachedCss.modern}, var(--conic-checkerboard)` : (layer?.cachedCss?.classic ? `${layer.cachedCss.classic}, var(--gradient-checkerboard)` : 'var(--gradient-checkerboard)')}`}></div>
-      <GradientType
-        idBase={`layer-${layer.id}`}
-        value={layer.type}
-        on:change={(e) => onTypeChange(i, e.detail)}
-      />
-      <button class="layer-actions" aria-label="Layer actions" use:tooltip={{content: "Layer Actions"}}>
-        <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
-          <option disabled selected>Layer Actions</option>
-          <hr>
-          <option>Move up</option>
-          <option>Move down</option>
-          <option>Move to top</option>
-          <option>Move to bottom</option>
-          <hr>
-          <option>Toggle visibility</option>
-          <option disabled={$layers.length<=1}>Remove</option>
-        </select>
-      </button>
-    </div>
-    <div class="layer-body">
+<section class="sidebar-body-wrapper">
+  <div class="layers {$gradient_type}">
+    {#each $layers as layer, i (layer.id)}
+    <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1" animate:flip={{duration: 180, easing: quintOut}} in:scale={{start: 0.8, duration: 150, easing: quintOut}}>
+      <div class="layer-header">
+        <div class="layer-thumb" style={`background-image: ${layer?.cachedCss?.modern ? `${layer.cachedCss.modern}, var(--conic-checkerboard)` : (layer?.cachedCss?.classic ? `${layer.cachedCss.classic}, var(--gradient-checkerboard)` : 'var(--gradient-checkerboard)')}`}></div>
+        <GradientType
+          idBase={`layer-${layer.id}`}
+          value={layer.type}
+          on:change={(e) => onTypeChange(i, e.detail)}
+        />
+        <button class="layer-actions" aria-label="Layer actions" use:tooltip={{content: "Layer Actions"}}>
+          <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
+            <option disabled selected>Layer Actions</option>
+            <hr>
+            <option>Move up</option>
+            <option>Move down</option>
+            <option>Move to top</option>
+            <option>Move to bottom</option>
+            <hr>
+            <option>Toggle visibility</option>
+            <option disabled={$layers.length<=1}>Remove</option>
+          </select>
+        </button>
+      </div>
       {#if i === $active_layer_index}
-        {#if $gradient_type === 'linear'}
-          <LinearAngle />
-        {/if}
+        <div class="layer-body" transition:slide={{duration: 140, easing: quintOut}}>
+          {#if $gradient_type === 'linear'}
+            <LinearAngle />
+          {/if}
 
-        {#if $gradient_type === 'radial'}
-          <RadialSize />
-          <RadialShape />
-          <RadialPosition />
-        {/if}
+          {#if $gradient_type === 'radial'}
+            <RadialSize />
+            <RadialShape />
+            <RadialPosition />
+          {/if}
 
-        {#if $gradient_type === 'conic'}
-          <ConicAngle />
-          <ConicPosition />
-        {/if}
+          {#if $gradient_type === 'conic'}
+            <ConicAngle />
+            <ConicPosition />
+          {/if}
+        </div>
       {/if}
     </div>
+    {/each}
   </div>
-  {/each}
 
   <div class="end-of-layers">
     <button class="add-layer" use:tooltip={{content: "New layer"}} onclick={onAddLayer}>
@@ -101,16 +103,22 @@
 </section>
 
 <style>
-  .layers {
+  .sidebar-body-wrapper {
     display: grid;
     grid-template-rows: auto 1fr;
     gap: var(--size-1);
     padding-block: var(--size-1);
+  }
+
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-1);
     accent-color: var(--text-2);
   }
 
   @media (min-width: 1024px) {
-    .layers {
+    .sidebar-body-wrapper {
       max-block-size: calc(100cqb - var(--size-content-1));
       overflow-y: auto;
       overflow-x: hidden;
@@ -123,8 +131,6 @@
   }
 
   .layer {
-    place-self: start stretch;
-    display: grid;
     padding: 0;
   }
 
