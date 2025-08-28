@@ -33,7 +33,7 @@
     delta: {x:null,y:null},
     left: null,
     top: null,
-    stop: null,
+    stopIndex: null,
     target: null,
     angle: null,
     lastAngle: null,
@@ -104,8 +104,7 @@
   }
 
   function dragula(node) {
-    // all clicks, match stops and forward
-    node.addEventListener('pointerdown', e => {
+    const onPointerDown = (e) => {
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
       const isDrag = e.target.closest('.dragzone')
@@ -128,28 +127,33 @@
             y: pos.y
           }
         }
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
         dragIt(e.target)
       }
       else if (isRotator) {
+        try { node.setPointerCapture(e.pointerId) } catch {}
         rotateIt(isRotator)
       }
       else if (isStop) {
+        e.preventDefault()
+        e.stopPropagation()
+        const idx = Number(isStop.dataset.stopIndex)
+        $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
-        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
-
+        dragulaState.stopIndex = idx
+        try { isStop.setPointerCapture(e.pointerId) } catch {}
+        try { node.setPointerCapture(e.pointerId) } catch {}
         dragIt(isStop)
       }
-    })
+    }
 
-    // always watch pointer move
     let lastActiveIndex = null
-    window.addEventListener('pointermove', e => {
-      if (dragulaState.moving && dragulaState.stop) {
+    const onPointerMove = (e) => {
+      if (dragulaState.moving && dragulaState.stopIndex != null) {
         // Capture pointer to avoid losing events during fast drags
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
 
         // Determine ring center from the stops container
         const stopsEl = node.querySelector('.stops')
@@ -174,21 +178,7 @@
           const radialDelta = Math.abs(dist - ringRadius)
           const armThresh = 75
 
-          if (radialDelta >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
-            const pos = $gradient_stops.indexOf(dragulaState.stop)
-            if (pos !== -1) {
-              dragulaState.removedStop = dragulaState.stop
-              dragulaState.removedIndex = pos
-              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
-            }
-          } else if (radialDelta < armThresh && dragulaState.removedStop) {
-            const idx = dragulaState.removedIndex ?? $gradient_stops.length
-            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
-            $gradient_stops = updateStops($gradient_stops)
-            dragulaState.stop = dragulaState.removedStop
-            dragulaState.removedStop = null
-            dragulaState.removedIndex = null
-          }
+          // Pull-away removal disabled
 
           // Compute the angle under the pointer in screen space [0,360)
           let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
@@ -206,8 +196,8 @@
           // Track for UI feedback/tooltips
           dragulaState.angle = percent
 
-          // Update positions on active or removed stop
-          const targetStop = dragulaState.removedStop ?? dragulaState.stop
+          // Update positions using current index to avoid stale references
+          const targetStop = $gradient_stops?.[dragulaState.stopIndex]
           if (targetStop) {
             if (targetStop.kind === 'stop') {
               if (targetStop.position1 === targetStop.position2)
@@ -221,9 +211,6 @@
             else {
               targetStop.percentage = percent
             }
-          }
-
-          if (!dragulaState.removedStop) {
             $gradient_stops = [...$gradient_stops]
           }
         }
@@ -240,7 +227,7 @@
         }
       }
       else if (dragulaState.rotating) {
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
 
         if (typeof $conic_angle == 'string')
           $conic_angle = parseInt($conic_angle)
@@ -283,10 +270,10 @@
           lastActiveIndex = idx
         }
       }
-    })
+    }
 
-    function stopWatching(e) {
-      node.releasePointerCapture(e.pointerId)
+    const stopWatching = (e) => {
+      try { node.releasePointerCapture(e.pointerId) } catch {}
 
       // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
       //   dragYdelta = null
@@ -296,7 +283,7 @@
       dragulaState.moving = false
       dragulaState.rotating = false
       dragulaState.angle = null
-      dragulaState.stop = null
+      dragulaState.stopIndex = null
       dragulaState.target = null
       dragulaState.left = null
       dragulaState.top = null
@@ -308,20 +295,33 @@
       $active_stop_index = null
     }
 
+    node.addEventListener('pointerdown', onPointerDown, { passive: false })
+    window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', stopWatching)
     window.addEventListener('dragleave', stopWatching)
+
+    return {
+      destroy() {
+        node.removeEventListener('pointerdown', onPointerDown)
+        window.removeEventListener('pointermove', onPointerMove)
+        window.removeEventListener('pointerup', stopWatching)
+        window.removeEventListener('dragleave', stopWatching)
+      }
+    }
   }
 
   function dragIt(node) {
     dragulaState.moving = true
 
-    if (dragulaState.stop) {
-      if (dragulaState.stop.kind === 'hint')
-        dragulaState.angle = parseInt(dragulaState.stop.percentage)
-      else if (dragulaState.stop.kind === 'stop')
+    if (dragulaState.stopIndex != null) {
+      const s = $gradient_stops?.[dragulaState.stopIndex]
+      if (!s) return
+      if (s.kind === 'hint')
+        dragulaState.angle = parseInt(s.percentage)
+      else if (s.kind === 'stop')
         dragulaState.angle = parseInt(node.dataset.position === "1" 
-          ? dragulaState.stop.position1 
-          : dragulaState.stop.position2) 
+          ? s.position1 
+          : s.position2) 
     }
     else {
       dragulaState.left = $conic_position.x
@@ -345,8 +345,8 @@
   }
 
   function deleteStop(stop) {
-    if ($gradient_stops.length <= 1) return
-    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
+    // Deletion disabled
+    return
   }
 
   function handleKeypress(e, stop, prop) {
@@ -369,7 +369,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      deleteStop(stop)
+      // Deletion disabled
+      return
     }
   }
 
@@ -506,7 +507,7 @@
         <div class="ghost-stop"></div>
       </div>
     {/if}
-    {#each $gradient_stops as stop, i (stop)}
+    {#each $gradient_stops as stop, i (stop.id || i)}
       {#if stop.kind === 'stop'}
         <div 
           tabindex="0"

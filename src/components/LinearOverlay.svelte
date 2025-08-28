@@ -27,7 +27,7 @@
     start: {x:null,y:null},
     delta: {x:null,y:null},
     left: null,
-    stop: null,
+    stopIndex: null,
     target: null,
     lastAngle: null,
     centerX: null,
@@ -41,11 +41,12 @@
   let ghostPercent = $state(null)
   let showGhost = $state(false)
 
-  linear_named_angle.subscribe(value => {
-    if (value === '--') return
-    let ng = linear_keywords[value](w,h)
-    $linear_angle = radToDeg(ng)
-  })
+  // Keep the visual angle in sync with named directions and preview size without mutating the store
+  let visualAngleDeg = $derived(
+    ($linear_named_angle !== '--' && w != null && h != null)
+      ? Math.round(radToDeg(linear_keywords[$linear_named_angle](w, h)))
+      : $linear_angle
+  )
 
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
@@ -72,34 +73,50 @@
   }
 
   function dragula(node) {
-    // all clicks, match stops and forward
-    node.addEventListener('pointerdown', e => {
+    // Define handlers so we can clean them up on destroy
+    const onPointerDown = (e) => {
       const isStop = e.target.closest('[data-stop-index]')
       const isRotator = e.target.closest('.invisible-rotator')
 
       if (isStop) {
+        e.preventDefault()
+        e.stopPropagation()
+        const idx = Number(isStop.dataset.stopIndex)
+        $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
-        dragulaState.stop = $gradient_stops[isStop.dataset.stopIndex]
-
+        dragulaState.stopIndex = idx
+        // Capture immediately to keep move events flowing to this node
+        try { isStop.setPointerCapture(e.pointerId) } catch {}
+        try { node.setPointerCapture(e.pointerId) } catch {}
         dragIt(isStop)
       }
       else if (isRotator) {
+        try { node.setPointerCapture(e.pointerId) } catch {}
         rotateIt(isRotator)
       }
-    })
+    }
 
-    // always watch pointer move
     let lastActiveIndex = null
-    window.addEventListener('pointermove', e => {
+    const onPointerMove = (e) => {
       if (dragulaState.moving) {
-        node.setPointerCapture(e.pointerId)
-        let apercent = w / 100
-        apercent = $linear_angle >= 180 ? -apercent : apercent
-        dragulaState.left += (e.movementX || e.movementY * -1) / apercent
+        try { node.setPointerCapture(e.pointerId) } catch {}
+        // Project pointer movement onto the line axis for natural dragging in any orientation
+        const rot = (visualAngleDeg - 90) * Math.PI / 180
+        const ux = Math.cos(rot)
+        const uy = Math.sin(rot)
+        const dot = (e.movementX || 0) * ux + (e.movementY || 0) * uy
+        const a = visualAngleDeg * Math.PI / 180
+        const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)) || 1
+        const deltaPercent = (dot / L) * 100
+        dragulaState.left += deltaPercent
+        // Clamp within 0-100
+        if (dragulaState.left < 0) dragulaState.left = 0
+        if (dragulaState.left > 100) dragulaState.left = 100
 
-        // compute perpendicular distance to the rotated line
+        // compute perpendicular distance to the rotated line (removals disabled)
+        // Retain math for potential future features, but do not remove stops when pulling away
         const lineEl = node.querySelector('.line')
         if (lineEl) {
           const rect = lineEl.getBoundingClientRect()
@@ -111,35 +128,12 @@
           const vx = e.clientX - cx
           const vy = e.clientY - cy
           const perp = vx * nx + vy * ny
-          const absPerp = Math.abs(perp)
-
-          const armThresh = 75
-
-          // Pull-away removal
-          if (absPerp >= armThresh && !dragulaState.removedStop && dragulaState.stop?.kind === 'stop') {
-            const pos = $gradient_stops.indexOf(dragulaState.stop)
-            if (pos !== -1) {
-              // keep a working reference so we can update its position while removed
-              dragulaState.removedStop = dragulaState.stop
-              dragulaState.removedIndex = pos
-              $gradient_stops = updateStops(removeStop($gradient_stops, pos))
-            }
-          }
-          // Return to line: add back if previously removed
-          else if (absPerp < armThresh && dragulaState.removedStop) {
-            const idx = dragulaState.removedIndex ?? $gradient_stops.length
-            // restore stop and a hint placeholder after it to keep pattern
-            $gradient_stops.splice(idx, 0, dragulaState.removedStop, {kind: 'hint', percentage: null})
-            $gradient_stops = updateStops($gradient_stops)
-            // clear removed markers so we continue editing the live stop
-            dragulaState.stop = dragulaState.removedStop
-            dragulaState.removedStop = null
-            dragulaState.removedIndex = null
-          }
+          void perp // calculated but intentionally unused for removals
         }
 
-        // Update positions: if removed, keep updating the temp stop so it comes back at the right place
-        const targetStop = dragulaState.removedStop ?? dragulaState.stop
+        // Update positions by current index from the store to avoid stale references
+        const idx = dragulaState.stopIndex
+        const targetStop = $gradient_stops?.[idx]
         if (targetStop) {
           if (targetStop.kind === 'stop') {
             if (targetStop.position1 === targetStop.position2)
@@ -149,19 +143,14 @@
               targetStop.position1 = Math.round(dragulaState.left)
             else
               targetStop.position2 = Math.round(dragulaState.left)
-          }
-          else {
+          } else {
             targetStop.percentage = Math.round(dragulaState.left)
           }
-        }
-
-        // if we're actively editing a stop still in the list, push changes
-        if (!dragulaState.removedStop) {
           $gradient_stops = [...$gradient_stops]
         }
       }
       else if (dragulaState.rotating) {
-        node.setPointerCapture(e.pointerId)
+        try { node.setPointerCapture(e.pointerId) } catch {}
         $linear_named_angle = '--'
 
         // Calculate angle from center to mouse position
@@ -202,15 +191,15 @@
           lastActiveIndex = idx
         }
       }
-    })
+    }
 
-    function stopWatching(e) {
-      node.releasePointerCapture(e.pointerId)
+    const stopWatching = (e) => {
+      try { node.releasePointerCapture(e.pointerId) } catch {}
 
       // If we ended with the stop removed, keep it removed. If it was reattached already, nothing to do.
       dragulaState.moving = false
       dragulaState.rotating = false
-      dragulaState.stop = null
+      dragulaState.stopIndex = null
       dragulaState.target = null
       dragulaState.start.x = null
       dragulaState.start.y = null
@@ -221,19 +210,33 @@
       $active_stop_index = null
     }
 
+    node.addEventListener('pointerdown', onPointerDown, { passive: false })
+    window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', stopWatching)
     window.addEventListener('dragleave', stopWatching)
+
+    return {
+      destroy() {
+        node.removeEventListener('pointerdown', onPointerDown)
+        window.removeEventListener('pointermove', onPointerMove)
+        window.removeEventListener('pointerup', stopWatching)
+        window.removeEventListener('dragleave', stopWatching)
+      }
+    }
   }
 
   function dragIt(node) {
     dragulaState.moving = true
 
-    if (dragulaState.stop.kind === 'hint')
-      dragulaState.left = parseInt(dragulaState.stop.percentage)
+    const idx = dragulaState.stopIndex
+    const s = $gradient_stops?.[idx]
+    if (!s) return
+    if (s.kind === 'hint')
+      dragulaState.left = parseInt(s.percentage)
     else
       dragulaState.left = parseInt(node.dataset.position === "1"
-        ? dragulaState.stop.position1
-        : dragulaState.stop.position2)
+        ? s.position1
+        : s.position2)
   }
 
   function rotateIt(node) {
@@ -273,7 +276,7 @@
     const cy = lineRect.top + lineRect.height / 2
 
     // Direction unit vector of the line in screen space
-    const rotDeg = ( $linear_angle - 90 )
+    const rotDeg = ( visualAngleDeg - 90 )
     const rot = rotDeg * Math.PI / 180
     const ux = Math.cos(rot)
     const uy = Math.sin(rot)
@@ -286,7 +289,7 @@
     const t = px * ux + py * uy
 
     // Visual line length in px
-    const a = (Math.PI / 180) * $linear_angle
+    const a = (Math.PI / 180) * visualAngleDeg
     const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a))
 
     // Map [-L/2, L/2] -> [0,100]
@@ -371,7 +374,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      deleteStop(stop)
+      // Deletion disabled
+      return
     }
   }
 </script>
@@ -380,20 +384,20 @@
   {#if $linear_angle > 0}
     <div class="visual-vert"></div>
   {/if}
-  <div class="visual" style="--ng: {$linear_angle}deg"></div>
+<div class="visual" style="--ng: {visualAngleDeg}deg"></div>
   <div class="dot"></div>
 </div>
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div use:dragula class="linear-overlay" style="rotate: {gradientAngle($linear_angle)}deg">
+<div use:dragula class="linear-overlay" style="rotate: {gradientAngle(visualAngleDeg)}deg">
   <div class="invisible-rotator" use:tooltip={{content: $linear_named_angle == '--' ? `${$linear_angle}deg` : $linear_named_angle}}></div>
   <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
-  <div class="line" style="width: {gradientLineLength($linear_angle, h, w)}">
+  <div class="line" style="width: {gradientLineLength(visualAngleDeg)}">
     {#if showGhost && ghostPercent !== null}
       <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
         <div class="ghost-stop"></div>
       </div>
     {/if}
-    {#each $gradient_stops as stop, i (stop)}
+    {#each $gradient_stops as stop, i (stop.id || i)}
       {#if stop.kind === 'stop'}
         <div
           tabindex="0"
@@ -402,7 +406,6 @@
           style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
-          ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
             <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>

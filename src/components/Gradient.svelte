@@ -15,8 +15,9 @@
   } from '../store/radial.ts'
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
-  import {layers} from '../store/layers.ts'
+  import {layers, active_layer_index, selectLayer} from '../store/layers.ts'
   import {stateAsString, deserializeUrl, restoreStateFromUrl} from '../store/url.ts'
+  import { buildGradientStrings } from '../utils/gradientString'
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
@@ -73,47 +74,116 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     svgicon = document.querySelector('#svgicon')
 
     if (restore) {
-      if (restore.type)               $gradient_type = restore.type
-      if (restore.space)              $gradient_space = restore.space
-      if (restore.interpolation)      $gradient_interpolation = restore.interpolation
-
-      if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
-      if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
-
-      if (restore.radial_shape)       $radial_shape = restore.radial_shape
-      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
-      if (restore.radial_position) {
-        $radial_named_position = '--'
-        $radial_position = restore.radial_position
+      // Multi-layer restore path
+      if (restore.layers && Array.isArray(restore.layers)) {
+        try {
+          const restored = restore.layers.map((l) => {
+            const layer = {
+              id: crypto?.randomUUID?.() ?? `layer-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              name: l.name ?? 'Layer',
+              visible: l.visible ?? true,
+              type: l.type ?? 'linear',
+              space: l.space ?? 'oklab',
+              interpolation: l.interpolation ?? 'shorter',
+              stops: Array.isArray(l.stops) ? l.stops : [],
+              linear: l.linear ?? { named_angle: 'to right', angle: null },
+              radial: l.radial ?? { shape: 'circle', size: 'farthest-corner', named_position: 'center', position: { x: null, y: null } },
+              conic: l.conic ?? { angle: '0', named_position: 'center', position: { x: null, y: null } },
+            }
+            layer.cachedCss = buildGradientStrings(layer)
+            return layer
+          })
+          layers.set(restored)
+          const idx = Number.isFinite(restore.active) ? restore.active : 0
+          const boundIdx = Math.max(0, Math.min(restored.length - 1, idx))
+          active_layer_index.set(boundIdx)
+          // Apply selected layer to single-stores to keep UI in sync
+          selectLayer(boundIdx)
+          restoring = false
+        } catch (e) {
+          // Fallback to single-layer path if parsing fails
+          // eslint-disable-next-line no-console
+          console.warn('Failed to restore layers from URL, falling back to single-layer restore:', e)
+        }
       }
-      else if (restore.radial_named_position) {
-        $radial_named_position = restore.radial_named_position
-      }
-      if (restore.radial_size)        $radial_size = restore.radial_size
 
-      if (restore.conic_angle)        $conic_angle = restore.conic_angle
-      // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
-      if (restore.conic_position) {
-        $conic_named_position = '--'
-        $conic_position = restore.conic_position
-      }
-      else if (restore.conic_named_position) {
-        $conic_named_position = restore.conic_named_position
-      }
+      if (restoring) {
+        // Single-layer legacy restore path
+        if (restore.type)               $gradient_type = restore.type
+        if (restore.space)              $gradient_space = restore.space
+        if (restore.interpolation)      $gradient_interpolation = restore.interpolation
 
-      // last, to kickoff render
-      if (restore.stops)              $gradient_stops = updateStops(restore.stops)
-      restoring = false
+        if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
+        if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
+
+        if (restore.radial_shape)       $radial_shape = restore.radial_shape
+        // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+        if (restore.radial_position) {
+          $radial_named_position = '--'
+          $radial_position = restore.radial_position
+        }
+        else if (restore.radial_named_position) {
+          $radial_named_position = restore.radial_named_position
+        }
+        if (restore.radial_size)        $radial_size = restore.radial_size
+
+        if (restore.conic_angle)        $conic_angle = restore.conic_angle
+        // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
+        if (restore.conic_position) {
+          $conic_named_position = '--'
+          $conic_position = restore.conic_position
+        }
+        else if (restore.conic_named_position) {
+          $conic_named_position = restore.conic_named_position
+        }
+
+        // last, to kickoff render
+        if (restore.stops)              $gradient_stops = updateStops(restore.stops)
+        restoring = false
+      }
     }
     else {
       restoring = false
     }
 
-    stateAsString.subscribe(state => {
+    // Debounced URL syncing that pauses during active user interaction
+    let isInteracting = false
+    let pendingUrlState = null
+
+    function scheduleUrlWrite(state, delay = 350) {
       clearTimeout(window.syncStateTimer)
       window.syncStateTimer = setTimeout(() => {
-        state && replaceState('#'+state, {})
-      }, 500)
+        state && replaceState('#' + state, {})
+      }, delay)
+    }
+
+    const startInteract = () => {
+      isInteracting = true
+      clearTimeout(window.syncStateTimer)
+    }
+    const endInteract = () => {
+      isInteracting = false
+      if (pendingUrlState != null) {
+        // Write as soon as the interaction ends
+        scheduleUrlWrite(pendingUrlState, 0)
+        pendingUrlState = null
+      }
+    }
+
+    // Global listeners to detect interaction windows
+    window.addEventListener('pointerdown', startInteract, { passive: true })
+    window.addEventListener('pointerup', endInteract, { passive: true })
+    window.addEventListener('pointercancel', endInteract, { passive: true })
+    window.addEventListener('keydown', startInteract)
+    window.addEventListener('keyup', endInteract)
+
+    stateAsString.subscribe(state => {
+      if (isInteracting) {
+        // Defer writing until after the interaction ends
+        pendingUrlState = state
+        return
+      }
+      scheduleUrlWrite(state, 350)
     })
 
     gradient_stops.subscribe(state => {
@@ -364,7 +434,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     event.target.selectedIndex = 0
   }
 
-  let user_gradient = $derived(gensyntax[$gradient_type](
+let user_gradient = $derived(gensyntax[$gradient_type](
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
@@ -393,21 +463,21 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     $conic_position,
     $conic_named_position
   ))
+
+  // Multi-layer joined strings for preview and output
+  let user_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.modern || '').filter(Boolean).join(', '))
+  let classic_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.classic || '').filter(Boolean).join(', '))
 </script>
 
-<div class="color-wrap" style={`--user-classic: ${classic_gradient}; --user-modern: ${user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
+<div class="color-wrap" style={`--user-classic: ${classic_layers_joined || classic_gradient}; --user-modern: ${user_layers_joined || user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
     <div class="primary-sidebar">
       <header class="brand">
-        <div class="gradient-logo" style="background:{preview_hd ? user_gradient : classic_gradient}"></div>
+<div class="gradient-logo" style="background:{preview_hd ? (user_layers_joined || user_gradient) : (classic_layers_joined || classic_gradient)}"></div>
         <h1 class="brand-name">
           HD G<b>rad</b>ients
-          <sup class="brand-name-badge">
-            <Hint title="Beta?" copy="The app is still changing rapidly! Still needs:<br>- more unit types<br>- conic overlay gui<br>- be a PWA<br>- unit tests<br>- and much more 🤓"/>
-            beta
-          </sup>
         </h1>
       </header>
       <ColorPicker />
@@ -444,7 +514,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           <div
             bind:this={preview_resizer}
             class="resizer"
-            style={`background: ${classic_gradient};  ${preview_hd == true ? `background: ${user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
+            style={`background: ${classic_layers_joined || classic_gradient};  ${preview_hd == true ? `background: ${user_layers_joined || user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
               <Hint title="Dragging" copy="Drag <b>right or up</b> to increase values.<br><br>Drag <b>left or down</b> to decrease them!" />
           </div>
           {#if !restoring}
@@ -470,7 +540,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           </button>
         </div>
         <h4>Gradient CSS</h4>
-        <Prism modern_gradient={user_gradient} classic_gradient={classic_gradient} />
+<Prism modern_gradient={user_layers_joined || user_gradient} classic_gradient={classic_layers_joined || classic_gradient} />
       </section>
     </div>
   </contain-er>
@@ -521,6 +591,10 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 </div>
 
 <style>
+  :global(html) {
+    scrollbar-color: var(--surface-4) #0000;
+  }
+
   .import-btn { align-self: start; }
   .color-wrap {
     background: Canvas;
@@ -612,9 +686,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   .controls {
     display: grid;
     gap: var(--size-1);
-    align-content: start;
+    grid-template-rows: auto auto auto 1fr;
     background: var(--surface-2);
-    padding-block: 0 var(--size-fluid-5);
+    padding-block: 0;
     scrollbar-width: thin;
     accent-color: var(--surface-3);
   }
@@ -858,9 +932,13 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   }
 
   .end-of-stops {
+    place-content: end;
     padding: var(--size-3);
-    margin-block-start: var(--size-fluid-4);
+    margin-block-end: var(--size-fluid-2);
     text-align: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
   }
 
   .gradient-logo {
@@ -945,49 +1023,12 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     position: relative;
     text-align: center;
     padding-block: var(--size-3);
+    box-shadow: var(--shadow-3);
   }
 
   .brand-name:hover > b {
     color: cyan;
     color: color(display-p3 0 1 1);
-  }
-
-  .brand-name-badge {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    transform: translate(-37%, 100%) rotateZ(-45deg);
-    display: inline-flex;
-    place-items: center;
-    text-transform: uppercase;
-    font-size: var(--font-size-00);
-    background: var(--surface-4);
-    line-height: 1;
-    padding-inline: var(--size-10);
-    padding-block: var(--size-1);
-    box-shadow: var(--shadow-2);
-  }
-
-  .footer-links {
-    display: flex;
-    gap: var(--size-2);
-    background: var(--surface-3);
-    padding: var(--size-3);
-  }
-
-  @media (prefers-color-scheme: light) {
-    .footer-links {
-      background: white;
-    }
-  }
-
-  .footer-links > .icon-button {
-    border-radius: var(--radius-round);
-    aspect-ratio: var(--ratio-square);
-    padding: var(--size-2);
-/*     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight); */
-    --_bg: none;
-    --_border: none;
   }
 
   .hd-switch {

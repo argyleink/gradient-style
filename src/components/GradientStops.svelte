@@ -34,7 +34,7 @@
   function colorAction(event, position) {
     switch (event.target.value) {
       case 'Remove':
-        $gradient_stops = updateStops(removeStop($gradient_stops, position))
+        // Deletion disabled
         break
       case 'Reset':
         $gradient_stops[position].position1 = null
@@ -259,7 +259,7 @@
       >
         <h4>Color {i}</h4>
         {#if i === 0}
-          <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate or delete.<br><br>You can also delete a stop by double clicking it on the gradient line.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
+          <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
         {/if}
         <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
           <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)}></button>
@@ -303,7 +303,7 @@
             <option>Random color</option>
             <hr>
             <option>Reset</option>
-            <option disabled={$gradient_stops.length == 1}>Remove</option>
+            <option disabled={true}>Remove</option>
           </select>
         </button>
         <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder"></div>

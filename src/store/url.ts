@@ -8,6 +8,7 @@ import {radial_shape, radial_position, radial_named_position, radial_size
   } from '../store/radial.ts'
 import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
+import { layers, active_layer_index } from './layers'
 
 import {isCylindricalSpace} from '../utils/colorspace.ts'
 
@@ -17,18 +18,38 @@ export const stateAsString = derived(
 		linear_angle, linear_named_angle,
 		radial_shape, radial_position, radial_named_position, radial_size,
 		conic_angle, conic_position, conic_named_position,
+    layers, active_layer_index,
 	],
 	([
 		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation,
 		$linear_angle, $linear_named_angle,
 		$radial_shape, $radial_position, $radial_named_position, $radial_size,
 		$conic_angle, $conic_position, $conic_named_position,
+    $layers, $active_layer_index,
 	]) => {
-		// todo: rate limit this work
+		// Prefer serializing full layers when multiple are present
+    if (Array.isArray($layers) && $layers.length > 1) {
+      try {
+        // minimize payload: drop cachedCss and id
+        const compact = $layers.map(l => ({
+          name: l.name,
+          visible: l.visible,
+          type: l.type,
+          space: l.space,
+          interpolation: l.interpolation,
+          stops: l.stops,
+          linear: l.linear,
+          radial: l.radial,
+          conic: l.conic,
+        }))
+        return serializeUrl({ layers: JSON.stringify(compact), active: String($active_layer_index ?? 0) })
+      } catch {}
+    }
+
 		let urlGradient = {
 			type: $gradient_type,
 			space: $gradient_space,
-		}
+		} as any
 
 		if (isCylindricalSpace($gradient_space))
 			urlGradient.interpolation = $gradient_interpolation
@@ -67,6 +88,9 @@ export function serializeUrl(state) {
   	else if (key == 'radial_position' || key == 'conic_position') {
   		hash.set(key, JSON.stringify(state[key]))
   	}
+    else if (key == 'layers') {
+      hash.set(key, state[key])
+    }
   	else
 	    hash.set(key, state[key])
   }
@@ -75,25 +99,39 @@ export function serializeUrl(state) {
 }
 
 export function deserializeUrl(hash) {
-	let state = new URLSearchParams(hash)
+  const raw = typeof hash === 'string' ? hash.replace(/^#/, '') : ''
+  const params = new URLSearchParams(raw)
+  const out = {}
 
-  for (const [key, value] of state.entries()) {
-  	if (key == 'stops')
-  		state[key] = state.getAll(key).map(JSON.parse)
-  	else if (key == 'radial_position' || key == 'conic_position')
-  		state[key] = JSON.parse(value)
-  	else if (key == '#type')
-  		state.type = value
-  	else
-	    state[key] = value
+  for (const [k, value] of params.entries()) {
+    const key = k.startsWith('#') ? k.slice(1) : k
+
+    if (key === 'stops') {
+      out[key] = params.getAll(k).map(JSON.parse)
+    }
+    else if (key === 'radial_position' || key === 'conic_position') {
+      try { out[key] = JSON.parse(value) } catch { out[key] = null }
+    }
+    else if (key === 'layers') {
+      try { out[key] = JSON.parse(value) } catch { out[key] = null }
+    }
+    else if (key === 'active') {
+      out[key] = Number(value)
+    }
+    else if (key === 'type') {
+      out[key] = value
+    }
+    else {
+      out[key] = value
+    }
   }
 
-  return state
+  return out
 }
 
 export function restoreStateFromUrl() {
-	if (window.location.hash) {
-		return deserializeUrl(window.location.hash)
-	}
-	else return null
+  if (window.location.hash) {
+    return deserializeUrl(window.location.hash)
+  }
+  return null
 }
