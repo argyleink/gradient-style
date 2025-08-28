@@ -1,6 +1,8 @@
 <script>
   import { tooltip } from 'svooltip'
   import { tick } from 'svelte'
+  import { get } from 'svelte/store'
+  import { flip } from 'svelte/animate'
 
   import {gradient_type} from '../store/gradient.ts'
   import { layers, active_layer_index, addLayer, selectLayer, moveLayerUp, moveLayerDown, moveLayerToTop, moveLayerToBottom, toggleLayerVisibility, deleteLayer } from '../store/layers.ts'
@@ -13,22 +15,21 @@
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
   import Hint from './Hint.svelte'
-
   function onAddLayer() {
     addLayer({ seed: 'duplicate', position: 'top' })
   }
 
   function onFocusIn(i) {
-    // select the layer when any input inside gains focus
-    selectLayer(i)
+    // Avoid redundant store applications: only select if becoming active
+    if (get(active_layer_index) !== i) selectLayer(i)
   }
 
   function onTypeChange(i, t) {
-    // Fix regression: defer store update until after selectLayer finishes applying stores
-    selectLayer(i)
-    // wait for the microtask that clears the guard in applyLayerToStores
+    // Only select when needed
+    if (get(active_layer_index) !== i) selectLayer(i)
+    // Defer and only set if changed
     tick().then(() => {
-      gradient_type.set(t)
+      if (get(gradient_type) !== t) gradient_type.set(t)
     })
   }
 
@@ -42,8 +43,8 @@
 </script>
 
 <section class="layers {$gradient_type}">
-  {#each $layers as layer, i}
-  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1">
+  {#each $layers as layer, i (layer.id)}
+  <div class="layer" class:active={i === $active_layer_index} onfocusin={()=>onFocusIn(i)} tabindex="-1" animate:flip>
     <div class="layer-header">
       <GradientType
         idBase={`layer-${layer.id}`}
@@ -65,19 +66,21 @@
       </button>
     </div>
     <div class="layer-body">
-      {#if $gradient_type === 'linear'}
-        <LinearAngle />
-      {/if}
+      {#if i === $active_layer_index}
+        {#if $gradient_type === 'linear'}
+          <LinearAngle />
+        {/if}
 
-      {#if $gradient_type === 'radial'}
-        <RadialSize />
-        <RadialShape />
-        <RadialPosition />
-      {/if}
+        {#if $gradient_type === 'radial'}
+          <RadialSize />
+          <RadialShape />
+          <RadialPosition />
+        {/if}
 
-      {#if $gradient_type === 'conic'}
-        <ConicAngle />
-        <ConicPosition />
+        {#if $gradient_type === 'conic'}
+          <ConicAngle />
+          <ConicPosition />
+        {/if}
       {/if}
     </div>
   </div>
@@ -100,7 +103,7 @@
     grid-template-rows: auto 1fr;
     align-content: start;
     align-items: start;
-    gap: var(--size-2);
+    gap: var(--size-1);
     padding-block: var(--size-1);
     accent-color: var(--text-2);
   }
@@ -116,7 +119,6 @@
 
    :global(.layers .control-set) {
     gap: var(--size-4);
-    padding-block: var(--size-2);
   }
 
   .layer {
@@ -136,7 +138,7 @@
   }
 
   .layer-header {
-    background: var(--surface-3);
+    background: light-dark(white, var(--surface-3));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -154,7 +156,6 @@
 
   .layer-body {
     transition: opacity .1s ease;
-    padding-block: var(--size-3);
   }
 
   /* Active layer animated border */

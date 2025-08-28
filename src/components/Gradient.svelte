@@ -986,6 +986,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     position: relative;
     text-align: center;
     padding-block: var(--size-3);
+    box-shadow: var(--shadow-3);
   }
 
   .brand-name:hover > b {

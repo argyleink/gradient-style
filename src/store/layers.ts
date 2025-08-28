@@ -108,6 +108,47 @@ function updateActiveLayer(mutator: (l: GradientLayer) => void) {
 // Public API
 export function addLayer({ seed = 'duplicate', position = 'top' as 'top' | 'bottom' } = {}) {
   const base = seed === 'duplicate' ? snapshotFromStores() : defaultLayer()
+
+  // Set opacity of each stop color to 50% for the new layer
+  function withAlpha(color: string, alpha: number) {
+    const a = Math.max(0, Math.min(1, alpha))
+    // hex: #rgb, #rrggbb, #rgba, #rrggbbaa
+    if (/^#([0-9a-f]{3,8})$/i.test(color)) {
+      const hex = color.replace('#','')
+      // expand 3/4-digit hex
+      let r,g,b,al
+      if (hex.length === 3 || hex.length === 4) {
+        r = parseInt(hex[0]+hex[0], 16)
+        g = parseInt(hex[1]+hex[1], 16)
+        b = parseInt(hex[2]+hex[2], 16)
+        al = hex.length === 4 ? parseInt(hex[3]+hex[3], 16) / 255 : a
+      } else {
+        r = parseInt(hex.slice(0,2), 16)
+        g = parseInt(hex.slice(2,4), 16)
+        b = parseInt(hex.slice(4,6), 16)
+        al = hex.length >= 8 ? parseInt(hex.slice(6,8), 16) / 255 : a
+      }
+      const aHex = (Math.round((a) * 255)).toString(16).padStart(2,'0')
+      return `#${[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('')}${aHex}`
+    }
+    // oklch(...)
+    if (/^oklch\(/i.test(color)) {
+      // If already has alpha, replace it; otherwise append
+      if (/\/\s*\d*\.?\d+\s*\)$/.test(color)) {
+        return color.replace(/\/(.*)\)/, `/ ${a})`)
+      }
+      return color.replace(/\)$/,' / '+a+')')
+    }
+    // generic function color with ) at end; append slash alpha if not present
+    if (/\(/.test(color) && !/\//.test(color)) {
+      return color.replace(/\)$/,' / '+a+')')
+    }
+    return color
+  }
+
+  base.stops = base.stops.map(s => s?.kind === 'stop' ? { ...s, color: withAlpha(s.color, 0.5) } : s)
+  base.cachedCss = buildGradientStrings(base)
+
   const list = get(layers)
   const next = position === 'top' ? [base, ...list] : [...list, base]
   layers.set(next)
