@@ -1,5 +1,4 @@
 import Color from 'colorjs.io'
-import { linearAngleToString } from './linear'
 import { isCylindricalSpace } from './colorspace'
 
 export type LayerSnapshot = {
@@ -19,23 +18,33 @@ function spaceToString(space: string, interpolation: string) {
 }
 
 function radialPositionToString(radial: LayerSnapshot['radial']) {
+  const named = (radial as any).named_position
+  if (named && named !== '--') {
+    if (named === 'center') return ''
+    return named
+  }
   if (radial.position?.x != null) {
+    const x = radial.position.x
     const y = radial.position.y ?? '50'
-    return radial.position.x + '% ' + y + '%'
+    if (String(x) === '50' && String(y) === '50') return ''
+    return x + '% ' + y + '%'
   }
-  else {
-    return radial.named_position
-  }
+  return ''
 }
 
 function conicPositionToString(conic: LayerSnapshot['conic']) {
+  const named = (conic as any).named_position
+  if (named && named !== '--') {
+    if (named === 'center') return ''
+    return named
+  }
   if (conic.position?.x != null) {
+    const x = conic.position.x
     const y = conic.position.y ?? '50'
-    return conic.position.x + '% ' + y + '%'
+    if (String(x) === '50' && String(y) === '50') return ''
+    return x + '% ' + y + '%'
   }
-  else {
-    return conic.named_position
-  }
+  return ''
 }
 
 function maybeConvertColor(color: string, convert_colors?: boolean) {
@@ -74,14 +83,23 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
     return !!(m && Number(m[1]) === 100)
   }
 
+  function isPctFifty(p: any) {
+    if (p == null) return false
+    const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
+    return !!(m && Number(m[1]) === 50)
+  }
+
   return stops
     .map((s, i) => {
       if (s.kind === 'stop') {
         let p1 = s.position1
         let p2 = s.position2
 
+        // If position equals computed auto position, omit it
         if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
+        if (p2 != null && s.auto != null && p2 == s.auto) p2 = null
 
+        // Omit default endpoints
         if (i === firstStopIdx && isPctZero(p1)) p1 = null
         if (i === lastStopIdx && isPctHundred(p2)) p2 = null
 
@@ -105,8 +123,12 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
         return maybeConvertColor(s.color, convert_colors)
       }
       else if (s.kind === 'hint') {
-        if (s.percentage == null) return null
-        return s.percentage + '%'
+        // Omit default/auto hints (like 50%)
+        const pct = s.percentage
+        if (pct == null) return null
+        if (s.auto != null && String(pct) == String(s.auto)) return null
+        if (isPctFifty(pct)) return null
+        return pct + '%'
       }
       return null
     })
@@ -114,27 +136,58 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
     .join(new_lines === true ? ',\n      ' : ', ')
 }
 
+function linearAngleToken(linear: LayerSnapshot['linear']) {
+  // Omit default 'to bottom' or 180deg
+  const named = linear.named_angle
+  const ang = linear.angle
+  if (named && named !== '--') {
+    if (named === 'to bottom') return ''
+    return named
+  }
+  if (ang != null) {
+    const n = Number(ang)
+    if (!Number.isNaN(n) && (n % 360 === 180)) return ''
+    return String(ang) + 'deg'
+  }
+  return ''
+}
+
 function modernString(layer: LayerSnapshot) {
   if (layer.type === 'linear') {
-    return `linear-gradient(\n    ${linearAngleToString(layer.linear.angle as any, layer.linear.named_angle as any)} ${spaceToString(layer.space, layer.interpolation)},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+    const tokens = [linearAngleToken(layer.linear), spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
+    return `linear-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
   }
   else if (layer.type === 'radial') {
-    return `radial-gradient(\n    ${layer.radial.size} ${layer.radial.shape} at ${radialPositionToString(layer.radial)} ${spaceToString(layer.space, layer.interpolation)},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+    const pos = radialPositionToString(layer.radial)
+    const posPart = pos && pos !== 'center' ? 'at ' + pos : ''
+    const tokens = [layer.radial.size, layer.radial.shape, posPart, spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
+    return `radial-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
   }
   else {
-    return `conic-gradient(\n    from ${layer.conic.angle}deg at ${conicPositionToString(layer.conic)} ${spaceToString(layer.space, layer.interpolation)},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+    const pos = conicPositionToString(layer.conic)
+    const posPart = pos && pos !== 'center' ? 'at ' + pos : ''
+    const fromPart = (Number(layer.conic.angle) || 0) % 360 === 0 ? '' : `from ${layer.conic.angle}deg`
+    const tokens = [fromPart, posPart, spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
+    return `conic-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
   }
 }
 
 function classicString(layer: LayerSnapshot) {
   if (layer.type === 'linear') {
-    return `linear-gradient(${linearAngleToString(layer.linear.angle as any, layer.linear.named_angle as any)}, ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
+    const angleToken = linearAngleToken(layer.linear)
+    const header = angleToken ? angleToken + ', ' : ''
+    return `linear-gradient(${header}${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
   }
   else if (layer.type === 'radial') {
-    return `radial-gradient(\n    ${layer.radial.size} ${layer.radial.shape} at ${radialPositionToString(layer.radial)},\n    ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })}\n  )`
+    const pos = radialPositionToString(layer.radial)
+    const posPart = pos && pos !== 'center' ? ' at ' + pos : ''
+    return `radial-gradient(${layer.radial.size} ${layer.radial.shape}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
   }
   else {
-    return `conic-gradient(\n    from ${layer.conic.angle}deg at ${conicPositionToString(layer.conic)},\n    ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })}\n  )`
+    const pos = conicPositionToString(layer.conic)
+    const posPart = pos && pos !== 'center' ? ' at ' + pos : ''
+    const fromPart = (Number(layer.conic.angle) || 0) % 360 === 0 ? '' : `from ${layer.conic.angle}deg `
+    return `conic-gradient(${fromPart.trim()}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
   }
 }
 
