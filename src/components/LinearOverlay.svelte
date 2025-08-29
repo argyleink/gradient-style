@@ -114,6 +114,12 @@
       }
       else if (isRotator) {
         try { node.setPointerCapture(e.pointerId) } catch {}
+        // If starting rotation from a named angle, normalize numeric angle first to avoid a visual jump
+        if ($linear_named_angle !== '--') {
+          // Align the numeric store with the visual angle immediately
+          $linear_angle = visualAngleDeg
+          $linear_named_angle = '--'
+        }
         // Initialize rotation anchor from current pointer so the first delta starts from here
         const previewRect = isRotator.closest('.preview')?.getBoundingClientRect()
         if (previewRect) {
