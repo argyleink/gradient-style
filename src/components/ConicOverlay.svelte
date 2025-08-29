@@ -42,6 +42,8 @@
     // simplified pull-away state
     removedStop: null,
     removedIndex: null,
+    // cache the visual offset for the drag session to avoid first-move jumps
+    visualOffsetDeg: null,
   }
 
   function pickColor(stop, e) {
@@ -71,6 +73,38 @@
   function percentToDecimal(percent) {
     return percent / 100
   }
+
+  // Map exact percent positions to named keywords
+  function nearestNamedPosName(x, y) {
+    const ex = x, ey = y
+    const is = (a,b) => a === b
+    if (is(ex,50) && is(ey,50)) return 'center'
+    if (is(ey,0)) {
+      if (is(ex,0)) return 'top left'
+      if (is(ex,50)) return 'top'
+      if (is(ex,100)) return 'top right'
+    }
+    if (is(ey,100)) {
+      if (is(ex,0)) return 'bottom left'
+      if (is(ex,50)) return 'bottom'
+      if (is(ex,100)) return 'bottom right'
+    }
+    if (is(ex,0) && is(ey,50)) return 'left'
+    if (is(ex,100) && is(ey,50)) return 'right'
+    return null
+  }
+
+  // When sliders set an exact named position, reflect it in the named store so UI updates
+  $effect(() => {
+    if (dragulaState.moving || dragulaState.rotating) return
+    const x = Number($conic_position.x)
+    const y = Number($conic_position.y)
+    if (Number.isNaN(x) || Number.isNaN(y)) return
+    const name = nearestNamedPosName(x, y)
+    if (name && $conic_named_position !== name) {
+      $conic_named_position = name
+    }
+  })
 
   function determineAbsPosition() {
     let x = $conic_position.x
@@ -132,25 +166,44 @@
       }
       else if (isRotator) {
         try { node.setPointerCapture(e.pointerId) } catch {}
+        // Initialize rotation anchor from current pointer so the first delta starts from here
+        const previewRect = isRotator.closest('.preview')?.getBoundingClientRect()
+        if (previewRect) {
+          dragulaState.centerX = previewRect.left + previewRect.width / 2
+          dragulaState.centerY = previewRect.top + previewRect.height / 2
+          const deltaX = e.clientX - dragulaState.centerX
+          const deltaY = e.clientY - dragulaState.centerY
+          let currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+          if (currentAngle < 0) currentAngle += 360
+          dragulaState.lastAngle = currentAngle
+        }
         rotateIt(isRotator)
       }
       else if (isStop) {
-        e.preventDefault()
-        e.stopPropagation()
+        // If clicking the color swatch, let the click go through (no drag)
+        if (e.target.closest('.stop-color')) return
         const idx = Number(isStop.dataset.stopIndex)
         $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
         dragulaState.stopIndex = idx
-        try { isStop.setPointerCapture(e.pointerId) } catch {}
-        try { node.setPointerCapture(e.pointerId) } catch {}
-        dragIt(isStop)
+        // Do not start dragging yet; wait for movement threshold in pointermove
       }
     }
 
     let lastActiveIndex = null
     const onPointerMove = (e) => {
+      // Arm drag on small movement to preserve click/dblclick behavior
+      if (!dragulaState.moving && dragulaState.stopIndex != null) {
+        const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
+        const dy = (e.screenY ?? 0) - (dragulaState.start.y ?? 0)
+        if (Math.hypot(dx, dy) > 3) {
+          dragulaState.moving = true
+          try { node.setPointerCapture(e.pointerId) } catch {}
+          dragIt(dragulaState.target)
+        }
+      }
       if (dragulaState.moving && dragulaState.stopIndex != null) {
         // Capture pointer to avoid losing events during fast drags
         try { node.setPointerCapture(e.pointerId) } catch {}
@@ -176,18 +229,50 @@
             ringRadius = Math.hypot(sx - cx, sy - cy)
           }
           const radialDelta = Math.abs(dist - ringRadius)
-          const armThresh = 75
+          const removeArm = 28
+          const insertArm = 18
 
-          // Pull-away removal disabled
+          // Drag-away to remove / return to reinsert
+          if (radialDelta > removeArm && dragulaState.stopIndex != null && !dragulaState.removedStop) {
+            const colorCount = ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+            if (colorCount > 1) {
+              dragulaState.removedStop = { ...( $gradient_stops[dragulaState.stopIndex] ) }
+              dragulaState.removedIndex = dragulaState.stopIndex
+              $gradient_stops = updateStops(removeStop($gradient_stops, dragulaState.stopIndex))
+              dragulaState.stopIndex = null
+            }
+          } else if (radialDelta <= insertArm && dragulaState.removedStop && dragulaState.stopIndex == null) {
+            const percent = Math.max(0, Math.min(100, Math.round(dragulaState.angle ?? 0)))
+            const colors = $gradient_stops.filter(s => s.kind === 'stop')
+            let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+            if (k === -1) k = colors.length
+            const arrIdx = k * 2
+            const newStop = {
+              kind: 'stop',
+              color: dragulaState.removedStop.color,
+              auto: percent,
+              position1: percent,
+              position2: percent,
+              _manual: true,
+            }
+            if (k === colors.length) {
+              $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+            } else {
+              $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
+            }
+            $gradient_stops = updateStops($gradient_stops)
+            dragulaState.stopIndex = arrIdx
+            dragulaState.removedStop = null
+            dragulaState.removedIndex = null
+          }
 
           // Compute the angle under the pointer in screen space [0,360)
           let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
           if (deg < 0) deg += 360
 
           // Align to the visual orientation of the overlay and stops
-          const dynamicOffset = computeVisualOffsetDeg(node)
           const baseOffset = normalizeDeg($conic_angle - 180)
-          const offset = dynamicOffset ?? baseOffset
+          const offset = (dragulaState.visualOffsetDeg ?? baseOffset)
 
           const localDeg = normalizeDeg(deg - offset)
           // Map degrees to percent [0,100]
@@ -291,6 +376,7 @@
       dragulaState.start.y = null
       dragulaState.removedStop = null
       dragulaState.removedIndex = null
+      dragulaState.visualOffsetDeg = null
 
       $active_stop_index = null
     }
@@ -316,6 +402,11 @@
     if (dragulaState.stopIndex != null) {
       const s = $gradient_stops?.[dragulaState.stopIndex]
       if (!s) return
+      // Cache visual offset once at drag start to keep hint/angle stable on first move
+      try { 
+        const root = node.closest('.conic-overlay')
+        dragulaState.visualOffsetDeg = computeVisualOffsetDeg(root) 
+      } catch {}
       if (s.kind === 'hint')
         dragulaState.angle = parseInt(s.percentage)
       else if (s.kind === 'stop')
@@ -344,9 +435,14 @@
     $active_stop_index = null
   }
 
+  function colorStopCount() {
+    return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+  }
+
   function deleteStop(stop) {
-    // Deletion disabled
-    return
+    // Do not allow removing the last remaining color stop
+    if (colorStopCount() <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
   function handleKeypress(e, stop, prop) {
@@ -369,8 +465,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      // Deletion disabled
-      return
+      e.preventDefault()
+      deleteStop(stop)
     }
   }
 

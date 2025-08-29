@@ -48,6 +48,29 @@
       : $linear_angle
   )
 
+  // Snap named angle when numeric angle matches a named value (e.g., via slider)
+  const NAMED_ANGLES = [
+    ['to top', 0],
+    ['to top right', 45],
+    ['to right', 90],
+    ['to bottom right', 135],
+    ['to bottom', 180],
+    ['to bottom left', 225],
+    ['to left', 270],
+    ['to top left', 315],
+  ]
+
+  $effect(() => {
+    if (dragulaState.rotating) return
+    const val = Number($linear_angle)
+    if (Number.isNaN(val)) return
+    const match = NAMED_ANGLES.find(([_, deg]) => deg === ((val % 360) + 360) % 360)
+    if (match && $linear_named_angle !== match[0]) {
+      // Update named angle so UI reflects the keyword state
+      $linear_named_angle = match[0]
+    }
+  })
+
   function pickColor(stop, e) {
     const picker = document.getElementById('color-picker')
 
@@ -79,27 +102,45 @@
       const isRotator = e.target.closest('.invisible-rotator')
 
       if (isStop) {
-        e.preventDefault()
-        e.stopPropagation()
+        // If clicking the color swatch, let the click go through (no drag)
+        if (e.target.closest('.stop-color')) return
         const idx = Number(isStop.dataset.stopIndex)
         $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
         dragulaState.stopIndex = idx
-        // Capture immediately to keep move events flowing to this node
-        try { isStop.setPointerCapture(e.pointerId) } catch {}
-        try { node.setPointerCapture(e.pointerId) } catch {}
-        dragIt(isStop)
+        // Do not start dragging yet; wait for movement threshold in pointermove
       }
       else if (isRotator) {
         try { node.setPointerCapture(e.pointerId) } catch {}
+        // Initialize rotation anchor from current pointer so the first delta starts from here
+        const previewRect = isRotator.closest('.preview')?.getBoundingClientRect()
+        if (previewRect) {
+          dragulaState.centerX = previewRect.left + previewRect.width / 2
+          dragulaState.centerY = previewRect.top + previewRect.height / 2
+          const deltaX = e.clientX - dragulaState.centerX
+          const deltaY = e.clientY - dragulaState.centerY
+          let currentAngle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+          if (currentAngle < 0) currentAngle += 360
+          dragulaState.lastAngle = currentAngle
+        }
         rotateIt(isRotator)
       }
     }
 
     let lastActiveIndex = null
     const onPointerMove = (e) => {
+      // Arm drag on small movement to preserve click/dblclick behavior
+      if (!dragulaState.moving && dragulaState.stopIndex != null) {
+        const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
+        const dy = (e.screenY ?? 0) - (dragulaState.start.y ?? 0)
+        if (Math.hypot(dx, dy) > 3) {
+          dragulaState.moving = true
+          try { node.setPointerCapture(e.pointerId) } catch {}
+          dragIt(dragulaState.target)
+        }
+      }
       if (dragulaState.moving) {
         try { node.setPointerCapture(e.pointerId) } catch {}
         // Project pointer movement onto the line axis for natural dragging in any orientation
@@ -122,13 +163,50 @@
           const rect = lineEl.getBoundingClientRect()
           const cx = rect.left + rect.width / 2
           const cy = rect.top + rect.height / 2
-          const rot = (($linear_angle - 90) * Math.PI) / 180
+          const rot = ((visualAngleDeg - 90) * Math.PI) / 180
           const ux = Math.cos(rot), uy = Math.sin(rot)
           const nx = -uy, ny = ux
           const vx = e.clientX - cx
           const vy = e.clientY - cy
           const perp = vx * nx + vy * ny
-          void perp // calculated but intentionally unused for removals
+
+          const removeArm = 36
+          const insertArm = 24
+          if (Math.abs(perp) > removeArm && dragulaState.stopIndex != null && !dragulaState.removedStop) {
+            // Remove stop if more than one color stop remains
+            const colorCount = ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+            if (colorCount > 1) {
+              dragulaState.removedStop = { ...( $gradient_stops[dragulaState.stopIndex] ) }
+              dragulaState.removedIndex = dragulaState.stopIndex
+              $gradient_stops = updateStops(removeStop($gradient_stops, dragulaState.stopIndex))
+              dragulaState.stopIndex = null
+            }
+          }
+          else if (Math.abs(perp) <= insertArm && dragulaState.removedStop && dragulaState.stopIndex == null) {
+            // Reinsert near current left percent
+            const percent = Math.max(0, Math.min(100, Math.round(dragulaState.left)))
+            const colors = $gradient_stops.filter(s => s.kind === 'stop')
+            let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+            if (k === -1) k = colors.length
+            const arrIdx = k * 2
+            const newStop = {
+              kind: 'stop',
+              color: dragulaState.removedStop.color,
+              auto: percent,
+              position1: percent,
+              position2: percent,
+              _manual: true,
+            }
+            if (k === colors.length) {
+              $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+            } else {
+              $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
+            }
+            $gradient_stops = updateStops($gradient_stops)
+            dragulaState.stopIndex = arrIdx
+            dragulaState.removedStop = null
+            dragulaState.removedIndex = null
+          }
         }
 
         // Update positions by current index from the store to avoid stale references
@@ -196,7 +274,8 @@
     const stopWatching = (e) => {
       try { node.releasePointerCapture(e.pointerId) } catch {}
 
-      // If we ended with the stop removed, keep it removed. If it was reattached already, nothing to do.
+      // If we ended with the stop removed and never reinserted, keep it removed. If reattached already, nothing to do.
+      const wasRotating = dragulaState.rotating
       dragulaState.moving = false
       dragulaState.rotating = false
       dragulaState.stopIndex = null
@@ -206,6 +285,28 @@
       dragYdelta = null
       dragulaState.removedStop = null
       dragulaState.removedIndex = null
+
+      // Snap to a named direction if very close to it
+      if (wasRotating && $linear_angle != null) {
+        const val = Number($linear_angle)
+        if (!Number.isNaN(val)) {
+          const names = [
+            ['to top', 0],
+            ['to top right', 45],
+            ['to right', 90],
+            ['to bottom right', 135],
+            ['to bottom', 180],
+            ['to bottom left', 225],
+            ['to left', 270],
+            ['to top left', 315],
+          ]
+          const tol = 1 // degree tolerance
+          for (const [name, deg] of names) {
+            const d = Math.abs((((val - deg) % 360) + 540) % 360 - 180)
+            if (d <= tol) { $linear_named_angle = name; break }
+          }
+        }
+      }
 
       $active_stop_index = null
     }
@@ -344,8 +445,13 @@
     ghostPercent = null
   }
 
+  function colorStopCount() {
+    return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+  }
+
   function deleteStop(stop) {
-    if ($gradient_stops.length <= 1) return
+    // Do not allow removing the last remaining color stop
+    if (colorStopCount() <= 1) return
     $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
@@ -374,8 +480,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      // Deletion disabled
-      return
+      e.preventDefault()
+      deleteStop(stop)
     }
   }
 </script>
@@ -407,7 +513,7 @@
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
         >
-          <div class="stop" data-stop-index={i} data-position="1">
+          <div class="stop" data-stop-index={i} data-position="1" ondblclick={()=>deleteStop(stop)}>
             <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>

@@ -170,23 +170,53 @@
     return percent / 100
   }
 
+  // Map exact percent positions to named keywords
+  function nearestNamedPosName(x, y) {
+    const ex = x, ey = y
+    const is = (a,b) => a === b
+    if (is(ex,50) && is(ey,50)) return 'center'
+    if (is(ey,0)) {
+      if (is(ex,0)) return 'top left'
+      if (is(ex,50)) return 'top'
+      if (is(ex,100)) return 'top right'
+    }
+    if (is(ey,100)) {
+      if (is(ex,0)) return 'bottom left'
+      if (is(ex,50)) return 'bottom'
+      if (is(ex,100)) return 'bottom right'
+    }
+    if (is(ex,0) && is(ey,50)) return 'left'
+    if (is(ex,100) && is(ey,50)) return 'right'
+    return null
+  }
+
+  // When sliders set an exact named position, reflect it in the named store so UI updates
+  $effect(() => {
+    if (dragulaState.moving) return
+    const x = Number($radial_position.x)
+    const y = Number($radial_position.y)
+    if (Number.isNaN(x) || Number.isNaN(y)) return
+    const name = nearestNamedPosName(x, y)
+    if (name && $radial_named_position !== name) {
+      $radial_named_position = name
+    }
+  })
+
   function dragula(node) {
     const onPointerDown = (e) => {
       const isStop = e.target.closest('[data-stop-index]')
       const isTrack = e.target.closest('.invisible-track')
 
       if (isStop) {
-        e.preventDefault()
-        e.stopPropagation()
+        // If clicking the color swatch, let the click go through (no drag)
+        if (e.target.closest('.stop-color')) return
         const idx = Number(isStop.dataset.stopIndex)
         $active_stop_index = idx
         dragulaState.target = isStop
         dragulaState.start.x = e.screenX
         dragulaState.start.y = e.screenY
         dragulaState.stopIndex = idx
-        try { isStop.setPointerCapture(e.pointerId) } catch {}
-        try { node.setPointerCapture(e.pointerId) } catch {}
-        dragIt(isStop)
+        // Do not start dragging yet; wait for movement threshold in pointermove
       }
       else if (isTrack) {
         // Allow click-to-add without starting a drag move of the center
@@ -209,6 +239,16 @@
 
     let lastActiveIndex = null
     const onPointerMove = (e) => {
+      // Arm drag on small movement to preserve click/dblclick behavior
+      if (!dragulaState.moving && dragulaState.stopIndex != null) {
+        const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
+        const dy = (e.screenY ?? 0) - (dragulaState.start.y ?? 0)
+        if (Math.hypot(dx, dy) > 3) {
+          dragulaState.moving = true
+          try { node.setPointerCapture(e.pointerId) } catch {}
+          dragIt(dragulaState.target)
+        }
+      }
       if (dragulaState.moving && dragulaState.stopIndex != null) {
         try { node.setPointerCapture(e.pointerId) } catch {}
         let apercent = (size.w / 2) / 100
@@ -220,7 +260,41 @@
             const rect = lineEl.getBoundingClientRect()
             const cy = rect.top + rect.height / 2
             const perp = e.clientY - cy
-            void perp
+
+            const removeArm = 28
+            const insertArm = 18
+            if (Math.abs(perp) > removeArm && dragulaState.stopIndex != null && !dragulaState.removedStop) {
+              const colorCount = ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+              if (colorCount > 1) {
+                dragulaState.removedStop = { ...( $gradient_stops[dragulaState.stopIndex] ) }
+                dragulaState.removedIndex = dragulaState.stopIndex
+                $gradient_stops = updateStops(removeStop($gradient_stops, dragulaState.stopIndex))
+                dragulaState.stopIndex = null
+              }
+            } else if (Math.abs(perp) <= insertArm && dragulaState.removedStop && dragulaState.stopIndex == null) {
+              const percent = Math.max(0, Math.min(100, Math.round(dragulaState.left)))
+              const colors = $gradient_stops.filter(s => s.kind === 'stop')
+              let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+              if (k === -1) k = colors.length
+              const arrIdx = k * 2
+              const newStop = {
+                kind: 'stop',
+                color: dragulaState.removedStop.color,
+                auto: percent,
+                position1: percent,
+                position2: percent,
+                _manual: true,
+              }
+              if (k === colors.length) {
+                $gradient_stops.splice(arrIdx, 0, {kind: 'hint', percentage: null}, newStop)
+              } else {
+                $gradient_stops.splice(arrIdx, 0, newStop, {kind: 'hint', percentage: null})
+              }
+              $gradient_stops = updateStops($gradient_stops)
+              dragulaState.stopIndex = arrIdx
+              dragulaState.removedStop = null
+              dragulaState.removedIndex = null
+            }
           }
 
         // Update positions using current index to avoid stale references
@@ -375,9 +449,14 @@
     $active_stop_index = null
   }
 
+  function colorStopCount() {
+    return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
+  }
+
   function deleteStop(stop) {
-    // Deletion disabled
-    return
+    // Do not allow removing the last remaining color stop
+    if (colorStopCount() <= 1) return
+    $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
   function handleKeypress(e, stop, prop) {
@@ -400,8 +479,8 @@
       $gradient_stops = $gradient_stops
     }
     else if (['Backspace','Delete'].includes(e.key)) {
-      // Deletion disabled
-      return
+      e.preventDefault()
+      deleteStop(stop)
     }
   }
 
@@ -476,7 +555,7 @@
           onmouseleave={mouseOut}
           onkeydown={(e)=>handleKeypress(e,stop,'position1')}
         >
-          <div class="stop" data-stop-index={i} data-position="1">
+          <div class="stop" data-stop-index={i} data-position="1" ondblclick={()=>deleteStop(stop)}>
             <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>

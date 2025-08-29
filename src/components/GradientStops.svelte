@@ -34,7 +34,8 @@
   function colorAction(event, position) {
     switch (event.target.value) {
       case 'Remove':
-        // Deletion disabled
+        if (colorStopCount() <= 1) break
+        $gradient_stops = updateStops(removeStop($gradient_stops, position))
         break
       case 'Reset':
         $gradient_stops[position].position1 = null
@@ -54,6 +55,10 @@
 
     // reset
     event.target.selectedIndex = 0
+  }
+
+  function colorStopCount() {
+    return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
   }
 
   function dupeStop(pos) {
@@ -296,14 +301,14 @@
         </div>
         <button class="stop-actions" use:tooltip={{content: "Actions", offset: 15}}>
           <select tabindex="-1" onchange={(e) => colorAction(e,i)}>
-            <option disabled selected>Color Actions</option>
+            <option disabled selected>Color Stop Actions</option>
             <hr>
             <option>Duplicate</option>
             <option>Copy CSS color</option>
             <option>Random color</option>
             <hr>
             <option>Reset</option>
-            <option disabled={true}>Remove</option>
+            <option disabled={colorStopCount() <= 1}>Remove</option>
           </select>
         </button>
         <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder"></div>
