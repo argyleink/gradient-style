@@ -72,11 +72,12 @@
     border: 1px solid transparent;
     padding: var(--size-2);
     place-content: center;
-    color: var(--text-2);
+    color: oklch(from var(--text-2) l c h / 50%);
   }
 
-  .switch:hover {
-    background: var(--surface-1);
+  .switch:is(:hover, :focus-visble) {
+    border-color: var(--surface-3);
+    color: var(--text-1);
   }
 
 .switch:has(input:focus-visible) {
@@ -85,18 +86,7 @@
 
   .switch:has(input:checked) {
     color: var(--text-1);
-    background: var(--surface-2);
-    border-color: var(--surface-4);
-  }
-
-  @media (prefers-color-scheme: light) {
-    .switch:hover {
-      background: var(--surface-2);
-    }
-
-    .switch:has(input:checked) {
-      background: var(--surface-2);
-    }
+    border-color: var(--link);
   }
 
   .switch > * {
