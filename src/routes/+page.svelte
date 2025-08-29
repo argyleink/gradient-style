@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>CSS HD Gradients</title>
+	<title>CSS HDR Gradients</title>
 	<meta name="description" content="Wide gamut Color 4 compliant CSS gradient builder." />
 	<meta id="browsertheme" name="theme-color" content="#ff00ff">
 </svelte:head>

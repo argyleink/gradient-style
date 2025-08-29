@@ -265,11 +265,11 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
           <option>hsl</option>
           <option>hwb</option>
         </optgroup>
-        <optgroup label="HD">
+        <optgroup label="HDR">
           <option>display-p3</option>
           <option>a98-rgb</option>
         </optgroup>
-        <optgroup label="Ultra HD">
+        <optgroup label="Ultra HDR">
           <option>lab</option>
           <option>lch</option>
           <option selected>oklch</option>
