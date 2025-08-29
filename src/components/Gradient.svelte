@@ -400,17 +400,22 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     document.querySelector('.preview-panel .panel-actions button').focus()
   }
 
+  import { copyToClipboard } from '../utils/clipboard.ts'
+  import { layers as layersStore, active_layer_index as activeLayerIndex, defaultLayer, selectLayer as selectLayerFn } from '../store/layers.ts'
+
   function globalAction(event) {
     switch (event.target.value) {
       case 'Start new':
-        $gradient_type = 'linear'
-        $gradient_space = 'oklab'
-        $gradient_stops = [
-          {kind: 'stop', color: '#000', auto: '0', position1: '0', position2: '0'},
-          {kind: 'hint', auto: '50', percentage: '50'},
-          {kind: 'stop', color: '#fff', auto: '100', position1: '100', position2: '100'},
-        ]
-        $linear_named_angle = 'to right'
+        // Reset to a single default linear layer and sync stores
+        layersStore.set([defaultLayer()])
+        activeLayerIndex.set(0)
+        selectLayerFn(0)
+        break
+      case 'Copy modern CSS':
+        copyToClipboard(user_layers_joined || user_gradient)
+        break
+      case 'Copy classic CSS':
+        copyToClipboard(classic_layers_joined || classic_gradient)
         break
       case 'Import gradient':
         openImport()
@@ -477,7 +482,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       <header class="brand">
 <div class="gradient-logo" style="background:{preview_hd ? (user_layers_joined || user_gradient) : (classic_layers_joined || classic_gradient)}"></div>
         <h1 class="brand-name">
-          HD G<b>rad</b>ients
+          HDR G<b>rad</b>ients
         </h1>
       </header>
       <ColorPicker />
@@ -500,7 +505,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         <div class="preview">
           {#if $gradient_interpolation !== 'longer'}
           <label class="hd-switch">
-            <Hint title="HDR" copy="This switch toggles between the SDR and HDR CSS gradients.<br><br>When off it shows the gradient with hex colors, which has always been in the sRGB colorspace.<br><br>When on, the gradient shown is using a newer color space and also using newer wide gamut colors.<br><br>This button helps you preview the classic gradient vs the HD gradient you're building in this tool." />
+            <Hint title="HDR" copy="This switch toggles between the SDR and HDR CSS gradients.<br><br>When off it shows the gradient with hex colors, which has always been in the sRGB colorspace.<br><br>When on, the gradient shown is using a newer color space and also using newer wide gamut colors.<br><br>This button helps you preview the classic gradient vs the HDR gradient you're building in this tool." />
             <span class="sr-only">HD on or off?</span>
             {#if preview_hd == true}
               <svg aria-hidden="true" width="32" height="32" viewBox="0 0 20 20"><path fill="currentColor" d="M4.75 4A2.75 2.75 0 0 0 2 6.75v6.5A2.75 2.75 0 0 0 4.75 16h10.5A2.75 2.75 0 0 0 18 13.25v-6.5A2.75 2.75 0 0 0 15.25 4H4.75ZM4.5 7.5A.5.5 0 0 1 5 8v1.5h2V8a.5.5 0 0 1 1 0v4a.5.5 0 0 1-1 0v-1.5H5V12a.5.5 0 0 1-1 0V8a.5.5 0 0 1 .5-.5ZM9 8a.5.5 0 0 1 .5-.5h.25A2.25 2.25 0 0 1 12 9.75v.5a2.25 2.25 0 0 1-2.25 2.25H9.5A.5.5 0 0 1 9 12V8Zm1 3.475c.57-.116 1-.62 1-1.225v-.5c0-.605-.43-1.11-1-1.225v2.95ZM13 8a.5.5 0 0 1 .5-.5h1a1.5 1.5 0 0 1 .868 2.724l.6 1.6a.5.5 0 0 1-.936.352l-.629-1.676H14V12a.5.5 0 0 1-1 0V8Zm1 1.5h.5a.5.5 0 0 0 0-1H14v1Z"/></svg>
@@ -550,15 +555,15 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       <div class="menu-bar">
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
-            <option disabled selected>Actions</option>
+            <option disabled selected>Global Actions</option>
             <hr>
             <option>Start new</option>
             <option>Import gradient</option>
-            <option disabled>Copy modern CSS</option>
-            <option disabled>Copy classic CSS</option>
-            <option disabled>Reset all stops to auto</option>
+            <option>Copy modern CSS</option>
+            <option>Copy classic CSS</option>
+            <!-- <option disabled>Reset all stops to auto</option> -->
             <hr>
-            <option disabled>Toggle light & dark</option>
+            <!-- <option disabled>Toggle light & dark</option> -->
             <option>Tips & tricks</option>
             <option>Help & feedback</option>
           </select>
