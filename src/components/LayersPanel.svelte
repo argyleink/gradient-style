@@ -123,6 +123,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       overscroll-behavior: contain;
+      scrollbar-width: thin;
     }
   }
 
