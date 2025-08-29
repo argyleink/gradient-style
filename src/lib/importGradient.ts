@@ -47,7 +47,7 @@ export function applyParsedToStores(parsed: ParsedGradient) {
       linear_angle.set(null)
     } else if (parsed.linear?.angleDeg) {
       linear_angle.set(toDegreesString(parsed.linear.angleDeg))
-      linear_named_angle.set(null)
+      linear_named_angle.set('--')
     }
   } else if (parsed.type === 'radial') {
     radial_shape.set(parsed.radial?.shape ?? 'circle')

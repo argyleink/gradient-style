@@ -69,7 +69,7 @@ function applyLayerToStores(layer: GradientLayer) {
     gradient_space.set(layer.space)
     gradient_interpolation.set(layer.interpolation)
 
-    linear_named_angle.set(layer.linear.named_angle as any)
+    linear_named_angle.set((layer.linear.named_angle as any) ?? '--')
     linear_angle.set(layer.linear.angle as any)
 
     radial_shape.set(layer.radial.shape)
