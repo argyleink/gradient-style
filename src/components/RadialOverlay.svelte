@@ -629,7 +629,7 @@
     transform: translate(-50%, -50%);
   }
 
-  .line {
+.line {
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: 50%;
@@ -641,6 +641,7 @@
     inline-size: 100%;
     background: var(--line-1);
     transform: translate(0%, -50%);
+    z-index: 11; /* ensure the entire line (and its children) stack above the dragzone */
   }
 
   .line::after {
@@ -666,7 +667,7 @@
     transition: box-shadow .5s var(--ease-3);
     --_shadow-size: 0px;
     box-shadow: inset 0 0 0 var(--_shadow-size) hsl(0 0% 100% / 25%);
-    z-index: 1;
+    z-index: 2; /* keep below stops/hints */
   }
 
   .dragzone:hover {
@@ -694,7 +695,7 @@
     inset-block-start: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    z-index: 1;
+    z-index: 1; /* below dragzone and stops */
   }
 
   .ghost-stop {
@@ -756,7 +757,7 @@
     place-content: center;
     place-items: center;
     gap: var(--size-2);
-    z-index: 3; /* ensure stops/hints hover over track/ghost */
+    z-index: 10; /* ensure stops/hints hover over dragzone and track/ghost */
   }
 
   .hint {
