@@ -282,6 +282,8 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
         </optgroup>
       </select>
       <div class="gamut" title="Gamut">{gamut}</div>
+      <!-- just a convenience, keyboard can still grab the contents -->
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions  -->
       <output class="color-information" onclick={copyColor}>
         {$picker_value}
         <svg width="32" height="32" viewBox="0 0 24 24">
@@ -294,7 +296,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'oklab'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input autofocus class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
+          <input class="control-input" type="range" min="0" max="100" bind:value={$oklabL} style="background-image: linear-gradient(in oklab to right, black, white)">
           <input type="number" bind:value={$oklabL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -320,7 +322,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'oklch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input autofocus class="control-input" type="range" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
+          <input class="control-input" type="range" bind:value={$oklchL} style="background-image: linear-gradient(in oklab to right, black, white)">
           <input type="number" bind:value={$oklchL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -346,7 +348,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'lab'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input autofocus class="control-input" type="range" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input class="control-input" type="range" bind:value={$labL} style="background-image: linear-gradient(in lab to right, black, white)">
           <input type="number" bind:value={$labL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -372,7 +374,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'lch'}
         <div class="control">
           <span class="control-channel">L</span>
-          <input autofocus class="control-input" type="range" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
+          <input class="control-input" type="range" bind:value={$lchL} style="background-image: linear-gradient(in lab to right, black, white)">
           <input type="number" bind:value={$lchL} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -398,7 +400,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'hsl'}
         <div class="control">
           <span class="control-channel">H</span>
-          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hslH} style={`background-image: linear-gradient(to right in hsl longer hue, hsl(0 ${$hslS} 50%), hsl(0 ${$hslS} 50%))`}>
+          <input class="control-input" type="range" min="0" max="360" bind:value={$hslH} style={`background-image: linear-gradient(to right in hsl longer hue, hsl(0 ${$hslS} 50%), hsl(0 ${$hslS} 50%))`}>
           <input type="number" bind:value={$hslH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -424,7 +426,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'hwb'}
         <div class="control">
           <span class="control-channel">H</span>
-          <input autofocus class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
+          <input class="control-input" type="range" min="0" max="360" bind:value={$hwbH} style="background-image: linear-gradient(to right in hsl longer hue, red, red)">
           <input type="number" bind:value={$hwbH} min="0" max="360" class="slider-percentage">
         </div>
 
@@ -450,7 +452,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if $colorspace === 'srgb'}
         <div class="control">
           <span class="control-channel">R</span>
-          <input autofocus class="control-input" type="range" min="0" max="100" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+          <input class="control-input" type="range" min="0" max="100" bind:value={$rgbR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
           <input type="number" bind:value={$rgbR} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -476,7 +478,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
       {#if isRGBcolor($colorspace)}
         <div class="control">
           <span class="control-channel">R</span>
-          <input autofocus class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
+          <input class="control-input" type="range" bind:value={$colorR} style="background-image: linear-gradient(to right in oklab, #f000, #f00); background-color: black;">
           <input type="number" bind:value={$colorR} min="0" max="100" class="slider-percentage">
         </div>
 
@@ -628,11 +630,6 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
     ;
   }
 
-  .control-value {
-    min-inline-size: 4ch;
-    text-align: end;
-  }
-
   .control-input::-webkit-slider-thumb {
     --_border-size: 4px;
 
@@ -666,12 +663,6 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
 
   .color-information:is(:global(:hover, :focus)) > svg {
     opacity: 1;
-  }
-
-  .color-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
   }
 
   .gamut {
