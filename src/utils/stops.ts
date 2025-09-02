@@ -13,14 +13,14 @@ export function updateStops(stops) {
       else if (!stop._manual) {
         // Treat null/undefined as unset; 0 is a valid value and must be preserved
         const p1Unset = (stop.position1 == null) || (stop.auto != null && String(stop.position1) == String(stop.auto))
-        const p2UnsetOrAuto = (stop.position2 == null) || (stop.auto != null && String(stop.position2) == String(stop.auto))
+        const p2Unset = (stop.position2 == null)
 
         // Only assign auto for position1 when it is unset or previously auto-managed
         if (p1Unset) stop.position1 = autoVal
 
-        // Only assign auto for position2 when it's unset or previously auto-managed.
-        // Preserve any explicitly provided second position (e.g., from presets) to avoid regressions.
-        if (p2UnsetOrAuto) stop.position2 = p1Unset ? autoVal : stop.position1
+        // Only assign a second position when it is truly unset. Never override an existing value,
+        // even if it equals the auto position, to preserve explicit spans from presets/URL restores.
+        if (p2Unset) stop.position2 = p1Unset ? autoVal : stop.position1
       }
       // Clear the manual flag after one normalization pass so future edits behave normally
       if (stop._manual) delete stop._manual
