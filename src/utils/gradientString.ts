@@ -95,9 +95,8 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
         let p1 = s.position1
         let p2 = s.position2
 
-        // If position equals computed auto position, omit it
-        if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
-        if (p2 != null && s.auto != null && p2 == s.auto) p2 = null
+        // If first position equals computed auto position, omit it (keep explicit second positions)
+        if (p1 != null && s.auto != null && String(p1) == String(s.auto)) p1 = null
 
         // Omit default endpoints
         if (i === firstStopIdx && isPctZero(p1)) p1 = null

@@ -296,8 +296,8 @@
 						kind: 'stop',
 						color: stop.color,
 						auto: null,
-						position1: stop.position1 || null,
-						position2: stop.position2 || null,
+						position1: (stop.position1 ?? null),
+						position2: (stop.position2 ?? null),
 				}
 			}
 			else return stop
