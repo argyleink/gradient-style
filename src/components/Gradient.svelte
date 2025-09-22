@@ -6,8 +6,7 @@
   import { tooltip } from 'svooltip'
   import 'svooltip/styles.css'
 
-  import {gradient_type, gradient_space, gradient_interpolation,
-          gradient_stops, gradient_positions
+  import {gradient_type, gradient_space, gradient_interpolation, gradient_stops
   } from '../store/gradient.ts'
   import {linear_named_angle, linear_angle
   } from '../store/linear.ts'
@@ -16,7 +15,6 @@
   import {conic_angle, conic_position, conic_named_position
   } from '../store/conic.ts'
   import {layers, active_layer_index, selectLayer} from '../store/layers.ts'
-  import {stateAsString, deserializeUrl, restoreStateFromUrl} from '../store/url.ts'
   import { buildGradientStrings } from '../utils/gradientString'
 
   import {linearAngleToString} from '../utils/linear.ts'
@@ -34,9 +32,9 @@
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Presets from './Presets.svelte'
-import Prism from './PrismJS.svelte'
-import GradientImportDialog from './GradientImportDialog.svelte'
-import AIGradientDialog from './AIGradientDialog.svelte'
+  import Prism from './PrismJS.svelte'
+  import GradientImportDialog from './GradientImportDialog.svelte'
+  import AIGradientDialog from './AIGradientDialog.svelte'
 
   import Hint from './Hint.svelte'
 
@@ -563,9 +561,6 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       <div class="menu-bar">
         <button class="ai-button" onclick={() => openAI()} use:tooltip={{content: "Generate gradient with AI"}}>
           <span class="sr-only">AI Generate</span>
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 2L13.09 8.26L19 7L15.45 11.82L21.8 14L16 16.5L19.53 22L13.17 18.45L9 24L8.89 17.74L3 19L6.55 14.18L0.2 12L6 9.5L2.47 4L8.83 7.55L13 2Z"/>
-          </svg>
         </button>
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
@@ -1116,9 +1111,10 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-image: url(https://api.iconify.design/material-symbols:auto-awesome.svg?color=%23ffffff);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -1132,22 +1128,4 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     transform: scale(0.95);
   }
   
-  .ai-button svg {
-    color: white;
-    width: 60%;
-    height: 60%;
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
-    animation: sparkle 3s ease-in-out infinite;
-  }
-  
-  @keyframes sparkle {
-    0%, 100% {
-      transform: scale(1) rotate(0deg);
-      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
-    }
-    50% {
-      transform: scale(1.1) rotate(180deg);
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-    }
-  }
 </style>
