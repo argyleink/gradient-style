@@ -36,6 +36,7 @@
   import Presets from './Presets.svelte'
 import Prism from './PrismJS.svelte'
 import GradientImportDialog from './GradientImportDialog.svelte'
+import AIGradientDialog from './AIGradientDialog.svelte'
 
   import Hint from './Hint.svelte'
 
@@ -47,6 +48,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   let svgicon
   let restoring = $state(true)
   let importRef
+  let aiDialogRef
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -233,6 +235,10 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   function openImport() {
     importRef?.show()
+  }
+  
+  function openAI() {
+    aiDialogRef?.open()
   }
 
   const gensyntax = {
@@ -555,6 +561,12 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <div class="menu-bar">
+        <button class="ai-button" onclick={() => openAI()} use:tooltip={{content: "Generate gradient with AI"}}>
+          <span class="sr-only">AI Generate</span>
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2L13.09 8.26L19 7L15.45 11.82L21.8 14L16 16.5L19.53 22L13.17 18.45L9 24L8.89 17.74L3 19L6.55 14.18L0.2 12L6 9.5L2.47 4L8.83 7.55L13 2Z"/>
+          </svg>
+        </button>
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
@@ -595,6 +607,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     </section>
   </contain-er>
   <GradientImportDialog bind:this={importRef} />
+  <AIGradientDialog bind:this={aiDialogRef} />
 </main>
 </div>
 
@@ -1085,5 +1098,56 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 
   .global-actions > select {
     position: absolute;
+  }
+  
+  .menu-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .ai-button {
+    position: relative;
+    inline-size: var(--size-7);
+    overflow: hidden;
+    border-radius: var(--radius-round);
+    padding-inline: 0;
+    aspect-ratio: 1;
+    border: none;
+    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .ai-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  }
+  
+  .ai-button:active {
+    transform: scale(0.95);
+  }
+  
+  .ai-button svg {
+    color: white;
+    width: 60%;
+    height: 60%;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    animation: sparkle 3s ease-in-out infinite;
+  }
+  
+  @keyframes sparkle {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+    50% {
+      transform: scale(1.1) rotate(180deg);
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
   }
 </style>
