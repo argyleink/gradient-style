@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import * as z from 'zod';
   import { gradient_type, gradient_space, gradient_stops } from '../store/gradient';
   import { linear_angle, linear_named_angle } from '../store/linear';
   import { radial_shape, radial_position, radial_named_position } from '../store/radial';
@@ -14,56 +15,35 @@
   let session = null;
   let modelAvailable = false;
   
-  // JSON Schema for gradient data
-  const gradientSchema = {
-    type: "object",
-    properties: {
-      gradient_type: {
-        type: "string",
-        enum: ["linear", "radial", "conic"]
-      },
-      gradient_space: {
-        type: "string",
-        enum: ["srgb", "srgb-linear", "lab", "oklab", "xyz", "xyz-d50", "xyz-d65", "hsl", "hwb", "lch", "oklch", "display-p3", "a98-rgb", "prophoto-rgb", "rec2020"]
-      },
-      gradient_stops: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            color: { type: "string" },
-            position: { type: "number", minimum: 0, maximum: 100 }
-          },
-          required: ["color", "position"]
-        },
-        minItems: 2
-      },
-      // Linear gradient specific
-      linear_angle: { type: "number" },
-      // Radial gradient specific
-      radial_shape: {
-        type: "string",
-        enum: ["circle", "ellipse"]
-      },
-      radial_position: {
-        type: "object",
-        properties: {
-          x: { type: "number", minimum: 0, maximum: 100 },
-          y: { type: "number", minimum: 0, maximum: 100 }
-        }
-      },
-      // Conic gradient specific
-      conic_angle: { type: "number" },
-      conic_position: {
-        type: "object",
-        properties: {
-          x: { type: "number", minimum: 0, maximum: 100 },
-          y: { type: "number", minimum: 0, maximum: 100 }
-        }
-      }
-    },
-    required: ["gradient_type", "gradient_stops"]
-  };
+  // Zod Schema for gradient data
+  const gradientZodSchema = z.object({
+    gradient_type: z.enum(["linear", "radial", "conic"]),
+    gradient_space: z.enum([
+      "srgb", "srgb-linear", "lab", "oklab", "xyz", "xyz-d50", "xyz-d65", 
+      "hsl", "hwb", "lch", "oklch", "display-p3", "a98-rgb", "prophoto-rgb", "rec2020"
+    ]),
+    gradient_stops: z.array(z.object({
+      color: z.string(),
+      position: z.number().min(0).max(100)
+    })).min(2),
+    // Linear gradient specific
+    linear_angle: z.number().optional(),
+    // Radial gradient specific
+    radial_shape: z.enum(["circle", "ellipse"]).optional(),
+    radial_position: z.object({
+      x: z.number().min(0).max(100).optional(),
+      y: z.number().min(0).max(100).optional()
+    }).optional(),
+    // Conic gradient specific
+    conic_angle: z.number().optional(),
+    conic_position: z.object({
+      x: z.number().min(0).max(100).optional(),
+      y: z.number().min(0).max(100).optional()
+    }).optional()
+  });
+
+  // Convert Zod schema to JSON Schema for AI model
+  const gradientSchema = z.toJSONSchema(gradientZodSchema);
   
   onMount(async () => {
     // Check if the Prompt API is available
