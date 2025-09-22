@@ -18,16 +18,23 @@
   let availability = 'unknown';
   
   // Zod Schema for gradient data
+  const stopItemSchema = z.object({
+    kind: z.literal('stop').optional(),
+    color: z.string(),
+    position: z.number().min(0).max(100)
+  })
+  const hintItemSchema = z.object({
+    kind: z.literal('hint'),
+    percentage: z.number().min(0).max(100)
+  })
   const gradientZodSchema = z.object({
     gradient_type: z.enum(["linear", "radial", "conic"]),
     gradient_space: z.enum([
       "srgb", "srgb-linear", "lab", "oklab", "xyz", "xyz-d50", "xyz-d65", 
       "hsl", "hwb", "lch", "oklch", "display-p3", "a98-rgb", "prophoto-rgb", "rec2020"
     ]),
-    gradient_stops: z.array(z.object({
-      color: z.string(),
-      position: z.number().min(0).max(100)
-    })).min(2),
+    // An ordered list mixing color stops and transition hints
+    gradient_stops: z.array(z.union([stopItemSchema, hintItemSchema])).min(2),
     // Linear gradient specific
     linear_angle: z.number().optional(),
     // Radial gradient specific
@@ -165,31 +172,34 @@
         gradient_space.set(gradientData.gradient_space);
       }
       
-      // Update gradient stops
+      // Update gradient stops (supports both color stops and transition hints)
       if (gradientData.gradient_stops && Array.isArray(gradientData.gradient_stops)) {
         // Import Color for color conversion
         const Color = (await import('colorjs.io')).default;
         
-        // Ensure stops have proper structure and convert colors to OKLCH
-        const formattedStops = gradientData.gradient_stops.map((/** @type {any} */ stop) => {
-          let oklchColor;
-          try {
-            // Convert any color format to OKLCH
-            const color = new Color(stop.color);
-            oklchColor = color.to('oklch').toString();
-          } catch (err) {
-            console.warn('Failed to convert color to OKLCH:', stop.color, err);
-            // Fallback to a default OKLCH color if conversion fails
-            oklchColor = 'oklch(70% 0.15 180)'; // Default blue-ish color
+        const formattedStops = [];
+        for (const item of gradientData.gradient_stops) {
+          if (item && item.kind === 'hint') {
+            // Transition hint between adjacent color stops
+            formattedStops.push({ kind: 'hint', percentage: item.percentage });
+          } else if (item) {
+            // Treat as a color stop (with or without explicit kind)
+            let oklchColor;
+            try {
+              const color = new Color(item.color);
+              oklchColor = color.to('oklch').toString();
+            } catch (err) {
+              console.warn('Failed to convert color to OKLCH:', item.color, err);
+              oklchColor = 'oklch(70% 0.15 180)';
+            }
+            formattedStops.push({
+              kind: 'stop',
+              color: oklchColor,
+              position1: item.position,
+              position2: item.position,
+            });
           }
-          
-          return {
-            color: oklchColor,
-            position1: stop.position,
-            position2: stop.position,
-            kind: 'stop'
-          };
-        });
+        }
         gradient_stops.set(formattedStops);
       }
     
@@ -308,18 +318,17 @@
 
 <style>
   .ai-dialog {
-    border: 1px solid var(--gray-4);
-    border-radius: 8px;
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-3);
     padding: 0;
-    width: 90vw;
-    max-width: 500px;
-    background: var(--gray-1);
-    color: var(--gray-12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    inline-size: 90vw;
+    max-inline-size: var(--size-content-2);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-6);
   }
   
   .ai-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
+    background: radial-gradient(circle, #0001, #000e);
   }
   
   .dialog-content {
@@ -334,12 +343,11 @@
   
   .description {
     margin: 0 0 1rem 0;
-    color: var(--gray-11);
   }
   
   .examples {
-    background: var(--gray-2);
-    border: 1px solid var(--gray-4);
+    background: var(--surface-2);
+    border: 1px solid var(--surface-3);
     border-radius: 6px;
     padding: 0.75rem;
     margin-bottom: 1rem;
@@ -349,13 +357,11 @@
     margin: 0 0 0.5rem 0;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--gray-11);
   }
   
   .examples ul {
     margin: 0;
     padding-left: 1.25rem;
-    color: var(--gray-10);
     font-size: 0.875rem;
   }
   
@@ -366,14 +372,12 @@
   textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--gray-6);
     border-radius: 6px;
-    background: var(--gray-0);
-    color: var(--gray-12);
+    background: var(--surface-3);
     font-family: inherit;
     font-size: 0.95rem;
     resize: vertical;
-    min-height: 100px;
+    min-height: 3lh;
   }
   
   textarea:focus {
@@ -385,6 +389,10 @@
   textarea:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  button[type="submit"] {
+    --link: light-dark(var(--indigo-6), var(--indigo-3));
   }
   
   .error-message {
@@ -401,39 +409,6 @@
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1.5rem;
-  }
-  
-  button {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--gray-6);
-    border-radius: 6px;
-    background: var(--gray-0);
-    color: var(--gray-12);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  
-  button:hover:not(:disabled) {
-    background: var(--gray-2);
-    border-color: var(--gray-7);
-  }
-  
-  button.primary {
-    background: var(--blue-9);
-    color: white;
-    border-color: var(--blue-9);
-  }
-  
-  button.primary:hover:not(:disabled) {
-    background: var(--blue-10);
-    border-color: var(--blue-10);
-  }
-  
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
   
   .loading {
