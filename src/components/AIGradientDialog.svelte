@@ -14,6 +14,8 @@
   /** @type {any} */
   let session = null;
   let modelAvailable = false;
+  /** @type {'unknown' | 'unavailable' | 'downloadable' | 'downloading' | 'available'} */
+  let availability = 'unknown';
   
   // Zod Schema for gradient data
   const gradientZodSchema = z.object({
@@ -51,40 +53,13 @@
     if ('LanguageModel' in window) {
       try {
         // @ts-ignore - LanguageModel is a new Chrome API
-        const availability = await window.LanguageModel.availability();
-        console.log('AI Model availability:', availability);
-        
-        if (availability !== 'unavailable') {
-          modelAvailable = true;
-          
-          // If model needs to be downloaded, we can show progress
-          if (availability === 'downloadable') {
-            loading = true;
-            error = 'AI model is being downloaded. This may take a few minutes...';
-            
-            // @ts-ignore - LanguageModel is a new Chrome API
-            session = await window.LanguageModel.create({
-          monitor(m) {
-            m.addEventListener('downloadprogress', (/** @type {any} */ e) => {
-                  const progress = Math.round(e.loaded * 100);
-                  error = `Downloading AI model: ${progress}%`;
-                });
-              }
-            });
-            
-            error = '';
-            loading = false;
-          } else if (availability === 'available') {
-            // Model is ready to use
-            // @ts-ignore - LanguageModel is a new Chrome API
-            session = await window.LanguageModel.create();
-          }
-        } else {
-          error = 'AI model is not available. Please check Chrome settings and hardware requirements.';
-        }
+        const avail = await window.LanguageModel.availability();
+        console.log('AI Model availability:', avail);
+        availability = /** @type {any} */ (avail);
+        modelAvailable = avail !== 'unavailable';
       } catch (err) {
-        console.error('Error initializing AI:', err);
-        error = 'Failed to initialize AI model. Make sure you are using Chrome 138+ with the Prompt API enabled.';
+        console.error('Error checking AI availability:', err);
+        error = 'Failed to check AI availability. Make sure you are using Chrome 138+ with the Prompt API enabled.';
       }
     } else {
       error = 'The Prompt API is not available in your browser. Please use Chrome 138+ and enable the API.';
@@ -105,22 +80,65 @@
     }
   }
   
+  async function ensureSession() {
+    if (session) return;
+    // @ts-ignore - LanguageModel is a new Chrome API
+    if (!('LanguageModel' in window)) {
+      throw new Error('The Prompt API is not available in your browser. Please use Chrome 138+ and enable the API.');
+    }
+    try {
+      // @ts-ignore - LanguageModel is a new Chrome API
+      const avail = availability === 'unknown' ? await window.LanguageModel.availability() : availability;
+      availability = /** @type {any} */ (avail);
+      if (avail === 'unavailable') {
+        throw new Error('AI model is not available. Please check Chrome settings and hardware requirements.');
+      }
+      if (avail === 'downloadable' || avail === 'downloading') {
+        loading = true;
+        error = 'Preparing AI model...';
+        // @ts-ignore - LanguageModel is a new Chrome API
+        session = await window.LanguageModel.create({
+          monitor(m) {
+            m.addEventListener('downloadprogress', (/** @type {any} */ e) => {
+              const progress = Math.round(e.loaded * 100);
+              error = `Downloading AI model: ${progress}%`;
+            });
+          }
+        });
+        error = '';
+        loading = false;
+      } else {
+        // available
+        loading = true;
+        // @ts-ignore - LanguageModel is a new Chrome API
+        session = await window.LanguageModel.create();
+        loading = false;
+      }
+    } catch (err) {
+      console.error('Error preparing AI model:', err);
+      throw err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  
   async function generateGradient() {
-    if (!userPrompt.trim() || !session) return;
+    if (!userPrompt.trim()) return;
     
     loading = true;
     error = '';
     
     try {
+      // Lazily create session on first use (user gesture), including downloads
+      await ensureSession();
+      
       // Create a detailed prompt for the AI
       const systemPrompt = `You are a CSS gradient generator. Convert the user's description into gradient data.
       
       Guidelines:
-      - For color descriptions like "sunset", "ocean", "forest", use appropriate colors
+      - For color descriptions like \"sunset\", \"ocean\", \"forest\" use appropriate colors
       - Default to linear gradients unless the user specifies radial or conic
       - Use modern color spaces like oklch for vibrant gradients when appropriate
       - Position stops evenly if not specified
-      - For linear gradients, interpret directions like "left to right" as angle 90, "top to bottom" as 180
+      - For linear gradients, interpret directions like \"left to right\" as angle 90, \"top to bottom\" as 180
       - For radial gradients, default to ellipse shape centered
       - Return valid CSS color values (hex, rgb, hsl, oklch, etc.)
       
@@ -266,7 +284,7 @@
         <button 
           on:click={generateGradient} 
           disabled={loading || !userPrompt.trim()}
-          class="primary"
+          type="submit"
         >
           {#if loading}
             Generating...
