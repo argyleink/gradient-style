@@ -5,6 +5,7 @@
   import { linear_angle, linear_named_angle } from '../store/linear';
   import { radial_shape, radial_position, radial_named_position } from '../store/radial';
   import { conic_angle, conic_position, conic_named_position } from '../store/conic';
+  import { updateStops } from '../utils/stops.ts';
   
   /** @type {HTMLDialogElement | null} */
   let dialog = null;
@@ -18,9 +19,13 @@
   let availability = 'unknown';
   
   // Zod Schema for gradient data
+  const colorString = z.string().regex(
+    /^(#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|(?:oklch|oklab|lab|lch|hsl|hsla|hwb|rgb|rgba|color)\s*\()/i,
+    'color must be a valid CSS color string (hex or function)'
+  )
   const stopItemSchema = z.object({
     kind: z.literal('stop').optional(),
-    color: z.string(),
+    color: colorString,
     position: z.number().min(0).max(100)
   })
   const hintItemSchema = z.object({
@@ -36,7 +41,7 @@
     // An ordered list mixing color stops and transition hints
     gradient_stops: z.array(z.union([stopItemSchema, hintItemSchema])).min(2),
     // Linear gradient specific
-    linear_angle: z.number().optional(),
+    linear_angle: z.number().min(0).max(360).optional(),
     // Radial gradient specific
     radial_shape: z.enum(["circle", "ellipse"]).optional(),
     radial_position: z.object({
@@ -44,7 +49,7 @@
       y: z.number().min(0).max(100).optional()
     }).optional(),
     // Conic gradient specific
-    conic_angle: z.number().optional(),
+    conic_angle: z.number().min(0).max(360).optional(),
     conic_position: z.object({
       x: z.number().min(0).max(100).optional(),
       y: z.number().min(0).max(100).optional()
@@ -137,6 +142,29 @@
       // Lazily create session on first use (user gesture), including downloads
       await ensureSession();
       
+      // Helpers
+      const clamp01 = (n) => Math.max(0, Math.min(100, Number(n)));
+      const clamp360 = (n) => {
+        const v = Number(n);
+        if (!Number.isFinite(v)) return 0;
+        let x = v % 360;
+        if (x < 0) x += 360;
+        return x;
+      };
+      function sanitizeJsonLike(text) {
+        if (typeof text !== 'string') return text;
+        // Strip code fences and surrounding text, keep the outermost JSON object/array
+        const start = text.indexOf('{');
+        const startArr = text.indexOf('[');
+        const s = start >= 0 && (startArr < 0 || start < startArr) ? start : startArr;
+        if (s < 0) return text.trim();
+        let end = text.lastIndexOf('}');
+        let endArr = text.lastIndexOf(']');
+        const e = end >= 0 && (endArr < 0 || end > endArr) ? end : endArr;
+        if (e < 0) return text.slice(s).trim();
+        return text.slice(s, e + 1).trim();
+      }
+      
       // Create a detailed prompt for the AI
       const systemPrompt = `You are a CSS gradient generator. Convert the user's description into gradient data.
       
@@ -145,19 +173,42 @@
       - Default to linear gradients unless the user specifies radial or conic
       - Use modern color spaces like oklch for vibrant gradients when appropriate
       - Position stops evenly if not specified
+      - Interleave transition hints between adjacent color stops (as {\"kind\":\"hint\",\"percentage\":number})
       - For linear gradients, interpret directions like \"left to right\" as angle 90, \"top to bottom\" as 180
       - For radial gradients, default to ellipse shape centered
       - Return valid CSS color values (hex, rgb, hsl, oklch, etc.)
+      - Allowed positions and percentages are 0–100 inclusive
+      - Allowed angles are 0–360 inclusive
       
       User request: ${userPrompt}`;
       
-      // Use the Prompt API with structured output
-      const result = await session.prompt(systemPrompt, {
-        responseConstraint: gradientSchema
-      });
+      let result;
+      try {
+        // Try structured output first
+        result = await session.prompt(systemPrompt, {
+          responseConstraint: gradientSchema
+        });
+      } catch (err) {
+        // Fallback: request plain JSON without constraint to avoid UnknownError
+        console.warn('Structured Prompt failed, retrying without constraint:', err);
+        const fallbackPrompt = systemPrompt + `\n\nOutput ONLY JSON with this exact shape (no markdown fences, no extra text):\n{\n  \"gradient_type\": \"linear|radial|conic\",\n  \"gradient_space\": \"oklab|oklch|srgb|display-p3|...\",\n  \"gradient_stops\": [\n    {\"kind\":\"stop\",\"color\":\"...\",\"position\":number},\n    {\"kind\":\"hint\",\"percentage\":number},\n    ...\n  ],\n  \"linear_angle\": number (optional),\n  \"radial_shape\": \"circle|ellipse\" (optional),\n  \"radial_position\": {\"x\":number,\"y\":number} (optional),\n  \"conic_angle\": number (optional),\n  \"conic_position\": {\"x\":number,\"y\":number} (optional)\n}`;
+        result = await session.prompt(fallbackPrompt);
+      }
       
-      // Parse the JSON response
-      const gradientData = JSON.parse(result);
+      // Parse the response (could be an object or a string)
+      let gradientData = null;
+      if (typeof result === 'string') {
+        const cleaned = sanitizeJsonLike(result);
+        try {
+          gradientData = JSON.parse(cleaned);
+        } catch (e) {
+          throw new Error('AI returned non-JSON output. Please try again.');
+        }
+      } else if (result && typeof result === 'object') {
+        gradientData = result;
+      } else {
+        throw new Error('Unexpected AI response format.');
+      }
       // console.log('Generated gradient data:', gradientData);
       
       // Update stores directly with the AI-generated gradient data
@@ -177,35 +228,64 @@
         // Import Color for color conversion
         const Color = (await import('colorjs.io')).default;
         
-        const formattedStops = [];
-        for (const item of gradientData.gradient_stops) {
-          if (item && item.kind === 'hint') {
-            // Transition hint between adjacent color stops
-            formattedStops.push({ kind: 'hint', percentage: item.percentage });
-          } else if (item) {
+        
+        // First pass: normalize items, drop invalid colors, clamp positions
+        const normalized = [];
+        for (const raw of gradientData.gradient_stops) {
+          if (!raw) continue;
+          if (raw.kind === 'hint') {
+            // Clamp to [0, 100]
+            const pct = clamp01(raw.percentage);
+            normalized.push({ kind: 'hint', percentage: pct });
+          } else {
             // Treat as a color stop (with or without explicit kind)
-            let oklchColor;
             try {
-              const color = new Color(item.color);
-              oklchColor = color.to('oklch').toString();
+              const color = new Color(raw.color);
+              const oklchColor = color.to('oklch').toString();
+              const pos = clamp01(raw.position);
+              normalized.push({ kind: 'stop', color: oklchColor, position1: pos, position2: pos });
             } catch (err) {
-              console.warn('Failed to convert color to OKLCH:', item.color, err);
-              oklchColor = 'oklch(70% 0.15 180)';
+              console.warn('Dropping invalid color from AI output:', raw.color, err);
             }
-            formattedStops.push({
-              kind: 'stop',
-              color: oklchColor,
-              position1: item.position,
-              position2: item.position,
-            });
           }
         }
-        gradient_stops.set(formattedStops);
+        
+        // Ensure we start and end with a color stop and have at least two stops
+        const stopsOnly = normalized.filter((i) => i.kind === 'stop');
+        if (stopsOnly.length < 2) {
+          // Fallback to a simple gradient if AI output was unusable
+          gradient_stops.set([
+            { kind: 'stop', color: 'oklch(80% 0.2 20)', position1: 0, position2: 0 },
+            { kind: 'hint', percentage: 50 },
+            { kind: 'stop', color: 'oklch(60% 0.2 200)', position1: 100, position2: 100 },
+          ]);
+          return;
+        }
+        
+        // Second pass: interleave hints between each adjacent pair of stops if missing
+        const interleaved = [];
+        for (let i = 0; i < normalized.length; i++) {
+          const cur = normalized[i];
+          interleaved.push(cur);
+          if (cur.kind === 'stop') {
+            const next = normalized[i + 1];
+            const hasNextStop = normalized.slice(i + 1).find((x) => x.kind === 'stop');
+            const nextIsHint = next?.kind === 'hint';
+            // Insert a hint if the next item is not a hint but there is another stop later
+            if (!nextIsHint && hasNextStop) {
+              interleaved.push({ kind: 'hint', percentage: null });
+            }
+          }
+        }
+        
+        // Final normalization using existing utility to compute auto positions and default hint percentages
+        const finalList = updateStops(interleaved);
+        gradient_stops.set(finalList);
       }
     
       // Handle linear gradient properties
       if (gradientData.gradient_type === 'linear' && gradientData.linear_angle !== undefined) {
-        linear_angle.set(String(gradientData.linear_angle));
+        linear_angle.set(String(clamp360(gradientData.linear_angle)));
         linear_named_angle.set('--'); // Set to custom angle indicator
       }
       
@@ -215,7 +295,9 @@
           radial_shape.set(gradientData.radial_shape);
         }
         if (gradientData.radial_position) {
-          radial_position.set(gradientData.radial_position);
+          const rx = gradientData.radial_position.x;
+          const ry = gradientData.radial_position.y;
+          radial_position.set({ x: rx == null ? null : clamp01(rx), y: ry == null ? null : clamp01(ry) });
           radial_named_position.set('--'); // Set to custom position indicator
         } else {
           // Default to center if no position specified
@@ -227,10 +309,12 @@
       // Handle conic gradient properties
       if (gradientData.gradient_type === 'conic') {
         if (gradientData.conic_angle !== undefined) {
-          conic_angle.set(String(gradientData.conic_angle));
+          conic_angle.set(String(clamp360(gradientData.conic_angle)));
         }
         if (gradientData.conic_position) {
-          conic_position.set(gradientData.conic_position);
+          const cx = gradientData.conic_position.x;
+          const cy = gradientData.conic_position.y;
+          conic_position.set({ x: cx == null ? null : clamp01(cx), y: cy == null ? null : clamp01(cy) });
           conic_named_position.set('--'); // Set to custom position indicator
         } else {
           // Default to center if no position specified
