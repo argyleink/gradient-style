@@ -1102,21 +1102,14 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   }
   
   .ai-button {
-    position: relative;
-    inline-size: var(--size-7);
-    overflow: hidden;
+    inline-size: var(--size-6);
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
-    border: none;
-    box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-image: url(https://api.iconify.design/material-symbols:auto-awesome.svg?color=%23ffffff);
+    background-image: url(https://api.iconify.design/material-symbols:auto-awesome.svg?color=%23777777);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 75%;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-size: 50%;
   }
   
   .ai-button:hover {
