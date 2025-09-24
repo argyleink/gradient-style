@@ -939,14 +939,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       margin: 0;
   }
 
-  .end-of-stops {
+.end-of-stops {
     place-content: end;
     padding: var(--size-3);
     margin-block-end: var(--size-fluid-2);
     text-align: center;
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
   }
 
   .gradient-logo {
