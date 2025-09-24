@@ -12,15 +12,27 @@ export function updateStops(stops) {
       }
       else if (!stop._manual) {
         // Treat null/undefined as unset; 0 is a valid value and must be preserved
-        const p1Unset = (stop.position1 == null) || (stop.auto != null && String(stop.position1) == String(stop.auto))
+        const prevAuto = stop.auto
+        const p1Unset = (stop.position1 == null) || (prevAuto != null && String(stop.position1) == String(prevAuto))
         const p2Unset = (stop.position2 == null)
+
+        // Detect whether position2 was effectively "linked" to position1 or to the prior auto value
+        const hadLinked = (!p2Unset) && (
+          String(stop.position2) === String(stop.position1) ||
+          (prevAuto != null && String(stop.position2) === String(prevAuto))
+        )
 
         // Only assign auto for position1 when it is unset or previously auto-managed
         if (p1Unset) stop.position1 = autoVal
 
         // Only assign a second position when it is truly unset. Never override an existing value,
         // even if it equals the auto position, to preserve explicit spans from presets/URL restores.
-        if (p2Unset) stop.position2 = p1Unset ? autoVal : stop.position1
+        if (p2Unset) {
+          stop.position2 = p1Unset ? autoVal : stop.position1
+        } else if (hadLinked) {
+          // Maintain linkage when redistributing: keep position2 equal to position1
+          stop.position2 = (stop.position1 != null) ? stop.position1 : autoVal
+        }
       }
       // Clear the manual flag after one normalization pass so future edits behave normally
       if (stop._manual) delete stop._manual
