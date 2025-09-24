@@ -71,68 +71,116 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
     return str + '%'
   }
 
+  function asNumberPercent(p: any): number | null {
+    if (p == null) return null
+    // Accept numbers, unitless numeric strings, or percent strings
+    if (typeof p === 'number' && !Number.isNaN(p)) return p
+    const str = String(p).trim()
+    if (/^[-+]?\d*\.?\d+%$/.test(str)) return Number(str.replace('%',''))
+    if (/^[-+]?\d*\.?\d+$/.test(str)) return Number(str)
+    return null
+  }
+
   function isPctZero(p: any) {
-    if (p == null) return false
-    const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
-    return !!(m && Number(m[1]) === 0)
+    const n = asNumberPercent(p)
+    return n != null && Number(n) === 0
   }
 
   function isPctHundred(p: any) {
-    if (p == null) return false
-    const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
-    return !!(m && Number(m[1]) === 100)
+    const n = asNumberPercent(p)
+    return n != null && Number(n) === 100
   }
 
   function isPctFifty(p: any) {
-    if (p == null) return false
-    const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
-    return !!(m && Number(m[1]) === 50)
+    const n = asNumberPercent(p)
+    return n != null && Number(n) === 50
   }
 
-  return stops
-    .map((s, i) => {
-      if (s.kind === 'stop') {
-        let p1 = s.position1
-        let p2 = s.position2
+  type StopOut = { kind: 'stop'; color: string; posA?: string | null; posB?: string | null } | { kind: 'hint'; text: string }
+  const out: StopOut[] = []
 
-        // If first position equals computed auto position, omit it (keep explicit second positions)
-        if (p1 != null && s.auto != null && String(p1) == String(s.auto)) p1 = null
+  for (let i = 0; i < stops.length; i++) {
+    const s = stops[i]
+    if (!s) continue
+    if (s.kind === 'stop') {
+      let p1: any = s.position1
+      let p2: any = s.position2
 
-        // Omit default endpoints
-        if (i === firstStopIdx && isPctZero(p1)) p1 = null
-        if (i === lastStopIdx && isPctHundred(p2)) p2 = null
+      // If positions equal computed auto position, omit them
+      if (p1 != null && s.auto != null && String(p1) == String(s.auto)) p1 = null
+      if (p2 != null && s.auto != null && String(p2) == String(s.auto)) p2 = null
 
-        if (p1 != null && p2 != null) {
-          const a = fmtPos(p1)
-          const b = fmtPos(p2)
-          if (a !== b) return maybeConvertColor(s.color, convert_colors) + ' ' + a + ' ' + b
-          return maybeConvertColor(s.color, convert_colors) + ' ' + a
-        }
-
-        if (p1 == null && p2 != null) {
-          const b = fmtPos(p2)
-          return maybeConvertColor(s.color, convert_colors) + ' ' + b
-        }
-
-        if (p1 != null && p2 == null) {
-          const a = fmtPos(p1)
-          return maybeConvertColor(s.color, convert_colors) + ' ' + a
-        }
-
-        return maybeConvertColor(s.color, convert_colors)
+      // Omit default endpoints regardless of whether value is in p1 or p2
+      if (i === firstStopIdx) {
+        if (isPctZero(p1)) p1 = null
+        if (isPctZero(p2) && p1 == null) p2 = null
       }
-      else if (s.kind === 'hint') {
-        // Omit default/auto hints (like 50%)
-        const pct = s.percentage
-        if (pct == null) return null
-        if (s.auto != null && String(pct) == String(s.auto)) return null
-        if (isPctFifty(pct)) return null
-        return pct + '%'
+      if (i === lastStopIdx) {
+        if (isPctHundred(p2)) p2 = null
+        if (isPctHundred(p1) && p2 == null) p1 = null
       }
-      return null
-    })
-    .filter(Boolean)
-    .join(new_lines === true ? ',\n      ' : ', ')
+
+      const colorStr = maybeConvertColor(s.color, convert_colors)
+
+      // Normalize: if both positions present and equal, reduce to one
+      if (p1 != null && p2 != null) {
+        const a = fmtPos(p1)
+        const b = fmtPos(p2)
+        if (a === b) {
+          out.push({ kind: 'stop', color: colorStr, posA: a })
+        } else {
+          out.push({ kind: 'stop', color: colorStr, posA: a, posB: b })
+        }
+        continue
+      }
+
+      if (p1 == null && p2 != null) {
+        out.push({ kind: 'stop', color: colorStr, posA: fmtPos(p2) })
+        continue
+      }
+
+      if (p1 != null && p2 == null) {
+        out.push({ kind: 'stop', color: colorStr, posA: fmtPos(p1) })
+        continue
+      }
+
+      out.push({ kind: 'stop', color: colorStr })
+    }
+    else if (s.kind === 'hint') {
+      // Omit default/auto hints (like 50%)
+      const pct = s.percentage
+      if (pct == null) continue
+      if (s.auto != null && String(pct) == String(s.auto)) continue
+      if (isPctFifty(pct)) continue
+      out.push({ kind: 'hint', text: pct + '%' })
+    }
+  }
+
+  // Decide whether to use multi-line formatting based on color token lengths
+  const colorStops = out.filter((x): x is Extract<StopOut, {kind: 'stop'}> => x.kind === 'stop')
+  const maxColorLen = colorStops.reduce((m, s) => Math.max(m, s.color.length), 0)
+  const hasLongColor = maxColorLen >= 20 || colorStops.some(s => /\(|\s/.test(s.color))
+  const useNewLines = new_lines === true || (new_lines !== false && hasLongColor)
+
+  if (!useNewLines) {
+    return out.map(s => {
+      if (s.kind === 'hint') return s.text
+      const parts = [s.color]
+      if (s.posA) parts.push(s.posA)
+      if (s.posB) parts.push(s.posB)
+      return parts.join(' ')
+    }).join(', ')
+  }
+
+  // Multi-line with aligned positions
+  return out.map(s => {
+    if (s.kind === 'hint') return s.text
+    const pad = s.posA || s.posB ? ' '.repeat(Math.max(1, maxColorLen - s.color.length + 1)) : ''
+    const parts = [s.color]
+    if (s.posA) parts.push(pad + s.posA)
+    if (s.posB) parts.push(' ' + s.posB) // second position separated by single space
+    return parts.join('')
+  }).join(',\n    ')
 }
 
 function linearAngleToken(linear: LayerSnapshot['linear']) {
@@ -154,20 +202,20 @@ function linearAngleToken(linear: LayerSnapshot['linear']) {
 function modernString(layer: LayerSnapshot) {
   if (layer.type === 'linear') {
     const tokens = [linearAngleToken(layer.linear), spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
-    return `linear-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+return `linear-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops)}\n  )`
   }
   else if (layer.type === 'radial') {
     const pos = radialPositionToString(layer.radial)
     const posPart = pos && pos !== 'center' ? 'at ' + pos : ''
     const tokens = [layer.radial.size, layer.radial.shape, posPart, spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
-    return `radial-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+return `radial-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops)}\n  )`
   }
   else {
     const pos = conicPositionToString(layer.conic)
     const posPart = pos && pos !== 'center' ? 'at ' + pos : ''
     const fromPart = (Number(layer.conic.angle) || 0) % 360 === 0 ? '' : `from ${layer.conic.angle}deg`
     const tokens = [fromPart, posPart, spaceToString(layer.space, layer.interpolation)].filter(Boolean).join(' ')
-    return `conic-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops, { new_lines: false })}\n  )`
+return `conic-gradient(\n    ${tokens},\n    ${stopsToStrings(layer.stops)}\n  )`
   }
 }
 
@@ -175,18 +223,18 @@ function classicString(layer: LayerSnapshot) {
   if (layer.type === 'linear') {
     const angleToken = linearAngleToken(layer.linear)
     const header = angleToken ? angleToken + ', ' : ''
-    return `linear-gradient(${header}${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
+return `linear-gradient(${header}${stopsToStrings(layer.stops, { convert_colors: true })})`
   }
   else if (layer.type === 'radial') {
     const pos = radialPositionToString(layer.radial)
     const posPart = pos && pos !== 'center' ? ' at ' + pos : ''
-    return `radial-gradient(${layer.radial.size} ${layer.radial.shape}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
+return `radial-gradient(${layer.radial.size} ${layer.radial.shape}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true })})`
   }
   else {
     const pos = conicPositionToString(layer.conic)
     const posPart = pos && pos !== 'center' ? ' at ' + pos : ''
     const fromPart = (Number(layer.conic.angle) || 0) % 360 === 0 ? '' : `from ${layer.conic.angle}deg `
-    return `conic-gradient(${fromPart.trim()}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true, new_lines: false })})`
+return `conic-gradient(${fromPart.trim()}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true })})`
   }
 }
 
