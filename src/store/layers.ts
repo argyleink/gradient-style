@@ -263,7 +263,7 @@ export function defaultLayer(): GradientLayer {
       { kind: 'hint', auto: '50', percentage: '50' },
       { kind: 'stop', color: '#fff', auto: '100', position1: '100', position2: '100' },
     ],
-    linear: { named_angle: 'to right', angle: null },
+    linear: { named_angle: 'to right', angle: '90' },
     radial: { shape: 'circle', size: 'farthest-corner', named_position: 'center', position: { x: null, y: null } },
     conic: { angle: '0', named_position: 'center', position: { x: null, y: null } },
   }

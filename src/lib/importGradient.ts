@@ -21,6 +21,7 @@ function toDegreesString(valueWithUnit: string): string {
     // assume degrees if unitless numeric
     deg = parseFloat(v)
   }
+  if (isNaN(deg)) return '0'
   // format: trim insignificant decimals
   const fixed = deg.toFixed(4)
   return String(parseFloat(fixed))
@@ -43,11 +44,16 @@ export function applyParsedToStores(parsed: ParsedGradient) {
 
   if (parsed.type === 'linear') {
     if (parsed.linear?.angleKeyword) {
+      // Just set the named angle - the store's subscriber will automatically
+      // sync the numeric angle based on the nameToDeg mapping
       linear_named_angle.set(parsed.linear.angleKeyword)
-      linear_angle.set(null)
     } else if (parsed.linear?.angleDeg) {
+      // For numeric angles, set the angle value
+      // The store will determine if it matches a named direction
       linear_angle.set(toDegreesString(parsed.linear.angleDeg))
-      linear_named_angle.set('--')
+    } else {
+      // No angle specified, use default "to bottom" (180deg)
+      linear_named_angle.set('to bottom')
     }
   } else if (parsed.type === 'radial') {
     radial_shape.set(parsed.radial?.shape ?? 'circle')
@@ -71,11 +77,28 @@ export function applyParsedToStores(parsed: ParsedGradient) {
     }
   }
 
+  // Normalize position values: strip % suffix to get numeric strings
+  const normalizedStops = (parsed.stops as any[]).map(s => {
+    if (s.kind === 'stop') {
+      return {
+        ...s,
+        position1: s.position1 ? String(s.position1).replace(/%$/, '') : null,
+        position2: s.position2 ? String(s.position2).replace(/%$/, '') : null,
+      }
+    } else if (s.kind === 'hint') {
+      return {
+        ...s,
+        percentage: s.percentage ? String(s.percentage).replace(/%$/, '') : null,
+      }
+    }
+    return s
+  })
+
   // Ensure a hint exists between each adjacent pair of color stops when none were provided
-  const hasAnyHints = (parsed.stops as any[]).some(s => s.kind === 'hint')
-  let stopsWithHints = parsed.stops as any[]
+  const hasAnyHints = normalizedStops.some(s => s.kind === 'hint')
+  let stopsWithHints = normalizedStops
   if (!hasAnyHints) {
-    const colors = (parsed.stops as any[]).filter(s => s.kind === 'stop')
+    const colors = normalizedStops.filter(s => s.kind === 'stop')
     const rebuilt: any[] = []
     colors.forEach((st, idx) => {
       rebuilt.push({ ...st })

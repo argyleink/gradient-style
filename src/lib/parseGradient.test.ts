@@ -19,6 +19,13 @@ const valid = [
   'conic-gradient(from 0deg at 0% 100% in oklab,#fff, 2%, #f00 0%, 8%, #fff 0%, 13%, #f00 0%, 18%, #fff 0%, 21%, #f00 0%, 24%, #fff 0%)',
   'linear-gradient(to right in oklab,#0ff 12%, #111 0% 24%, #ff0 0% 36%, #111 0% 48%, #f0f 0% 60%, #111 0% 72%, #0ff 0%, #111 0% 100%)',
   'radial-gradient(farthest-corner circle at 0% 0% in oklch,oklch(95% .25 160), 26%, oklch(75% .5 180) 0%, 46%, oklch(75% .5 210) 0%, 60%, oklch(75% .5 230) 0%, 82%, oklch(75% .5 260) 0%)',
+  // Multi-line gradient with semicolon and directional keyword
+  `linear-gradient(
+    to right in oklab,
+    oklch(70% 0.5 340),
+    oklch(80% 0.3 89)  64%,
+    oklch(90% 0.5 200)
+  );`,
 ]
 
 const invalid = [
@@ -63,6 +70,35 @@ describe('parseGradient', () => {
     expect(stopsB[0].position2).toBeNull()
     expect(stopsB[1].position1).toBeNull()
     expect(stopsB[1].position2).toBeNull()
+  })
+
+  it('strips trailing semicolons and correctly parses directional keywords', () => {
+    const withSemi = parseGradient('linear-gradient(to right, red, blue);')
+    expect(withSemi.type).toBe('linear')
+    expect(withSemi.linear?.angleKeyword).toBe('to right')
+    expect(withSemi.stops.length).toBeGreaterThanOrEqual(2)
+
+    const multiline = parseGradient(`linear-gradient(
+      to right in oklab,
+      oklch(70% 0.5 340),
+      oklch(80% 0.3 89) 64%,
+      oklch(90% 0.5 200)
+    );`)
+    expect(multiline.type).toBe('linear')
+    expect(multiline.linear?.angleKeyword).toBe('to right')
+    expect(multiline.space).toBe('oklab')
+    expect(multiline.stops.length).toBe(3)
+  })
+
+  it('correctly parses all directional keywords', () => {
+    const keywords = [
+      'to top', 'to top right', 'to right', 'to bottom right',
+      'to bottom', 'to bottom left', 'to left', 'to top left'
+    ]
+    keywords.forEach(kw => {
+      const parsed = parseGradient(`linear-gradient(${kw}, red, blue)`)
+      expect(parsed.linear?.angleKeyword).toBe(kw)
+    })
   })
 })
 

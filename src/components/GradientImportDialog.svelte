@@ -93,7 +93,7 @@
           inputId={inputId}
           bind:this={textareaEl}
         />
-        <ImportActions {canImport} primaryType="submit" on:cancel={close} on:import={onImportClick} />
+        <ImportActions {canImport} primaryType="submit" on:cancel={close} />
       </form>
     </section>
   </dialog>

@@ -87,8 +87,10 @@ function innerContent(input: string): string {
 }
 
 export function parseGradient(input: string): ParsedGradient {
-  const type = classifyFunction(input)
-  const body = innerContent(input)
+  // Strip trailing semicolons that may be present when copying from CSS rules
+  const cleanedInput = input.trim().replace(/;+$/, '')
+  const type = classifyFunction(cleanedInput)
+  const body = innerContent(cleanedInput)
 
   // split by top-level commas
   const segments = splitTopLevel(body, ',')
@@ -156,9 +158,9 @@ export function parseGradient(input: string): ParsedGradient {
     if (/(circle|ellipse|closest-|farthest-| at )/.test(lowerPrelude)) {
       throw new ParseError('Invalid radial/conic tokens in linear-gradient prelude')
     }
-    // angle keyword
+    // angle keyword - match "to <direction>" patterns
     const kw = prelude.match(/\bto\s+(top|bottom|left|right)(?:\s+(left|right|top|bottom))?/i)
-    const ang = prelude.match(/([-+]?\d*\.?\d+(?:deg|turn|grad|rad))/i)
+    const ang = prelude.match(/(?:^|\s)([-+]?\d*\.?\d+(?:deg|turn|grad|rad))(?:\s|$)/i)
     linear = { angleKeyword: null, angleDeg: null }
     if (kw) {
       linear.angleKeyword = kw[0].toLowerCase()

@@ -7,7 +7,7 @@
 
 <div class="actions">
   <button type="reset" class="btn secondary" on:click={() => dispatch('cancel')}>Cancel</button>
-  <button type={primaryType} class="btn primary" disabled={!canImport} aria-disabled={!canImport} on:click={() => canImport && dispatch('import')}>Import</button>
+  <button type={primaryType} class="btn primary" disabled={!canImport} aria-disabled={!canImport}>Import</button>
 </div>
 
 <style>
