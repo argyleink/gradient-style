@@ -1,3 +1,5 @@
+import Color from 'colorjs.io'
+
 export type ParsedGradient = {
   type: 'linear' | 'radial' | 'conic'
   space?: string
@@ -51,27 +53,19 @@ function splitTopLevel(input: string, sep: string): string[] {
   return parts
 }
 
-const namedColors = new Set([
-  'red','blue','green','cyan','deeppink','rebeccapurple','white','black','lightblue',
-  '#fff','#000','#111','#222','#ff0','#0ff','#f0f'
-])
-
-function isColorFunctionName(name: string): boolean {
-  return /^(rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color)$/i.test(name)
-}
-
 function isColorToken(token: string): boolean {
   const t = token.trim()
   if (!t) return false
-  if (t.startsWith('#')) {
-    const hex = t.slice(1)
-    return [3,4,6,8].includes(hex.length) && /^[0-9a-fA-F]+$/.test(hex)
+  try {
+    // colorjs.io understands named colors, hex, rgb/hsl/hwb, lab/lch, oklab/oklch, and color() spaces
+    // If this succeeds, it's a valid color token for our purposes
+    // Note: This parse is tolerant and safe for validation only
+    // eslint-disable-next-line no-new
+    new Color(t)
+    return true
+  } catch {
+    return false
   }
-  if (namedColors.has(t.toLowerCase())) return true
-  // function-like color
-  const m = t.match(/^([a-zA-Z][a-zA-Z0-9-]*)\(/)
-  if (m) return isColorFunctionName(m[1])
-  return false
 }
 
 function classifyFunction(input: string): 'linear'|'radial'|'conic' {
@@ -257,8 +251,8 @@ export function parseGradient(input: string): ParsedGradient {
           posTokens.push(t)
         }
       }
-      if (posTokens[0]) pos1 = posTokens[0].replace(/%$/,'')
-      if (posTokens[1]) pos2 = posTokens[1].replace(/%$/,'')
+      if (posTokens[0]) pos1 = posTokens[0]
+      if (posTokens[1]) pos2 = posTokens[1]
     }
 
     stops.push({ kind: 'stop', color, auto: null, position1: pos1, position2: pos2 })

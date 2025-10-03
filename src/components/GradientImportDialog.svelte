@@ -2,24 +2,29 @@
   import { onMount } from 'svelte'
   import { parseGradient, ParseError } from '../lib/parseGradient'
   import { applyParsedToStores } from '../lib/importGradient'
+  import ImportEditor from './import/ImportEditor.svelte'
+  import ImportActions from './import/ImportActions.svelte'
 
   let open = false
-  export function show() {
-    open = true
-    // open dialog on next tick
-    queueMicrotask(() => {
-      dialog?.showModal()
-      // focus textarea for good UX
-      setTimeout(() => textareaEl?.focus(), 0)
-    })
-  }
-
   let dialog
-  let textareaEl
+  let textareaEl // will hold ImportEditor component instance for focusing via editor.focus()
+  const titleId = 'import-gradient-title'
+  const inputId = 'import-gradient-input'
+
+  // input state
   let gradientText = ''
   let error = ''
   let valid = false
   let timer
+
+  export function show() {
+    open = true
+    queueMicrotask(() => {
+      dialog?.showModal()
+      // focus the editor's textarea via its exposed focus method
+      setTimeout(() => textareaEl?.focus?.(), 0)
+    })
+  }
 
   function close() {
     dialog?.close()
@@ -33,21 +38,32 @@
     gradientText = e.currentTarget.value
     scheduleValidate()
   }
+  $: canImport = valid && gradientText.trim().length > 0
 
   function scheduleValidate() {
     clearTimeout(timer)
-    timer = setTimeout(validate, 150)
+    timer = setTimeout(validate, 200)
   }
 
   function validate() {
     try {
-      const parsed = parseGradient(gradientText)
+      parseGradient(gradientText)
       valid = true
       error = ''
-      // auto-import and close upon success
+    } catch (e) {
+      valid = false
+      error = e instanceof ParseError ? e.message : 'Invalid gradient'
+    }
+  }
+
+  function onImportClick() {
+    if (!valid || !gradientText.trim()) return
+    try {
+      const parsed = parseGradient(gradientText)
       applyParsedToStores(parsed)
       close()
     } catch (e) {
+      // Should be rare because button is disabled when invalid; keep safe
       valid = false
       error = e instanceof ParseError ? e.message : 'Invalid gradient'
     }
@@ -57,80 +73,110 @@
 </script>
 
 {#if open}
-  <dialog bind:this={dialog} class="import-dialog" on:close={close}>
-    <div class="panel">
-      <h2 class="title">Import CSS Gradient</h2>
-      <div class="editor {valid ? 'ok' : (error ? 'bad' : '')}">
-        <textarea
-          bind:this={textareaEl}
-          placeholder="Paste any valid CSS gradient..."
+  <dialog
+    bind:this={dialog}
+    class="push-z"
+    id="import-dialog"
+    aria-labelledby={titleId}
+    aria-describedby="import-error"
+    on:close={close}
+  >
+    <section>
+      <form on:submit|preventDefault={onImportClick} aria-labelledby={titleId}>
+        <h2 class="title" id={titleId}>Import CSS Gradient</h2>
+        <label class="sr-only" for={inputId}>CSS gradient string</label>
+        <ImportEditor
+          on:input={(e) => { gradientText = e.detail.value; scheduleValidate() }}
+          {error}
+          {valid}
           value={gradientText}
-          on:input={onInput}
-          spellcheck={false}
-          aria-invalid={!valid}
-          aria-describedby="import-error"
-          autofocus
+          inputId={inputId}
+          bind:this={textareaEl}
         />
-      </div>
-      {#if error}
-        <p id="import-error" role="alert" class="error">{error}</p>
-      {/if}
-      <div class="actions">
-        <button type="button" on:click={close}>Cancel</button>
-      </div>
-    </div>
+        <ImportActions {canImport} primaryType="submit" on:cancel={close} on:import={onImportClick} />
+      </form>
+    </section>
   </dialog>
 {/if}
 
 <style>
-  .import-dialog::backdrop {
-    background: color-mix(in oklab, black 60%, transparent);
+  @media (prefers-reduced-motion: no-preference) {
+    :global(body) {
+      transition:
+        scale .8s var(--ease-in-out-5),
+        border-radius .8s var(--ease-in-out-5);
+
+      &:has(.push-z[open]) {
+        scale: 95%;
+        border-radius: var(--radius-3);
+        overflow: hidden;
+      }
+    }
   }
-  .import-dialog {
-    border: none;
-    outline: none;
+
+  dialog.push-z {
+    --_duration: .5s;
+    background: none;
+    box-shadow: none;
     padding: 0;
-    max-width: none;
-    width: calc(100vw - (var(--size-5) * 2));
-    margin-inline: var(--size-5);
-    height: 100vh;
-    background: transparent;
+    overflow: clip;
+    transition:
+      display var(--_duration) allow-discrete,
+      overlay var(--_duration) allow-discrete;
+
+    &::backdrop {
+      transition: opacity var(--_duration) var(--ease-4);
+      opacity: 0;
+      background-color: light-dark(#0003, #0008);
+      cursor: zoom-out;
+    }
+
+    & > section {
+      > form {
+        display: grid; 
+      gap: var(--size-4);
+        }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: opacity .7s var(--ease-2);
+        opacity: 0;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        transition: translate .7s var(--ease-elastic-in-out-2) .0s;
+        translate: 0 100%;
+      }
+    }
+
+    &[open] {
+      &, &::backdrop { opacity: 1; }
+
+      & > section {
+        opacity: 1;
+        translate: 0;
+        @media (prefers-reduced-motion: no-preference) {
+          transition-delay: var(--_duration);
+          transition-timing-function: var(--ease-spring-2);
+        }
+      }
+    }
+
+    @starting-style {
+      &[open], &[open]::backdrop { opacity: 0; }
+      &[open] > section { opacity: 0; translate: 0 100%; }
+    }
+
+    section {
+      inline-size: min(var(--size-content-2), 80vw);
+      aspect-ratio: var(--ratio-landscape);
+      border-radius: var(--radius-3);
+      background: light-dark(white, var(--surface-2));
+      padding: var(--size-5);
+
+      @media (orientation: portrait) { aspect-ratio: var(--ratio-portrait); }
+    }
   }
-  .panel {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: var(--size-4);
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    padding: var(--size-7);
-    background: var(--surface-2, white);
-    color: var(--text-1, black);
-    border-radius: var(--radius-4);
-    box-shadow: var(--shadow-4);
-  }
-  .editor {
-    position: relative;
-  }
-  .title {
-    font-size: var(--font-size-2);
-    text-align: center;
-    margin: 0;
-  }
-  .editor textarea {
-    width: 100%;
-    height: 40vh;
-    resize: none;
-    background: var(--surface-1, var(--gray-9));
-    color: var(--text-1, black);
-    border: 1px solid var(--surface-3);
-    border-radius: var(--radius-3);
-    padding: var(--size-3);
-    font: 400 14px/1.6 var(--font-mono);
-    white-space: pre-wrap;
-  }
-  .editor.ok textarea { border-color: var(--green-6); }
-  .editor.bad textarea { border-color: var(--red-6); }
-  .actions { display: flex; justify-content: flex-end; gap: var(--size-2); }
+
+  .title { margin: 0; font-size: var(--font-size-2); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 </style>
 
