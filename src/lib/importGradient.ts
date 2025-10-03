@@ -37,7 +37,7 @@ function normalizeNamedPosition(name: string): string {
   return map[name] || name
 }
 
-export function applyParsedToStores(parsed: ParsedGradient) {
+export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers?: boolean }) {
   gradient_type.set(parsed.type)
   if (parsed.space) gradient_space.set(parsed.space)
   if (parsed.interpolation) gradient_interpolation.set(parsed.interpolation)

@@ -86,11 +86,50 @@ function innerContent(input: string): string {
   return input.slice(start + 1, end).trim()
 }
 
+// Helper to extract individual gradient functions from comma-separated list
+function extractGradients(input: string): string[] {
+  const results: string[] = []
+  let depth = 0
+  let current = ''
+  let i = 0
+  
+  while (i < input.length) {
+    const ch = input[i]
+    
+    if (ch === '(') depth++
+    else if (ch === ')') depth--
+    
+    if (ch === ',' && depth === 0) {
+      const trimmed = current.trim()
+      if (trimmed && /^(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
+        results.push(trimmed)
+      }
+      current = ''
+    } else {
+      current += ch
+    }
+    i++
+  }
+  
+  // Don't forget the last one
+  const trimmed = current.trim()
+  if (trimmed && /^(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
+    results.push(trimmed)
+  }
+  
+  return results.length > 0 ? results : [input.trim()]
+}
+
 export function parseGradient(input: string): ParsedGradient {
   // Strip trailing semicolons that may be present when copying from CSS rules
   const cleanedInput = input.trim().replace(/;+$/, '')
-  const type = classifyFunction(cleanedInput)
-  const body = innerContent(cleanedInput)
+  
+  // Extract first gradient from potentially multiple gradients
+  const gradients = extractGradients(cleanedInput)
+  const firstGradient = gradients[0]
+  
+  const type = classifyFunction(firstGradient)
+  const body = innerContent(firstGradient)
 
   // split by top-level commas
   const segments = splitTopLevel(body, ',')
@@ -169,12 +208,18 @@ export function parseGradient(input: string): ParsedGradient {
     }
   } else if (type === 'radial') {
     const shape = /(circle|ellipse)/i.exec(prelude)?.[1]?.toLowerCase() as 'circle'|'ellipse'|undefined
-    // size keywords or length pairs
+    // size keywords or length/percentage values
     const sizeKw = /(closest-side|closest-corner|farthest-side|farthest-corner)/i.exec(prelude)?.[1]
     let size: string | undefined = sizeKw?.toLowerCase()
     if (!size) {
+      // Try to match explicit size: single length (for circle) or pair of lengths (for ellipse)
+      const singleSize = prelude.match(/\b(\d+(?:\.\d+)?(?:px|em|rem|vw|vh|%))(?!\s+\d)/i)
       const pair = prelude.match(/\b(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\s+(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\b/)
-      if (pair) size = `${pair[1]} ${pair[2]}`
+      if (pair) {
+        size = `${pair[1]} ${pair[2]}`
+      } else if (singleSize) {
+        size = singleSize[1]
+      }
     }
     const { namedPosition, position } = extractPosition(prelude)
     radial = {
@@ -271,5 +316,20 @@ export function parseGradient(input: string): ParsedGradient {
     conic,
     stops,
   }
+}
+
+// Parse multiple gradients from a comma-separated string
+export function parseMultipleGradients(input: string): ParsedGradient[] {
+  const cleanedInput = input.trim().replace(/;+$/, '')
+  const gradients = extractGradients(cleanedInput)
+  
+  return gradients.map(g => {
+    try {
+      return parseGradient(g)
+    } catch (e) {
+      // Skip invalid gradients
+      return null
+    }
+  }).filter(Boolean) as ParsedGradient[]
 }
 

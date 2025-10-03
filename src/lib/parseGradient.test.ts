@@ -26,6 +26,26 @@ const valid = [
     oklch(80% 0.3 89)  64%,
     oklch(90% 0.5 200)
   );`,
+  // Multiple gradients (parser should take the first one)
+  `linear-gradient(
+    to top right in oklab,
+    oklch(79% 0.21 182 / 0.5),
+    oklch(66% 0.32 259 / 0.5)
+  ), linear-gradient(
+    276deg in oklab,
+    color(display-p3 77% 0% 52%),
+    hsl(347 100% 81%) 39%,
+    oklab(95% -0.03 0.40)
+  )`,
+  // Radial gradient with length-based size
+  `radial-gradient(
+    100px circle in oklab,
+    color(display-p3 77% 0% 52%),
+    hsl(347 100% 81%) 39%,
+    oklab(95% -0.03 0.40)
+  )`,
+  // Color with alpha channel
+  'linear-gradient(to right, oklch(79% 0.21 182 / 0.5), oklch(66% 0.32 259 / 0.5))',
 ]
 
 const invalid = [
@@ -99,6 +119,25 @@ describe('parseGradient', () => {
       const parsed = parseGradient(`linear-gradient(${kw}, red, blue)`)
       expect(parsed.linear?.angleKeyword).toBe(kw)
     })
+  })
+
+  it('parses multiple gradients and takes the first one', () => {
+    const multiGradient = `linear-gradient(to top right in oklab, oklch(79% 0.21 182 / 0.5), oklch(66% 0.32 259 / 0.5)), linear-gradient(276deg, red, blue)`
+    const parsed = parseGradient(multiGradient)
+    expect(parsed.type).toBe('linear')
+    expect(parsed.linear?.angleKeyword).toBe('to top right')
+    expect(parsed.space).toBe('oklab')
+    expect(parsed.stops.length).toBe(2)
+  })
+
+  it('parses radial gradients with length-based sizes', () => {
+    const withLength = parseGradient('radial-gradient(100px circle, red, blue)')
+    expect(withLength.type).toBe('radial')
+    expect(withLength.radial?.size).toBe('100px')
+    expect(withLength.radial?.shape).toBe('circle')
+
+    const withPair = parseGradient('radial-gradient(50px 100px, red, blue)')
+    expect(withPair.radial?.size).toBe('50px 100px')
   })
 })
 

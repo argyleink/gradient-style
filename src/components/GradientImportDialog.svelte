@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte'
-  import { parseGradient, ParseError } from '../lib/parseGradient'
+  import { parseGradient, parseMultipleGradients, ParseError } from '../lib/parseGradient'
   import { applyParsedToStores } from '../lib/importGradient'
+  import { layers, addLayer } from '../store/layers'
+  import { get } from 'svelte/store'
   import ImportEditor from './import/ImportEditor.svelte'
   import ImportActions from './import/ImportActions.svelte'
 
@@ -47,9 +49,15 @@
 
   function validate() {
     try {
-      parseGradient(gradientText)
-      valid = true
-      error = ''
+      // Try parsing as multiple gradients first
+      const gradients = parseMultipleGradients(gradientText)
+      if (gradients.length > 0) {
+        valid = true
+        error = ''
+      } else {
+        valid = false
+        error = 'No valid gradients found'
+      }
     } catch (e) {
       valid = false
       error = e instanceof ParseError ? e.message : 'Invalid gradient'
@@ -59,8 +67,26 @@
   function onImportClick() {
     if (!valid || !gradientText.trim()) return
     try {
-      const parsed = parseGradient(gradientText)
-      applyParsedToStores(parsed)
+      const gradients = parseMultipleGradients(gradientText)
+      if (gradients.length === 0) {
+        error = 'No valid gradients found'
+        return
+      }
+      
+      // Clear existing layers if any, and import all gradients
+      const currentLayers = get(layers)
+      
+      // Import first gradient into current state
+      applyParsedToStores(gradients[0])
+      
+      // Import remaining gradients as new layers
+      if (gradients.length > 1) {
+        for (let i = 1; i < gradients.length; i++) {
+          applyParsedToStores(gradients[i])
+          addLayer({ seed: 'duplicate', position: 'bottom' })
+        }
+      }
+      
       close()
     } catch (e) {
       // Should be rare because button is disabled when invalid; keep safe
