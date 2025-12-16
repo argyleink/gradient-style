@@ -1,13 +1,13 @@
-export function degToRad(degrees) {
+export function degToRad(degrees: number): number {
   return degrees * (Math.PI / 180)
 }
 
-export function radToDeg(radians) {
+export function radToDeg(radians: number): number {
   return Math.round(radians * (180 / Math.PI))
 }
 
-export function namedPosToPercent(named_position) {
-  let x, y
+export function namedPosToPercent(named_position: string): { x: number; y: number } {
+  let x: number, y: number
   
   switch (named_position) {
     case 'top':

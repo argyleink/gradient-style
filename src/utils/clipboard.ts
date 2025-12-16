@@ -1,6 +1,6 @@
-export async function copyToClipboard(text) {
+export async function copyToClipboard(text: string): Promise<void> {
   try {
-    return navigator.clipboard.writeText(text)
+    await navigator.clipboard.writeText(text)
   } 
   catch (err) {
     return Promise.reject(err)

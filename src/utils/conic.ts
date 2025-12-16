@@ -1,5 +1,5 @@
-export function namedPosToPercent(named_position) {
-  let x, y
+export function namedPosToPercent(named_position: string): { x: number; y: number } {
+  let x: number, y: number
   
   switch (named_position) {
     case 'top':

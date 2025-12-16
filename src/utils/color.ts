@@ -1,10 +1,10 @@
 import Color from 'colorjs.io'
 
-export function parse_coords(coords) {
+export function parse_coords(coords: number): number {
   return Math.max(0, Math.min(100, coords))
 }
 
-export function contrast_color(c) {
+export function contrast_color(c: string): string {
   try {
     const color = new Color(c)
 
@@ -25,23 +25,29 @@ export function contrast_color(c) {
     }
 
     return whContrast > blContrast ? 'white' : 'black'
-  } catch {}
+  } catch {
+    return 'black'
+  }
 }
 
-export function contrast_color_with_alpha(c) {
+export function contrast_color_with_alpha(c: string) {
   try {
   const color = new Color(contrast_color(c))
   color.alpha = .6
   return color.to('oklch')
-  } catch {}
+  } catch {
+    return null
+  }
 }
 
-export function contrast_color_prefer_white(c) {
+export function contrast_color_prefer_white(c: string): string {
   try {
   const color = new Color(c)
   
   const whContrast = color.contrastLstar('white')
 
   return whContrast >= 8 || color.c.valueOf() > .1 ? 'white' : 'black'
-  } catch {}
+  } catch {
+    return 'black'
+  }
 }

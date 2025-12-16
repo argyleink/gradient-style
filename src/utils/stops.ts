@@ -1,7 +1,16 @@
-export function updateStops(stops) {
+interface Stop {
+  kind: string;
+  position1?: number;
+  position2?: number;
+  percentage?: number;
+  _manual?: boolean;
+  auto?: number;
+}
+
+export function updateStops(stops: Stop[]): Stop[] {
   const autoStops = genStopMap(stops)
 
-  let updated = stops.map((stop, i) => {
+  let updated = stops.map((stop: Stop, i: number): Stop => {
     let autoVal = autoStops[i]
 
     if (stop.kind == 'stop') {
@@ -52,7 +61,7 @@ export function updateStops(stops) {
   return updated
 }
 
-export function removeStop(stops, pos) {
+export function removeStop(stops: Stop[], pos: number): Stop[] {
   const updated = [...stops]
   updated.splice(pos, 2)
 
@@ -62,9 +71,9 @@ export function removeStop(stops, pos) {
   return updated
 }
 
-function genStopMap(stops) {
-  const colors = stops.filter(stop => stop.kind === 'stop')
-  const hints = stops.filter(stop => stop.kind === 'hint')
+function genStopMap(stops: Stop[]): number[] {
+  const colors = stops.filter((stop: Stop) => stop.kind === 'stop')
+  const hints = stops.filter((stop: Stop) => stop.kind === 'hint')
 
   const start = 0
   const colorIncrements = 100 / (colors.length - 1)

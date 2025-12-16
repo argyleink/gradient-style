@@ -1,10 +1,10 @@
 import Color from 'colorjs.io'
 
-export function isCylindricalSpace(space:string):Boolean {
+export function isCylindricalSpace(space: string): boolean {
   return ['hsl','hwb','lch','oklch'].includes(space)
 }
 
-export function whatsTheGamutDamnit(color) {
+export function whatsTheGamutDamnit(color: string): string {
   let gamut = 'srgb'
 
   if (color?.startsWith('#')) return gamut
@@ -27,13 +27,13 @@ export function whatsTheGamutDamnit(color) {
   return gamut
 }
 
-export function getColorJSspaceID(space) {
+export function getColorJSspaceID(space: string): string {
   if (space === 'display-p3') return 'p3'
   if (space === 'a98-rgb') return 'a98rgb'
   return space
 }
 
-export function reverseColorJSspaceID(space) {
+export function reverseColorJSspaceID(space: string): string {
   if (space === 'p3') return 'display-p3'
   if (space === 'a98rgb') return 'a98-rgb'
   return space

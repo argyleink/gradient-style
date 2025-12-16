@@ -1,18 +1,21 @@
-<script>
+<script lang="ts">
+// @ts-nocheck
   import {flip} from 'svelte/animate'
   import {fade,scale} from 'svelte/transition'
 
   import { tooltip } from 'svooltip'
 
-  import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
-  import {picker_value} from '../store/colorpicker.ts'
-  import {updateStops, removeStop} from '../utils/stops.ts'
-  import {copyToClipboard} from '../utils/clipboard.ts'
-  import {randomNumber} from '../utils/numbers.ts'
-  import {whatsTheGamutDamnit} from '../utils/colorspace.ts'
+  import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient'
+  import {picker_value} from '../store/colorpicker'
+
+  import {copyToClipboard} from '../utils/clipboard'
+  import {randomNumber} from '../utils/numbers'
+  import {whatsTheGamutDamnit} from '../utils/colorspace'
 
   import RangeSlider from './RangeSlider.svelte'
   import Hint from './Hint.svelte'
+
+  type GradientStop = any
 
   // Drag-reorder state
   let dragging = $state(false)
@@ -27,65 +30,77 @@
     catch { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}` }
   }
 
-  function ensureIds(list) {
+  function ensureIds(list: GradientStop[]): GradientStop[] {
     return list.map(item => item?.id ? item : ({ ...item, id: genId(item.kind) }))
   }
 
-  function colorAction(event, position) {
-    switch (event.target.value) {
+  function colorAction(event: Event, position: number) {
+    const target = event.target as HTMLSelectElement
+    switch (target.value) {
       case 'Remove':
         if (colorStopCount() <= 1) break
-        $gradient_stops = updateStops(removeStop($gradient_stops, position))
+        const newStops = [...$gradient_stops]
+        newStops.splice(position, 2)
+        $gradient_stops = newStops
         break
       case 'Reset':
-        $gradient_stops[position].position1 = null
-        $gradient_stops[position].position2 = null
-        updateStops($gradient_stops)
+        const resetStops = [...$gradient_stops]
+        resetStops[position].position1 = undefined
+        resetStops[position].position2 = undefined
+        $gradient_stops = resetStops
         break
       case 'Duplicate':
         dupeStop(position)
         break
       case 'Copy CSS color':
-        copyToClipboard($gradient_stops[position].color)
+        copyToClipboard($gradient_stops[position].color || '')
         break
       case 'Random color':
-        $gradient_stops[position].color = `oklch(80% 0.3 ${randomNumber(0,360)})`
+        const randomStops = [...$gradient_stops]
+        randomStops[position].color = `oklch(80% 0.3 ${randomNumber(0,360)})`
+        $gradient_stops = randomStops
         break
     }
 
     // reset
-    event.target.selectedIndex = 0
+    target.selectedIndex = 0
   }
 
   function colorStopCount() {
     return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
   }
 
-  function dupeStop(pos) {
+  function dupeStop(pos: number) {
+    const newStops: any[] = [...$gradient_stops]
     const clone = {
       id: genId('stop'),
       kind: 'stop',
-      color: $gradient_stops[pos].color,
-      position1: $gradient_stops[pos].position1,
-      position2: $gradient_stops[pos].position2,
+      color: newStops[pos].color,
+      position1: newStops[pos].position1,
+      position2: newStops[pos].position2,
+      auto: String(Number(newStops[pos].auto || 0))
     }
 
-    $gradient_stops.splice(pos, 0, {id: genId('hint'), kind: 'hint', percentage: null})
-    $gradient_stops.splice(pos, 0, clone)
+    newStops.splice(pos, 0, {id: genId('hint'), kind: 'hint', percentage: undefined, auto: ''})
+    newStops.splice(pos, 0, clone)
 
-    $gradient_stops = updateStops(ensureIds($gradient_stops))
+    $gradient_stops = ensureIds(newStops)
   }
 
-  function removePositionByIndex(index, pos) {
-    $gradient_stops[index]['position'+pos] = null
+  function removePositionByIndex(index: number, pos: number) {
+    const newStops: GradientStop[] = [...$gradient_stops]
+    ;(newStops[index] as any)['position'+pos] = undefined
 
     // spec fix, cant have 2nd position without the 1st one
-    if (pos === 1 && $gradient_stops[index].position2 !== null)
-      $gradient_stops[index]['position2'] = null
+    if (pos === 1 && (newStops[index] as any).position2 !== undefined) {
+      ;(newStops[index] as any)['position2'] = undefined
+    }
+    
+    $gradient_stops = newStops
   }
 
-  function pickColor(stop, e) {
-    const picker = document.getElementById('color-picker')
+  function pickColor(stop: GradientStop, e: Event) {
+    const picker = document.getElementById('color-picker') as any
 
     // Seed the picker with the current stop color to avoid stale value flashes
     $picker_value = stop.color
@@ -108,22 +123,22 @@
     })
   }
 
-  function fieldsetInteractingStart(stop) {
+  function fieldsetInteractingStart(stop: GradientStop) {
     $active_stop_index = $gradient_stops.indexOf(stop)
   }
 
-  function fieldsetInteractingEnd(stop) {
+  function fieldsetInteractingEnd() {
     $active_stop_index = null
   }
 
-  function fixIfEmptied(stop) {
-    if (stop.percentage === null) {
-      stop.percentage = stop.auto
+  function fixIfEmptied(stop: GradientStop) {
+      if (stop.percentage === null || stop.percentage === undefined) {
+      stop.percentage = String(stop.auto || '')
       $gradient_stops = [...$gradient_stops]
     }
   }
 
-  function unitBoundsForIndex(i) {
+  function unitBoundsForIndex(i: number) {
     // Drag units are a stop and its following hint (if present)
     const isStop = $gradient_stops[i]?.kind === 'stop'
     if (!isStop) return null
@@ -131,7 +146,7 @@
     return { start: i, length: hasFollowingHint ? 2 : 1 }
   }
 
-  function beginDrag(e, i) {
+  function beginDrag(e: DragEvent, i: number) {
     // prevent dragging from inputs/buttons
     if (e.target.closest('input, select, button')) return e.preventDefault()
     const unit = unitBoundsForIndex(i)
@@ -254,7 +269,7 @@
         ondragend={endDrag}
         class:drop-before={dragging && dropStart === i && dropPos === 'before'}
         class:drop-after={dragging && dropStart === i && dropPos === 'after'}
-        style="accent-color: {stop.color}; --brand: {stop.color}"
+        style="accent-color: {stop.color}; --brand: {stop.color}; --gs-glow-color: {stop.color}"
         class="stop control-set"
         onmouseenter={() => fieldsetInteractingStart(stop)}
         onfocusin={() => fieldsetInteractingStart(stop)}
@@ -267,7 +282,7 @@
           <Hint title="Color stop" copy="The color and position of that color on the gradient line.<br><br>The three dot menu has actions you can take on the color, like duplicate.<br><br>A color is not required in CSS to only be at a single position on the line, it may span the line by specifying a 2nd position." />
         {/if}
         <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
-          <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)}></button>
+          <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} aria-label="Pick color"></button>
           <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
         </div>
         <div class="positions-pair">
@@ -311,7 +326,7 @@
             <option disabled={colorStopCount() <= 1}>Remove</option>
           </select>
         </button>
-        <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} aria-label="Drag to reorder"></div>
+        <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} role="button" aria-label="Drag to reorder" tabindex="0"></div>
       </fieldset>
     {/if}
     {#if stop.kind === 'hint'}
@@ -343,7 +358,7 @@
     </div>
   {/each}
   <!-- End drop zone to allow dropping after the last stop -->
-  <div class="end-dropzone" ondragover={(e)=> onDragOverEnd(e)} ondrop={(e)=> dropAtEnd(e)}></div>
+  <div class="end-dropzone" ondragover={(e)=> onDragOverEnd(e)} ondrop={(e)=> dropAtEnd(e)} role="region" aria-label="Drop zone"></div>
 </section>
 
 <style>
@@ -367,6 +382,8 @@
     box-shadow: var(--shadow-2);
     gap: var(--size-3);
     cursor: auto;
+    /* Each stop carries its own glow color for the proximity sheen */
+    --gs-glow-color: var(--brand);
   }
 
   @media (prefers-color-scheme: light) {
