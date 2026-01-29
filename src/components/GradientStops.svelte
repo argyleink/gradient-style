@@ -2,6 +2,7 @@
 // @ts-nocheck
   import {flip} from 'svelte/animate'
   import {fade,scale} from 'svelte/transition'
+  import {tick} from 'svelte'
 
   import { tooltip } from 'svooltip'
 
@@ -245,7 +246,11 @@
     dropPos = null
   }
 
-  function slidingPosition(e, stop) {
+  // Batched update for sliding position to reduce store updates during rapid slider changes
+  // Uses Svelte's tick() to defer store update until after pending state changes
+  let slidingPending = false
+  async function slidingPosition(e, stop) {
+    // Apply position sync immediately (mutates the stop object directly)
     const range = [
       stop.position1 + 1,
       stop.position1 + 2,
@@ -255,7 +260,15 @@
     if (range.includes(stop.position2)) {
       stop.position2 = stop.position1
     }
-    $gradient_stops = [...$gradient_stops]
+    // Schedule a single batched store update via Svelte's tick()
+    // Multiple rapid calls will mutate stops synchronously, but only one
+    // store update fires after tick() resolves - capturing all mutations
+    if (!slidingPending) {
+      slidingPending = true
+      await tick()
+      $gradient_stops = [...$gradient_stops]
+      slidingPending = false
+    }
   }
 </script>
 

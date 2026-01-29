@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store'
+import { tick } from 'svelte'
 
 import { gradient_type, gradient_space, gradient_interpolation, gradient_stops, gradient_angles } from './gradient'
 import { linear_angle, linear_named_angle } from './linear'
@@ -6,6 +7,13 @@ import { radial_shape, radial_position, radial_named_position, radial_size } fro
 import { conic_angle, conic_position, conic_named_position } from './conic'
 
 import { buildGradientStrings } from '../utils/gradientString'
+
+// Pending mutations for batching rapid store updates via Svelte's tick()
+let pendingLayerUpdates: ((l: GradientLayer) => void)[] = []
+// Track the target layer index when updates are queued to prevent applying to wrong layer
+let pendingLayerIndex: number | null = null
+// Track whether a tick-based flush is already scheduled
+let flushScheduled = false
 
 // Minimal layer shape mirroring the single-store shape
 export type GradientLayer = {
@@ -40,7 +48,7 @@ function snapshotFromStores(): GradientLayer {
     type: get(gradient_type),
     space: get(gradient_space),
     interpolation: get(gradient_interpolation),
-    stops: JSON.parse(JSON.stringify(get(gradient_stops))),
+    stops: structuredClone(get(gradient_stops)),
     linear: {
       named_angle: get(linear_named_angle),
       angle: get(linear_angle),
@@ -81,7 +89,7 @@ function applyLayerToStores(layer: GradientLayer) {
     conic_named_position.set(layer.conic.named_position)
     conic_position.set({ ...layer.conic.position })
 
-    gradient_stops.set(JSON.parse(JSON.stringify(layer.stops)))
+    gradient_stops.set(structuredClone(layer.stops))
   }
   finally {
     // release in next microtask to let subscribers flush
@@ -89,20 +97,68 @@ function applyLayerToStores(layer: GradientLayer) {
   }
 }
 
-function updateActiveLayer(mutator: (l: GradientLayer) => void) {
+// Flush pending layer updates - called via tick() to batch multiple store changes
+async function flushPendingUpdates() {
+  // Wait for Svelte to finish processing current reactive updates
+  await tick()
+  
+  // Capture state AFTER tick() resolves - this ensures all synchronous updates
+  // that triggered before the await are included
+  const targetIdx = pendingLayerIndex
+  const updates = pendingLayerUpdates
   const list = get(layers)
-  const idx = get(active_layer_index) ?? 0
-  if (!list.length || idx < 0 || idx >= list.length) return
-  const copy = [...list]
-  const layer = { ...copy[idx],
-    linear: { ...copy[idx].linear },
-    radial: { ...copy[idx].radial, position: { ...copy[idx].radial.position } },
-    conic: { ...copy[idx].conic, position: { ...copy[idx].conic.position } },
+  
+  // Reset state to allow new batches to form
+  pendingLayerUpdates = []
+  flushScheduled = false
+  pendingLayerIndex = null
+  
+  // Verify we have updates and target layer still exists and is valid
+  if (!updates.length || targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
+    return
   }
-  mutator(layer)
+  
+  const copy = [...list]
+  const layer = { ...copy[targetIdx],
+    linear: { ...copy[targetIdx].linear },
+    radial: { ...copy[targetIdx].radial, position: { ...copy[targetIdx].radial.position } },
+    conic: { ...copy[targetIdx].conic, position: { ...copy[targetIdx].conic.position } },
+  }
+  
+  // Apply all pending mutations in order
+  for (const m of updates) {
+    m(layer)
+  }
+  
   layer.cachedCss = buildGradientStrings(layer)
-  copy[idx] = layer
+  copy[targetIdx] = layer
   layers.set(copy)
+}
+
+// Batch multiple rapid store updates into a single layer update to reduce renders
+function updateActiveLayer(mutator: (l: GradientLayer) => void) {
+  const currentIdx = get(active_layer_index) ?? 0
+  
+  // If layer changed since pending updates were queued, discard stale updates
+  if (pendingLayerIndex !== null && pendingLayerIndex !== currentIdx) {
+    pendingLayerUpdates = []
+    pendingLayerIndex = null
+  }
+  
+  // Track which layer these updates are for
+  if (pendingLayerIndex === null) {
+    pendingLayerIndex = currentIdx
+  }
+  
+  pendingLayerUpdates.push(mutator)
+  
+  // Schedule a flush via Svelte's tick() if not already scheduled
+  // tick() returns a promise that resolves after pending state changes are applied
+  // All synchronous store subscriptions will add their mutators before tick() resolves
+  if (!flushScheduled) {
+    flushScheduled = true
+    flushPendingUpdates()
+  }
 }
 
 // Public API
@@ -290,4 +346,5 @@ radial_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer
 conic_angle.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.angle = v as any }) })
 conic_named_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.named_position = v }) })
 conic_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.position = { ...(v as any) } }) })
-gradient_stops.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.stops = JSON.parse(JSON.stringify(v)) }) })
+// Use structuredClone for a faster deep clone than JSON.parse/stringify
+gradient_stops.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.stops = structuredClone(v) }) })
