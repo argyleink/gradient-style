@@ -102,17 +102,19 @@ async function flushPendingUpdates() {
   // Wait for Svelte to finish processing current reactive updates
   await tick()
   
+  // Capture state AFTER tick() resolves - this ensures all synchronous updates
+  // that triggered before the await are included
   const targetIdx = pendingLayerIndex
+  const updates = pendingLayerUpdates
   const list = get(layers)
   
-  // Reset state before processing (allows new updates to queue while we process)
-  const updates = pendingLayerUpdates
+  // Reset state to allow new batches to form
   pendingLayerUpdates = []
   flushScheduled = false
   pendingLayerIndex = null
   
-  // Verify target layer still exists and is valid
-  if (targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
+  // Verify we have updates and target layer still exists and is valid
+  if (!updates.length || targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
     return
   }
   
@@ -152,6 +154,7 @@ function updateActiveLayer(mutator: (l: GradientLayer) => void) {
   
   // Schedule a flush via Svelte's tick() if not already scheduled
   // tick() returns a promise that resolves after pending state changes are applied
+  // All synchronous store subscriptions will add their mutators before tick() resolves
   if (!flushScheduled) {
     flushScheduled = true
     flushPendingUpdates()

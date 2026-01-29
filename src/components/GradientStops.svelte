@@ -250,6 +250,7 @@
   // Uses Svelte's tick() to defer store update until after pending state changes
   let slidingPending = false
   async function slidingPosition(e, stop) {
+    // Apply position sync immediately (mutates the stop object directly)
     const range = [
       stop.position1 + 1,
       stop.position1 + 2,
@@ -259,7 +260,9 @@
     if (range.includes(stop.position2)) {
       stop.position2 = stop.position1
     }
-    // Schedule a batched store update via Svelte's tick() if not already pending
+    // Schedule a single batched store update via Svelte's tick()
+    // Multiple rapid calls will mutate stops synchronously, but only one
+    // store update fires after tick() resolves - capturing all mutations
     if (!slidingPending) {
       slidingPending = true
       await tick()
