@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { tooltip } from 'svooltip'
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
@@ -20,39 +20,39 @@
 
   /** @type {Props} */
   let { w = null, h = null } = $props();
-  let dragYdelta = null
+  let dragYdelta: null = null
 
   // Ghost stop preview state for hover on the ring
-  let ghostPercent = $state(null)
+  let ghostPercent = $state<number | null>(null)
   let showGhost = $state(false)
 
-  const dragulaState = {
+  const dragulaState = $state({
     moving: false,
     rotating: false,
-    start: {x:null,y:null},
-    delta: {x:null,y:null},
-    left: null,
-    top: null,
-    stopIndex: null,
-    target: null,
-    angle: null,
-    lastAngle: null,
-    centerX: null,
-    centerY: null,
+    start: {x: null as number | null, y: null as number | null},
+    delta: {x: null as number | null, y: null as number | null},
+    left: null as number | null,
+    top: null as number | null,
+    stopIndex: null as number | null,
+    target: null as HTMLElement | null,
+    angle: null as number | null,
+    lastAngle: null as number | null,
+    centerX: null as number | null,
+    centerY: null as number | null,
     // simplified pull-away state
-    removedStop: null,
-    removedIndex: null,
+    removedStop: null as any,
+    removedIndex: null as number | null,
     // cache the visual offset for the drag session to avoid first-move jumps
-    visualOffsetDeg: null,
-  }
+    visualOffsetDeg: null as number | null,
+  })
 
-  function pickColor(stop, e) {
-    const picker = document.getElementById('color-picker')
+  function pickColor(stop: any, e: Event) {
+    const picker = document.getElementById('color-picker') as any
 
     // Start the picker from the current stop color to avoid stale values
     $picker_value = stop.color
 
-    picker.setAnchor(e.target)
+    picker.setAnchor((e as PointerEvent).target as HTMLElement)
     picker.setColor(stop.color)
     picker.showModal()
 
@@ -70,14 +70,14 @@
     }, { once: true })
   }
 
-  function percentToDecimal(percent) {
+  function percentToDecimal(percent: number) {
     return percent / 100
   }
 
   // Map exact percent positions to named keywords
-  function nearestNamedPosName(x, y) {
+  function nearestNamedPosName(x: number, y: number) {
     const ex = x, ey = y
-    const is = (a,b) => a === b
+    const is = (a: number, b: number) => a === b
     if (is(ex,50) && is(ey,50)) return 'center'
     if (is(ey,0)) {
       if (is(ex,0)) return 'top left'
@@ -137,12 +137,12 @@
       }
   }
 
-  function dragula(node) {
-    const onPointerDown = (e) => {
-      const isStop = e.target.closest('[data-stop-index]')
-      const isRotator = e.target.closest('.invisible-rotator')
-      const isDrag = e.target.closest('.dragzone')
-      const isRing = e.target.closest('.invisible-ring')
+  function dragula(node: HTMLElement) {
+    const onPointerDown = (e: PointerEvent) => {
+      const isStop = (e.target as HTMLElement)?.closest('[data-stop-index]')
+      const isRotator = (e.target as HTMLElement)?.closest('.invisible-rotator')
+      const isDrag = (e.target as HTMLElement)?.closest('.dragzone')
+      const isRing = (e.target as HTMLElement)?.closest('.invisible-ring')
 
       if (isRing) {
         // Allow click-to-add without initiating any drag
@@ -150,7 +150,7 @@
       }
 
       if (isDrag) {
-        dragulaState.target = e.target
+        dragulaState.target = e.target as HTMLElement
         if ($conic_named_position != '--') {
           let pos = namedPosToPercent($conic_named_position)
           dragulaState.left = pos.x
@@ -162,7 +162,7 @@
           }
         }
         try { node.setPointerCapture(e.pointerId) } catch {}
-        dragIt(e.target)
+        dragIt(e.target as HTMLElement)
       }
       else if (isRotator) {
         try { node.setPointerCapture(e.pointerId) } catch {}
@@ -192,8 +192,8 @@
       }
     }
 
-    let lastActiveIndex = null
-    const onPointerMove = (e) => {
+    let lastActiveIndex: number | null = null
+    const onPointerMove = (e: PointerEvent) => {
       // Arm drag on small movement to preserve click/dblclick behavior
       if (!dragulaState.moving && dragulaState.stopIndex != null) {
         const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
@@ -201,7 +201,7 @@
         if (Math.hypot(dx, dy) > 3) {
           dragulaState.moving = true
           try { node.setPointerCapture(e.pointerId) } catch {}
-          dragIt(dragulaState.target)
+          dragIt(dragulaState.target as HTMLElement)
         }
       }
       if (dragulaState.moving && dragulaState.stopIndex != null) {
@@ -209,7 +209,7 @@
         try { node.setPointerCapture(e.pointerId) } catch {}
 
         // Determine ring center from the stops container
-        const stopsEl = node.querySelector('.stops')
+        const stopsEl = node.querySelector('.stops') as HTMLElement
         if (stopsEl) {
           const rect = stopsEl.getBoundingClientRect()
           const cx = rect.left + rect.width / 2
@@ -221,7 +221,7 @@
           const dist = Math.hypot(dx, dy)
           // Estimate the ring radius: sample an existing stop or fallback
           let ringRadius = 59
-          const sampleStop = node.querySelector('.stops .stop')
+          const sampleStop = node.querySelector('.stops .stop') as HTMLElement
           if (sampleStop) {
             const srect = sampleStop.getBoundingClientRect()
             const sx = srect.left + srect.width / 2
@@ -347,7 +347,7 @@
         dragulaState.lastAngle = currentAngle
       }
       
-      const target = e.target.closest('[data-stop-index]')
+      const target = (e.target as HTMLElement)?.closest('[data-stop-index]')
       if (target) {
         const idx = target.dataset.stopIndex
         if (lastActiveIndex !== idx) {
@@ -357,7 +357,7 @@
       }
     }
 
-    const stopWatching = (e) => {
+    const stopWatching = (e: PointerEvent) => {
       try { node.releasePointerCapture(e.pointerId) } catch {}
 
       // if (dragulaState.moving && Math.abs(dragulaState.start.y - e.screenY) > 50) {
@@ -396,7 +396,7 @@
     }
   }
 
-  function dragIt(node) {
+  function dragIt(node: HTMLElement | null) {
     dragulaState.moving = true
 
     if (dragulaState.stopIndex != null) {
@@ -404,15 +404,15 @@
       if (!s) return
       // Cache visual offset once at drag start to keep hint/angle stable on first move
       try { 
-        const root = node.closest('.conic-overlay')
+        const root = node?.closest('.conic-overlay') as HTMLElement
         dragulaState.visualOffsetDeg = computeVisualOffsetDeg(root) 
       } catch {}
       if (s.kind === 'hint')
-        dragulaState.angle = parseInt(s.percentage)
+        dragulaState.angle = parseInt(s.percentage as string)
       else if (s.kind === 'stop')
-        dragulaState.angle = parseInt(node.dataset.position === "1" 
-          ? s.position1 
-          : s.position2) 
+        dragulaState.angle = parseInt(node?.dataset.position === "1" 
+          ? (s.position1 as string)
+          : (s.position2 as string)) 
     }
     else {
       dragulaState.left = $conic_position.x
@@ -420,7 +420,7 @@
     }
   }
 
-  function rotateIt(node) {
+  function rotateIt(node: HTMLElement) {
     dragulaState.rotating = true
     // Get the center point of the preview area
     const previewRect = node.closest('.preview')?.getBoundingClientRect()
@@ -439,14 +439,14 @@
     return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
   }
 
-  function deleteStop(stop) {
+  function deleteStop(stop: any) {
     // Do not allow removing the last remaining color stop
     if (colorStopCount() <= 1) return
     $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
-  function handleKeypress(e, stop, prop) {
-    if (e.target.classList.contains('stop-color')) return
+  function handleKeypress(e: KeyboardEvent, stop: any, prop: string) {
+    if ((e.target as HTMLElement)?.classList.contains('stop-color')) return
 
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
       e.preventDefault()
@@ -470,25 +470,25 @@
     }
   }
 
-  function relinkStop(stop) {
+  function relinkStop(stop: any) {
     stop.position2 = stop.position1
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function gradientAngle(ng) {
+  function gradientAngle(ng: number) {
     return ng - 90
   }
 
-  function normalizeDeg(a) {
+  function normalizeDeg(a: number) {
     a = a % 360
     if (a < 0) a += 360
     return a
   }
 
-  function computeVisualOffsetDeg(root) {
+  function computeVisualOffsetDeg(root: HTMLElement | null) {
     try {
-      const stopsEl = root?.querySelector('.stops')
-      const sample = root?.querySelector('.stops .stop')
+      const stopsEl = root?.querySelector('.stops') as HTMLElement
+      const sample = root?.querySelector('.stops .stop') as HTMLElement
       if (!stopsEl || !sample) return null
       const rect = stopsEl.getBoundingClientRect()
       const cx = rect.left + rect.width / 2
@@ -500,10 +500,10 @@
       if (screenDeg < 0) screenDeg += 360
 
       // Read declared percent from the first stop element
-      const idx = parseInt(sample.dataset.stopIndex)
+      const idx = parseInt(sample.dataset.stopIndex as string)
       const pos = sample.dataset.position === '2' ? 'position2' : 'position1'
-      const declared = ($gradient_stops?.[idx]?.[pos] ?? 0)
-      const declaredDeg = (parseFloat(declared) / 100) * 360
+      const declared = ($gradient_stops?.[idx]?.[pos as keyof typeof sample] ?? 0)
+      const declaredDeg = (parseFloat(declared as string) / 100) * 360
 
       const offset = normalizeDeg(screenDeg - declaredDeg)
       return offset
@@ -511,9 +511,9 @@
   }
 
   // Compute percent around the ring from pointer position
-  function computePercentFromPointer(e) {
-    const root = e.currentTarget.closest('.conic-overlay')
-    const stopsEl = root?.querySelector('.stops')
+  function computePercentFromPointer(e: PointerEvent) {
+    const root = (e.currentTarget as HTMLElement)?.closest('.conic-overlay') as HTMLElement
+    const stopsEl = root?.querySelector('.stops') as HTMLElement
     if (!stopsEl) return 0
     const rect = stopsEl.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
@@ -531,7 +531,7 @@
     return percent
   }
 
-  function addStop(e) {
+  function addStop(e: PointerEvent) {
     const percent = computePercentFromPointer(e)
 
     const colors = $gradient_stops.filter(s => s.kind === 'stop')
@@ -557,7 +557,7 @@
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function onRingMove(e) {
+  function onRingMove(e: PointerEvent) {
     const percent = computePercentFromPointer(e)
     ghostPercent = percent
     showGhost = true
@@ -596,7 +596,7 @@
   </div>
   <div class="invisible-rotator" use:tooltip={{content: `${$conic_angle}deg`}}></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $conic_named_position == '--' ? `${position.x} ${position.y}` : $conic_named_position}} use:dragula style="max-inline-size: {w * .2}px"></div>
-  <div class="invisible-ring" onclick={addStop} onmousemove={onRingMove} onmouseenter={onRingEnter} onmouseleave={onRingLeave}></div>
+  <div class="invisible-ring" onclick={(e: MouseEvent) => addStop(e as PointerEvent)} onmousemove={(e: MouseEvent) => onRingMove(e as PointerEvent)} onmouseenter={onRingEnter} onmouseleave={onRingLeave}></div>
   <div class="stops" style="rotate: -90deg; translate: 0px -12px">
     {#if showGhost && ghostPercent !== null}
       <div class="ghost-stop-wrap" style="transform: rotateZ({(360 * (parseInt(ghostPercent) / 100))}deg) translate(0, 59px)">
@@ -611,11 +611,11 @@
           class="stop-wrap" 
           style="transform: rotateZ({(360 * (parseInt(stop.position1) / 100))}deg) translate(0, 59px)"
           onmouseleave={mouseOut} 
-          onkeydown={(e)=>handleKeypress(e,stop,'position1')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position1')}
           ondblclick={()=>deleteStop(stop)}
         >
           <div class="stop" data-stop-index={i} data-position="1">
-            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -625,11 +625,11 @@
             class="stop-wrap" 
             style="transform: rotateZ({(360 * (parseInt(stop.position2) / 100))}deg) translate(0, 59px)"
             onmouseleave={mouseOut} 
-            onkeydown={(e)=>handleKeypress(e,stop,'position2')}
+            onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2" style="opacity: {Number(stop.position2) < Number(stop.position1) ? 0.5 : 1}">
-              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -645,7 +645,7 @@
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           " 
           onmouseleave={mouseOut}
-          onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>

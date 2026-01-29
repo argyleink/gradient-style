@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount, afterUpdate } from 'svelte'
   import { copyToClipboard } from '../utils/clipboard.ts'
 
@@ -29,11 +29,11 @@
 }`.trim()
   }
 
-  $: snippet = makeSnippet(modern_gradient, classic_gradient)
+  $: snippet = makeSnippet()
 </script>
 
 <div class="copyable-block">
-<pre class="code-block" has-loaded={loaded}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
+<pre class="code-block" data-loaded={loaded}><code class="language-css" contenteditable="false" bind:textContent={snippet}></code></pre>
 <button class="copy-code" on:click={copy}>Copy</button>
 </div>
 
@@ -63,7 +63,7 @@
     cursor: auto;
   }
 
-  .code-block[has-loaded="true"] {
+  .code-block[data-loaded="true"] {
     animation: var(--animation-fade-in) forwards;
   }
 

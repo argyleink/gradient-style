@@ -16,7 +16,7 @@
   let selected = value
   $: selected = value
 
-  function onChange(t) {
+  function onChange(t: string) {
     selected = t
     dispatch('change', t)
   }

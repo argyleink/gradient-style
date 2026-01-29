@@ -40,8 +40,8 @@
       <label>X</label>
       <RangeSlider 
         bind:value={$radial_position.x} 
-        min="-100" max="200" 
-        step="1" 
+        min={-100} max={200} 
+        step={1} 
         emptytrack 
         on:change={resetNamedPosition}
       />
@@ -54,8 +54,8 @@
       <label>Y</label>
       <RangeSlider 
         bind:value={$radial_position.y} 
-        min="-100" max="200" 
-        step="1" 
+        min={-100} max={200} 
+        step={1} 
         emptytrack 
         on:change={() => {
           ensureRadialPair()

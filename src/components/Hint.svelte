@@ -13,10 +13,10 @@
 
 	let seen = $state(false)
 
-  function hideMe(e) {
+  function hideMe(e: Event) {
     setTimeout(() => {
       seen = true
-      e.target.removeAttribute('tabindex')
+      (e.target as HTMLElement).removeAttribute('tabindex')
     }, 10)
   }
 </script>

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte'
   export let value = ''
   export let valid = false
@@ -6,9 +6,9 @@
   export let inputId = 'import-gradient-input'
   export let describedBy = 'import-error'
   const dispatch = createEventDispatcher()
-  let textareaEl
+  let textareaEl: HTMLTextAreaElement | undefined
   export function focus() { textareaEl?.focus() }
-  function handleInput(e) { dispatch('input', { value: e.currentTarget.value }) }
+  function handleInput(e: Event) { dispatch('input', { value: (e.currentTarget as HTMLTextAreaElement).value }) }
 </script>
 
 <div class="editor {valid ? 'ok' : (error ? 'bad' : '')}">

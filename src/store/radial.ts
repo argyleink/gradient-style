@@ -1,9 +1,9 @@
 import { writable } from 'svelte/store';
 
-export const radial_shape = writable('circle');
-export const radial_named_position = writable('center');
-export const radial_position = writable({x: null, y: null});
-export const radial_size = writable('farthest-corner');
+export const radial_shape = writable<string>('circle');
+export const radial_named_position = writable<string>('center');
+export const radial_position = writable<{x: number | null, y: number | null}>({x: null, y: null});
+export const radial_size = writable<string>('farthest-corner');
 
 // Reflect numeric position into named position when it matches a canonical value
 function posToName(x: number, y: number): string | null {

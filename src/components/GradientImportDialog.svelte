@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte'
   import { parseGradient, parseMultipleGradients, ParseError } from '../lib/parseGradient'
   import { applyParsedToStores } from '../lib/importGradient'
@@ -8,8 +8,8 @@
   import ImportActions from './import/ImportActions.svelte'
 
   let open = false
-  let dialog
-  let textareaEl // will hold ImportEditor component instance for focusing via editor.focus()
+  let dialog: HTMLDialogElement | undefined
+  let textareaEl: any // will hold ImportEditor component instance for focusing via editor.focus()
   const titleId = 'import-gradient-title'
   const inputId = 'import-gradient-input'
 
@@ -17,7 +17,7 @@
   let gradientText = ''
   let error = ''
   let valid = false
-  let timer
+  let timer: ReturnType<typeof setTimeout> | undefined
 
   export function show() {
     open = true
@@ -36,8 +36,8 @@
     valid = false
   }
 
-  function onInput(e) {
-    gradientText = e.currentTarget.value
+  function onInput(e: Event) {
+    gradientText = (e.currentTarget as HTMLTextAreaElement).value
     scheduleValidate()
   }
   $: canImport = valid && gradientText.trim().length > 0

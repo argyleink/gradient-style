@@ -38,7 +38,7 @@
   <div class="stack">
     <div class="conic-position slider-set">
       <label>X</label>
-      <RangeSlider bind:value={$conic_position.x} min="-100" max="200" step="1" emptytrack="true" on:change={resetNamedPosition} />
+      <RangeSlider bind:value={$conic_position.x} min={-100} max={200} step={1} emptytrack="true" on:change={resetNamedPosition} />
       <div class="input-suffix">
         <input type="number" bind:value={$conic_position.x} min="-100" max="200" step="1"  class="slider-percentage">
         <sup>%</sup>
@@ -46,7 +46,7 @@
     </div>
     <div class="conic-position slider-set">
       <label>Y</label>
-      <RangeSlider bind:value={$conic_position.y} min="-100" max="200" step="1" emptytrack="true" on:change={() => {
+      <RangeSlider bind:value={$conic_position.y} min={-100} max={200} step={1} emptytrack="true" on:change={() => {
         ensurePositionPair()
         resetNamedPosition()
       }} />

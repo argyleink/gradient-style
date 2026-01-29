@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte'
   import Color from 'colorjs.io'
   import {
@@ -20,33 +20,37 @@
     colorR, colorG, colorB, colorAlpha
   } from '../store/colorpicker.ts'
 
-  let dialog
-  let dialogWidth
-  let dialogHeight
+  let dialog: HTMLDialogElement | null = null
+  let dialogWidth: number = 0
+  let dialogHeight: number = 0
 
   const dialogClosingEvent = new Event('closing')
   const dialogClosedEvent  = new Event('closed')
 
   onMount(() => {
-    dialog = document.querySelector('#color-picker')
+    dialog = document.querySelector('#color-picker') as HTMLDialogElement
 
-    dialog.addEventListener('close', dialogClose)
-    dialog.addEventListener('click', lightDismiss)
+    if (dialog) {
+      dialog.addEventListener('close', dialogClose)
+      dialog.addEventListener('click', lightDismiss)
 
-    dialog.setColor = setColor
-    dialog.setAnchor = setAnchor
+      dialog.setColor = setColor
+      dialog.setAnchor = setAnchor
 
-    dialog.show()
-    dialogWidth = dialog.clientWidth
-    dialogHeight = dialog.clientHeight
-    dialog.close()
+      dialog.show()
+      dialogWidth = dialog.clientWidth
+      dialogHeight = dialog.clientHeight
+      dialog.close()
+    }
   })
 
-  function setColor(color) {
+  function setColor(color: string) {
     const parsedColor = new Color(color)
     $colorspace = reverseColorJSspaceID(parsedColor.space.id)
 
-    dialog.querySelector('.colorspace').value = $colorspace
+    if (dialog) {
+      (dialog.querySelector('.colorspace') as HTMLSelectElement).value = $colorspace
+    }
 
     if ($colorspace === 'oklab') {
       const [l,a,b] = parsedColor.coords
@@ -92,7 +96,7 @@
       $hwbB = parse_coords(b).toFixed()
       $hwbAlpha = parsedColor.alpha * 100
     }
-    else if ($colorspace === 'srgb' || colorspace === 'rgb') {
+    else if ($colorspace === 'srgb' || $colorspace === 'rgb') {
       const [r,g,b] = parsedColor.toGamut({space: 'srgb', method: 'clip'}).coords
       $rgbR = (parse_coords(r) * 100).toFixed()
       $rgbG = (parse_coords(g) * 100).toFixed()
@@ -108,16 +112,18 @@
     }
   }
 
-  function setAnchor(target, panel) {
+  function setAnchor(target: HTMLElement, panel?: string) {
     const rect = target.getBoundingClientRect()
     const margin = 12
 
     // Ensure measurements exist (in case of dynamic sizing)
     if (!dialogWidth || !dialogHeight) {
-      dialog.show()
-      dialogWidth = dialog.clientWidth
-      dialogHeight = dialog.clientHeight
-      dialog.close()
+      if (dialog) {
+        dialog.show()
+        dialogWidth = dialog.clientWidth
+        dialogHeight = dialog.clientHeight
+        dialog.close()
+      }
     }
 
     const viewportW = window.innerWidth
@@ -155,13 +161,15 @@
       y = Math.min(Math.max(preferredY, minY), maxY)
     }
 
-    dialog.style.setProperty('--x', x + 'px')
-    dialog.style.setProperty('--y', y + 'px')
-    // No additional translate; place exactly at computed position
-    dialog.style.setProperty('--anchor', '0px')
+    if (dialog) {
+      dialog.style.setProperty('--x', x + 'px')
+      dialog.style.setProperty('--y', y + 'px')
+      // No additional translate; place exactly at computed position
+      dialog.style.setProperty('--anchor', '0px')
+    }
   }
 
-  const dialogClose = async ({target:dialog}) => {
+  const dialogClose = async ({target:dialog}: {target: HTMLDialogElement}) => {
     dialog.dispatchEvent(dialogClosingEvent)
 
     await animationsComplete(dialog)
@@ -169,17 +177,17 @@
     dialog.dispatchEvent(dialogClosedEvent)
   }
 
-  const animationsComplete = element =>
+  const animationsComplete = (element: HTMLElement) =>
     Promise.allSettled(
       element.getAnimations().map(animation =>
         animation.finished))
 
-  const lightDismiss = ({target:dialog}) => {
+  const lightDismiss = ({target:dialog}: {target: HTMLElement}) => {
     if (dialog.nodeName === 'DIALOG')
-      dialog.close('dismiss')
+      (dialog as HTMLDialogElement).close('dismiss')
   }
 
-  function gencolor(colorspace) {
+  function gencolor(colorspace: string, ...args: any[]): string {
     let color
 
     if (colorspace === 'oklab')
@@ -199,10 +207,10 @@
     else if (isRGBcolor(colorspace))
       color = rgbColor()
 
-    return color
+    return color || ''
   }
 
-  function alphaToString(alpha) {
+  function alphaToString(alpha: number | string) {
     return alpha === '100' || alpha === 100
       ? ''
       : ` / ${alpha}%`
@@ -212,7 +220,7 @@
     return `color(${$colorspace === 'prophoto' ? 'prophoto-rgb' : $colorspace} ${$colorR}% ${$colorG}% ${$colorB}%${alphaToString($colorAlpha)})`
   }
 
-  function isRGBcolor(space) {
+  function isRGBcolor(space: string) {
     return [
       'srgb-linear',
       'display-p3',
@@ -225,10 +233,10 @@
     ].includes(space)
   }
 
-  function spaceChange(e) {
+  function spaceChange(e: Event) {
     const current = new Color($picker_value)
-    setColor(current.to(getColorJSspaceID(e.target.value)).toGamut())
-    $colorspace = e.target.value
+    setColor(current.to(getColorJSspaceID((e.target as HTMLSelectElement).value)).toGamut())
+    $colorspace = (e.target as HTMLSelectElement).value
   }
 
   function copyColor() {

@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte'
   export let canImport = false
-  export let primaryType = 'button'
+  export let primaryType: 'submit' | 'button' | 'reset' = 'button'
   const dispatch = createEventDispatcher()
 </script>
 

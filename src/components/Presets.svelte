@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { tooltip } from 'svooltip'
 
 	import {gradient_type, gradient_space, gradient_interpolation,
@@ -12,7 +12,16 @@
 	} from '../store/conic.ts'
 	import {updateStops} from '../utils/stops.ts'
 
-	const presets = [
+	interface Preset {
+		name: string
+		gradient: string
+		type: 'linear' | 'radial' | 'conic'
+		space: string
+		stops: any[]
+		[key: string]: any
+	}
+
+	const presets: Preset[] = [
 		{
 			name: 'Wild Flower',
 			gradient: 'linear-gradient(to top right in oklab, oklch(60% .5 353), oklch(80% .5 325))',
@@ -281,7 +290,7 @@
 		},
 	]
 
-	function presetClicked(preset) {
+	function presetClicked(preset: Preset) {
 		$gradient_type = preset.type
 		$gradient_space = preset.space
 
@@ -290,7 +299,7 @@
 		else
 			$gradient_interpolation = 'shorter'
 
-		const convertedStops = preset.stops.map(stop => {
+		const convertedStops = preset.stops.map((stop: any) => {
 			if (stop.kind !== 'hint') {
 				return {
 						kind: 'stop',

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { tooltip } from 'svooltip'
   import { tick } from 'svelte'
   import { get } from 'svelte/store'
@@ -21,12 +21,12 @@
     addLayer({ seed: 'new', position: 'top' })
   }
 
-  function onFocusIn(i) {
+  function onFocusIn(i: number) {
     // Avoid redundant store applications: only select if becoming active
     if (get(active_layer_index) !== i) selectLayer(i)
   }
 
-  function onTypeChange(i, t) {
+  function onTypeChange(i: number, t: string) {
     // Only select when needed
     if (get(active_layer_index) !== i) selectLayer(i)
     // Defer and only set if changed
@@ -35,11 +35,11 @@
     })
   }
 
-  function onToggleVisibility(i) {
+  function onToggleVisibility(i: number) {
     toggleLayerVisibility(i)
   }
 
-  function onDelete(i) {
+  function onDelete(i: number) {
     deleteLayer(i)
   }
 </script>

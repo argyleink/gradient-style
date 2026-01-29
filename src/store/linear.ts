@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
-export const linear_named_angle = writable('to right');
-export const linear_angle = writable(null);
+export const linear_named_angle = writable<string>('to right');
+export const linear_angle = writable<string | null>(null);
 
 // Keep numeric angle in sync when a named direction is chosen.
 // This ensures UI indicators (like the angle icon) reflect the selection.

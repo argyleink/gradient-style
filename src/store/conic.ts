@@ -1,8 +1,8 @@
 import { writable } from 'svelte/store';
 
-export const conic_angle = writable('0');
-export const conic_named_position = writable('center');
-export const conic_position = writable({x: null, y: null});
+export const conic_angle = writable<string>('0');
+export const conic_named_position = writable<string>('center');
+export const conic_position = writable<{x: number | null, y: number | null}>({x: null, y: null});
 
 // Reflect numeric position into named position when it matches a canonical value
 function posToName(x: number, y: number): string | null {

@@ -1,44 +1,44 @@
 import { writable } from 'svelte/store';
 
-export const picker_value = writable('oklch(75% .3 180deg)')
-export const colorspace = writable('oklch');
+export const picker_value = writable<string>('oklch(75% .3 180deg)')
+export const colorspace = writable<string>('oklch');
 
-export const oklabL = writable(100);
-export const oklabA = writable(-.2);
-export const oklabB = writable(.5);
-export const oklabAlpha = writable(100);
+export const oklabL = writable<number | string>(100);
+export const oklabA = writable<number | string>(-.2);
+export const oklabB = writable<number | string>(.5);
+export const oklabAlpha = writable<number>(100);
 
-export const oklchL = writable(50);
-export const oklchC = writable(.5);
-export const oklchH = writable(220);
-export const oklchAlpha = writable(100);
+export const oklchL = writable<number | string>(50);
+export const oklchC = writable<number | string>(.5);
+export const oklchH = writable<number | string>(220);
+export const oklchAlpha = writable<number>(100);
 
-export const labL = writable(100);
-export const labA = writable(-20);
-export const labB = writable(160);
-export const labAlpha = writable(100);
+export const labL = writable<number | string>(100);
+export const labA = writable<number | string>(-20);
+export const labB = writable<number | string>(160);
+export const labAlpha = writable<number>(100);
 
-export const lchL = writable(50);
-export const lchC = writable(100);
-export const lchH = writable(220);
-export const lchAlpha = writable(100);
+export const lchL = writable<number | string>(50);
+export const lchC = writable<number | string>(100);
+export const lchH = writable<number | string>(220);
+export const lchAlpha = writable<number>(100);
 
-export const hslH = writable(220);
-export const hslS = writable(100);
-export const hslL = writable(50);
-export const hslAlpha = writable(100);
+export const hslH = writable<number | string>(220);
+export const hslS = writable<number | string>(100);
+export const hslL = writable<number | string>(50);
+export const hslAlpha = writable<number>(100);
 
-export const hwbH = writable(323);
-export const hwbW = writable(0);
-export const hwbB = writable(0);
-export const hwbAlpha = writable(100);
+export const hwbH = writable<number | string>(323);
+export const hwbW = writable<number | string>(0);
+export const hwbB = writable<number | string>(0);
+export const hwbAlpha = writable<number>(100);
 
-export const rgbR = writable(0);
-export const rgbG = writable(100);
-export const rgbB = writable(100);
-export const rgbAlpha = writable(100);
+export const rgbR = writable<number | string>(0);
+export const rgbG = writable<number | string>(100);
+export const rgbB = writable<number | string>(100);
+export const rgbAlpha = writable<number | string>(100);
 
-export const colorR = writable(0);
-export const colorG = writable(100);
-export const colorB = writable(100);
-export const colorAlpha = writable(100);
+export const colorR = writable<number | string>(0);
+export const colorG = writable<number | string>(100);
+export const colorB = writable<number | string>(100);
+export const colorAlpha = writable<number | string>(100);

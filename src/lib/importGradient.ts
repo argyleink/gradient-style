@@ -63,7 +63,10 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
       radial_position.set({ x: null, y: null })
     } else if (parsed.radial?.position) {
       radial_named_position.set('center')
-      radial_position.set({ x: parsed.radial.position.x, y: parsed.radial.position.y })
+      radial_position.set({ 
+        x: typeof parsed.radial.position.x === 'string' ? parseFloat(parsed.radial.position.x) || null : parsed.radial.position.x, 
+        y: typeof parsed.radial.position.y === 'string' ? parseFloat(parsed.radial.position.y) || null : parsed.radial.position.y 
+      })
     }
   } else if (parsed.type === 'conic') {
     const from = parsed.conic?.fromDeg ? toDegreesString(parsed.conic.fromDeg) : '0'
@@ -73,7 +76,10 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
       conic_position.set({ x: null, y: null })
     } else if (parsed.conic?.position) {
       conic_named_position.set('center')
-      conic_position.set({ x: parsed.conic.position.x, y: parsed.conic.position.y })
+      conic_position.set({ 
+        x: typeof parsed.conic.position.x === 'string' ? parseFloat(parsed.conic.position.x) || null : parsed.conic.position.x, 
+        y: typeof parsed.conic.position.y === 'string' ? parseFloat(parsed.conic.position.y) || null : parsed.conic.position.y 
+      })
     }
   }
 
@@ -108,6 +114,6 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
   }
 
   // normalize stops and compute autos/hints consistency
-  gradient_stops.set(updateStops(stopsWithHints))
+  gradient_stops.set(updateStops(stopsWithHints as Stop[]))
 }
 

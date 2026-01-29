@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import "prismjs"
 	import "../utils/prism-css.js"
@@ -17,16 +17,16 @@
 		 */
 		const SELECTOR = 'button, select, .stop';
 		const SEARCH_RADIUS = 96; // px beyond the element bounds
-		let activeEl = /** @type {HTMLElement | null} */ (null);
+		let activeEl: HTMLElement | null = null;
 		const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-		function updateProximity(event) {
+		function updateProximity(event: PointerEvent) {
 			const { clientX, clientY } = event;
 			const nodes = document.querySelectorAll(SELECTOR);
 
-			let closest = null;
+			let closest: Element | null = null;
 			let closestDist = Infinity;
-			let closestRect = null;
+			let closestRect: DOMRect | null = null;
 			let clampedX = 0;
 			let clampedY = 0;
 
@@ -60,18 +60,18 @@
 			if (activeEl && activeEl !== closest) {
 				activeEl.style.setProperty('--gs-pointer-opacity', '0');
 			}
-			activeEl = closest;
+			activeEl = closest as HTMLElement;
 
-			const localX = clampedX - closestRect.left;
-			const localY = clampedY - closestRect.top;
+			const localX = clampedX - (closestRect as DOMRect).left;
+			const localY = clampedY - (closestRect as DOMRect).top;
 
 			const falloff = 1 - Math.min(closestDist / SEARCH_RADIUS, 1);
 			const baseOpacity = 0.12 + 0.60 * falloff;
 			const opacity = baseOpacity * (darkQuery.matches ? 0.5 : 1);
 
-			closest.style.setProperty('--gs-pointer-x', `${localX}px`);
-			closest.style.setProperty('--gs-pointer-y', `${localY}px`);
-			closest.style.setProperty('--gs-pointer-opacity', opacity.toFixed(3));
+			(closest as HTMLElement).style.setProperty('--gs-pointer-x', `${localX}px`);
+			(closest as HTMLElement).style.setProperty('--gs-pointer-y', `${localY}px`);
+			(closest as HTMLElement).style.setProperty('--gs-pointer-opacity', opacity.toFixed(3));
 		}
 
 		function resetProximity() {
@@ -81,11 +81,11 @@
 			}
 		}
 
-		window.addEventListener('pointermove', updateProximity, { passive: true });
+		window.addEventListener('pointermove', updateProximity as EventListener, { passive: true });
 		window.addEventListener('pointerleave', resetProximity, { passive: true });
 
 		return () => {
-			window.removeEventListener('pointermove', updateProximity);
+			window.removeEventListener('pointermove', updateProximity as EventListener);
 			window.removeEventListener('pointerleave', resetProximity);
 		};
 	});

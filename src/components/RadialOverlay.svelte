@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { tooltip } from 'svooltip'
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
@@ -19,23 +19,23 @@
 
   /** @type {Props} */
   let { w = null, h = null } = $props();
-  let dragYdelta = null
+  let dragYdelta: null = null
 
   // Ghost stop preview state for hover on the gradient line
-  let ghostPercent = $state(null)
+  let ghostPercent = $state<number | null>(null)
   let showGhost = $state(false)
 
   const dragulaState = $state({
     moving: false,
-    start: {x:null,y:null},
-    delta: {x:null,y:null},
-    left: null,
-    top: null,
-    stopIndex: null,
-    target: null,
+    start: {x: null as number | null, y: null as number | null},
+    delta: {x: null as number | null, y: null as number | null},
+    left: null as number | null,
+    top: null as number | null,
+    stopIndex: null as number | null,
+    target: null as HTMLElement | null,
     // simplified pull-away state for radial
-    removedStop: null,
-    removedIndex: null,
+    removedStop: null as any,
+    removedIndex: null as number | null,
   })
 
   function determineOverlaySize() {
@@ -153,11 +153,11 @@
       }
   }
 
-  function calcDiagonalLength(pos) {
+  function calcDiagonalLength(pos: {x: number, y: number}): number {
     return Math.sqrt(pos.x ** 2 + pos.y ** 2)
   }
 
-  function calcDistances(pos) {
+  function calcDistances(pos: {x: number, y: number}) {
     return {
       left: pos.x,
       right: w - pos.x,
@@ -166,12 +166,12 @@
     }
   }
 
-  function percentToDecimal(percent) {
+  function percentToDecimal(percent: number): number {
     return percent / 100
   }
 
   // Map exact percent positions to named keywords
-  function nearestNamedPosName(x, y) {
+  function nearestNamedPosName(x: number, y: number) {
     const ex = x, ey = y
     const is = (a,b) => a === b
     if (is(ex,50) && is(ey,50)) return 'center'
@@ -202,10 +202,10 @@
     }
   })
 
-  function dragula(node) {
-    const onPointerDown = (e) => {
-      const isStop = e.target.closest('[data-stop-index]')
-      const isTrack = e.target.closest('.invisible-track')
+  function dragula(node: HTMLElement) {
+    const onPointerDown = (e: PointerEvent) => {
+      const isStop = (e.target as HTMLElement)?.closest('[data-stop-index]')
+      const isTrack = (e.target as HTMLElement)?.closest('.invisible-track')
 
       if (isStop) {
         // If clicking the color swatch, let the click go through (no drag)
@@ -238,7 +238,7 @@
     }
 
     let lastActiveIndex = null
-    const onPointerMove = (e) => {
+    const onPointerMove = (e: PointerEvent) => {
       // Arm drag on small movement to preserve click/dblclick behavior
       if (!dragulaState.moving && dragulaState.stopIndex != null) {
         const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
@@ -255,7 +255,7 @@
         dragulaState.left += (e.movementX || e.movementY * -1) / apercent
 
           // Pull-away removal disabled
-          const lineEl = node.querySelector('.line')
+          const lineEl = node.querySelector('.line') as HTMLElement
           if (lineEl) {
             const rect = lineEl.getBoundingClientRect()
             const cy = rect.top + rect.height / 2
@@ -335,7 +335,7 @@
       }
     }
 
-    const stopWatching = (e) => {
+    const stopWatching = (e: PointerEvent) => {
       try { node.releasePointerCapture(e.pointerId) } catch {}
 
       dragulaState.moving = false
@@ -364,7 +364,7 @@
     }
   }
 
-  function dragIt(node) {
+  function dragIt(node: HTMLElement) {
     dragulaState.moving = true
 
     if (dragulaState.stopIndex != null) {
@@ -383,14 +383,14 @@
     }
   }
 
-  function gradientLineLength() {
+  function gradientLineLength(): string {
     return size.w / 2 + 'px'
   }
 
   // Map a pointer event to a percent along the horizontal line
-  function computePercentFromPointer(e) {
-    const overlay = e.currentTarget.closest('.overlay')
-    const lineEl = overlay?.querySelector('.line')
+  function computePercentFromPointer(e: PointerEvent): number {
+    const overlay = (e.currentTarget as HTMLElement).closest('.overlay') as HTMLElement
+    const lineEl = overlay?.querySelector('.line') as HTMLElement
     if (!lineEl) return 0
     const rect = lineEl.getBoundingClientRect()
     const t = (e.clientX - rect.left) / rect.width
@@ -398,7 +398,7 @@
     return percent
   }
 
-  function addStop(e) {
+  function addStop(e: PointerEvent) {
     let percent = computePercentFromPointer(e)
 
     // Determine insertion point among color stops
@@ -430,7 +430,7 @@
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function onTrackMove(e) {
+  function onTrackMove(e: PointerEvent) {
     let percent = computePercentFromPointer(e)
     ghostPercent = percent
     showGhost = true
@@ -453,14 +453,14 @@
     return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
   }
 
-  function deleteStop(stop) {
+  function deleteStop(stop: any) {
     // Do not allow removing the last remaining color stop
     if (colorStopCount() <= 1) return
     $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
-  function handleKeypress(e, stop, prop) {
-    if (e.target.classList.contains('stop-color')) return
+  function handleKeypress(e: KeyboardEvent, stop: any, prop: string) {
+    if ((e.target as HTMLElement)?.classList.contains('stop-color')) return
 
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
       e.preventDefault()
@@ -484,18 +484,18 @@
     }
   }
 
-  function relinkStop(stop) {
+  function relinkStop(stop: any) {
     stop.position2 = stop.position1
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function pickColor(stop, e) {
-    const picker = document.getElementById('color-picker')
+  function pickColor(stop: any, e: Event) {
+    const picker = document.getElementById('color-picker') as any
 
     // Start the picker from the current stop color to avoid stale values
     $picker_value = stop.color
 
-    picker.setAnchor(e.target)
+    picker.setAnchor((e as PointerEvent).target as HTMLElement)
     picker.setColor(stop.color)
     picker.showModal()
 
@@ -538,7 +538,7 @@
     width:{size.w}px;
     height:{size.h}px;
   "></div>
-  <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
+  <div class="invisible-track" onclick={(e: MouseEvent) => addStop(e as PointerEvent)} onmousemove={(e: MouseEvent) => onTrackMove(e as PointerEvent)} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
   <div class="line" style="width: {gradientLineLength(size)}">
     {#if showGhost && ghostPercent !== null}
       <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
@@ -553,10 +553,10 @@
           class="stop-wrap"
           style="inset-inline-start: {stop.position1}%;inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''}; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
-          onkeydown={(e)=>handleKeypress(e,stop,'position1')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position1')}
         >
           <div class="stop" data-stop-index={i} data-position="1" ondblclick={()=>deleteStop(stop)}>
-            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -566,11 +566,11 @@
             class="stop-wrap"
             style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}; inset-block-end: {dragulaState.stop == stop && dragYdelta !== null ? dragYdelta+'px':''};"
             onmouseleave={mouseOut}
-            onkeydown={(e)=>handleKeypress(e,stop,'position2')}
+            onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2" style="opacity: {Number(stop.position2) < Number(stop.position1) ? 0.5 : 1}">
-              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -586,7 +586,7 @@
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           "
           onmouseleave={mouseOut}
-          onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>

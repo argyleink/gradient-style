@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { tooltip } from 'svooltip'
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient.ts'
@@ -24,17 +24,17 @@
   const dragulaState = $state({
     moving: false,
     rotating: false,
-    start: {x:null,y:null},
-    delta: {x:null,y:null},
-    left: null,
-    stopIndex: null,
-    target: null,
-    lastAngle: null,
-    centerX: null,
-    centerY: null,
+    start: {x: null as number | null, y: null as number | null},
+    delta: {x: null as number | null, y: null as number | null},
+    left: null as number | null,
+    stopIndex: null as number | null,
+    target: null as HTMLElement | null,
+    lastAngle: null as number | null,
+    centerX: null as number | null,
+    centerY: null as number | null,
     // simplified pull-away state
-    removedStop: null,
-    removedIndex: null,
+    removedStop: null as any,
+    removedIndex: null as number | null,
   })
 
   // Ghost stop preview state for hover on the gradient line
@@ -71,13 +71,13 @@
     }
   })
 
-  function pickColor(stop, e) {
-    const picker = document.getElementById('color-picker')
+  function pickColor(stop: any, e: Event) {
+    const picker = document.getElementById('color-picker') as any
 
     // Start the picker from the current stop color to avoid stale values
     $picker_value = stop.color
 
-    picker.setAnchor(e.target)
+    picker.setAnchor((e as PointerEvent).target as HTMLElement)
     picker.setColor(stop.color)
     picker.showModal()
 
@@ -95,15 +95,15 @@
     }, { once: true })
   }
 
-  function dragula(node) {
+  function dragula(node: HTMLElement) {
     // Define handlers so we can clean them up on destroy
-    const onPointerDown = (e) => {
-      const isStop = e.target.closest('[data-stop-index]')
-      const isRotator = e.target.closest('.invisible-rotator')
+    const onPointerDown = (e: PointerEvent) => {
+      const isStop = (e.target as HTMLElement)?.closest('[data-stop-index]')
+      const isRotator = (e.target as HTMLElement)?.closest('.invisible-rotator')
 
       if (isStop) {
         // If clicking the color swatch, let the click go through (no drag)
-        if (e.target.closest('.stop-color')) return
+        if ((e.target as HTMLElement)?.closest('.stop-color')) return
         const idx = Number(isStop.dataset.stopIndex)
         $active_stop_index = idx
         dragulaState.target = isStop
@@ -135,8 +135,8 @@
       }
     }
 
-    let lastActiveIndex = null
-    const onPointerMove = (e) => {
+    let lastActiveIndex: number | null = null
+    const onPointerMove = (e: PointerEvent) => {
       // Arm drag on small movement to preserve click/dblclick behavior
       if (!dragulaState.moving && dragulaState.stopIndex != null) {
         const dx = (e.screenX ?? 0) - (dragulaState.start.x ?? 0)
@@ -164,7 +164,7 @@
 
         // compute perpendicular distance to the rotated line (removals disabled)
         // Retain math for potential future features, but do not remove stops when pulling away
-        const lineEl = node.querySelector('.line')
+        const lineEl = node.querySelector('.line') as HTMLElement
         if (lineEl) {
           const rect = lineEl.getBoundingClientRect()
           const cx = rect.left + rect.width / 2
@@ -192,7 +192,7 @@
             // Reinsert near current left percent
             const percent = Math.max(0, Math.min(100, Math.round(dragulaState.left)))
             const colors = $gradient_stops.filter(s => s.kind === 'stop')
-            let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+            let k = colors.findIndex(s => parseFloat(s.position1 as string) > percent)
             if (k === -1) k = colors.length
             const arrIdx = k * 2
             const newStop = {
@@ -267,7 +267,7 @@
         dragulaState.lastAngle = currentAngle
       }
 
-      const target = e.target.closest('[data-stop-index]')
+      const target = (e.target as HTMLElement)?.closest('[data-stop-index]')
       if (target) {
         const idx = target.dataset.stopIndex
         if (lastActiveIndex !== idx) {
@@ -277,7 +277,7 @@
       }
     }
 
-    const stopWatching = (e) => {
+    const stopWatching = (e: PointerEvent) => {
       try { node.releasePointerCapture(e.pointerId) } catch {}
 
       // If we ended with the stop removed and never reinserted, keep it removed. If reattached already, nothing to do.
@@ -332,21 +332,21 @@
     }
   }
 
-  function dragIt(node) {
+  function dragIt(node: HTMLElement | null) {
     dragulaState.moving = true
 
     const idx = dragulaState.stopIndex
-    const s = $gradient_stops?.[idx]
-    if (!s) return
+    const s = $gradient_stops?.[idx as number]
+    if (!s || !node) return
     if (s.kind === 'hint')
-      dragulaState.left = parseInt(s.percentage)
+      dragulaState.left = parseInt(s.percentage as string)
     else
       dragulaState.left = parseInt(node.dataset.position === "1"
-        ? s.position1
-        : s.position2)
+        ? (s.position1 as string)
+        : (s.position2 as string))
   }
 
-  function rotateIt(node) {
+  function rotateIt(node: HTMLElement) {
     dragulaState.rotating = true
     // Get the center point of the preview area
     const previewRect = node.closest('.preview')?.getBoundingClientRect()
@@ -361,22 +361,22 @@
     $active_stop_index = null
   }
 
-  function gradientLineLength(a) {
+  function gradientLineLength(a: number) {
     if (!w && !h) return null
     a = degToRad(a)
     let l = Math.round(Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)))
     return l + 'px'
   }
 
-  function gradientAngle(ng) {
+  function gradientAngle(ng: number) {
     return ng - 90
   }
 
   // Compute percent by projecting the mouse onto the rotated line axis to avoid drift
-  function computePercentFromPointer(e) {
+  function computePercentFromPointer(e: PointerEvent) {
     // Find the visual line element and its center in screen space
-    const overlay = e.currentTarget.parentElement
-    const lineEl = overlay.querySelector('.line')
+    const overlay = e.currentTarget?.parentElement as HTMLElement
+    const lineEl = overlay.querySelector('.line') as HTMLElement
     if (!lineEl) return 0
     const lineRect = lineEl.getBoundingClientRect()
     const cx = lineRect.left + lineRect.width / 2
@@ -404,12 +404,12 @@
     return Math.round(percent)
   }
 
-  function addStop(e) {
+  function addStop(e: PointerEvent) {
     let percent = computePercentFromPointer(e)
 
     // Determine insertion point among color stops
     const colors = $gradient_stops.filter(s => s.kind === 'stop')
-    let k = colors.findIndex(s => parseFloat(s.position1) > percent)
+    let k = colors.findIndex(s => parseFloat(s.position1 as string) > percent)
     if (k === -1) k = colors.length // append at end
 
     // Map color index to full array index (pattern: stop, hint, stop, hint, ...)
@@ -436,7 +436,7 @@
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function onTrackMove(e) {
+  function onTrackMove(e: PointerEvent) {
     let percent = computePercentFromPointer(e)
     ghostPercent = percent
     showGhost = true
@@ -455,19 +455,19 @@
     return ($gradient_stops || []).filter(s => s?.kind === 'stop').length
   }
 
-  function deleteStop(stop) {
+  function deleteStop(stop: any) {
     // Do not allow removing the last remaining color stop
     if (colorStopCount() <= 1) return
     $gradient_stops = updateStops(removeStop($gradient_stops, $gradient_stops.indexOf(stop)))
   }
 
-  function relinkStop(stop) {
+  function relinkStop(stop: any) {
     stop.position2 = stop.position1
     $gradient_stops = updateStops($gradient_stops)
   }
 
-  function handleKeypress(e, stop, prop) {
-    if (e.target.classList.contains('stop-color')) return
+  function handleKeypress(e: KeyboardEvent, stop: any, prop: string) {
+    if ((e.target as HTMLElement)?.classList.contains('stop-color')) return
 
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
       e.preventDefault()
@@ -502,7 +502,7 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div use:dragula class="linear-overlay" style="rotate: {gradientAngle(visualAngleDeg)}deg">
   <div class="invisible-rotator" use:tooltip={{content: $linear_named_angle == '--' ? `${$linear_angle}deg` : $linear_named_angle}}></div>
-  <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
+  <div class="invisible-track" onclick={(e: MouseEvent) => addStop(e as PointerEvent)} onmousemove={(e: MouseEvent) => onTrackMove(e as PointerEvent)} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
   <div class="line" style="width: {gradientLineLength(visualAngleDeg)}">
     {#if showGhost && ghostPercent !== null}
       <div class="ghost-stop-wrap" style="inset-inline-start: {ghostPercent}%">
@@ -517,10 +517,10 @@
           class="stop-wrap"
           style="inset-inline-start: {stop.position1}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
           onmouseleave={mouseOut}
-          onkeydown={(e)=>handleKeypress(e,stop,'position1')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position1')}
         >
           <div class="stop" data-stop-index={i} data-position="1" ondblclick={()=>deleteStop(stop)}>
-            <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+            <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
           </div>
         </div>
         {#if stop.position1 !== stop.position2}
@@ -530,11 +530,11 @@
             class="stop-wrap"
             style="inset-inline-start: {stop.position2}%; --contrast-fill: {contrast_color_prefer_white(stop.color)}"
             onmouseleave={mouseOut}
-            onkeydown={(e)=>handleKeypress(e,stop,'position2')}
+            onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'position2')}
             ondblclick={()=>relinkStop(stop)}
           >
             <div class="stop" data-stop-index={i} data-position="2" style="opacity: {Number(stop.position2) < Number(stop.position1) ? 0.5 : 1}">
-              <button class="stop-color" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
+              <button class="stop-color" style="background-color: {stop.color}" onclick={(e: MouseEvent) => pickColor(stop,e)} use:tooltip={{content: stop.color}}></button>
             </div>
           </div>
         {/if}
@@ -550,7 +550,7 @@
             visibility: {stop.percentage == stop.auto ? 'hidden' : 'inherit'}
           "
           onmouseleave={mouseOut}
-          onkeydown={(e)=>handleKeypress(e,stop,'percentage')}
+          onkeydown={(e: KeyboardEvent)=>handleKeypress(e,stop,'percentage')}
         >
           <svg viewBox="0 0 256 256">
             <path d="M216.49 168.49a12 12 0 0 1-17 0L128 97l-71.51 71.49a12 12 0 0 1-17-17l80-80a12 12 0 0 1 17 0l80 80a12 12 0 0 1 0 17Z"/>

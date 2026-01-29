@@ -77,7 +77,7 @@ export const stateAsString = derived(
 	}
 )
 
-export function serializeUrl(state) {
+export function serializeUrl(state: any): string {
 	const hash = new URLSearchParams("")
 
   for (const key in state) {
@@ -98,16 +98,16 @@ export function serializeUrl(state) {
   return hash.toString()
 }
 
-export function deserializeUrl(hash) {
+export function deserializeUrl(hash: any): any {
   const raw = typeof hash === 'string' ? hash.replace(/^#/, '') : ''
   const params = new URLSearchParams(raw)
-  const out = {}
+  const out: any = {}
 
   for (const [k, value] of params.entries()) {
     const key = k.startsWith('#') ? k.slice(1) : k
 
     if (key === 'stops') {
-      out[key] = params.getAll(k).map(JSON.parse)
+      out[key] = params.getAll(k).map((s: string) => JSON.parse(s))
     }
     else if (key === 'radial_position' || key === 'conic_position') {
       try { out[key] = JSON.parse(value) } catch { out[key] = null }

@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
   import {radial_size, radial_shape} from '../store/radial.ts'
 
-  radial_shape.subscribe(state => {
+  radial_shape.subscribe((state: string) => {
     const current = $radial_size
     const parts = (current || '').split(/\s+/)
 
     const KEYWORDS = ['closest-side', 'closest-corner', 'farthest-side', 'farthest-corner']
-    const isKeyword = (v) => KEYWORDS.includes(v)
-    const isPx = (v) => /^\d+px$/.test((v || '').trim())
+    const isKeyword = (v: string) => KEYWORDS.includes(v)
+    const isPx = (v: string) => /^\d+px$/.test((v || '').trim())
 
     if (state === 'ellipse') {
       // Keep keywords as-is; ensure two px values for lengths
@@ -50,7 +50,7 @@
       : ellipse_sizes
   }
 
-  function optionExists(val) {
+  function optionExists(val: string) {
     if (!val) return false
     const sizes = getSizes()
     for (const [, list] of Object.entries(sizes)) {
@@ -67,7 +67,7 @@
       {#if !optionExists($radial_size)}
         <option value={$radial_size}>{$radial_size}</option>
       {/if}
-      {#each Object.entries(getSizes($radial_shape)) as [key, val]}
+      {#each Object.entries(getSizes()) as [key, val]}
         <optgroup label={key}>
           {#each val as entry}
             <option value={entry}>{entry}</option>  

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte'
   import { replaceState } from '$app/navigation'
 
@@ -39,14 +39,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   import Hint from './Hint.svelte'
 
-  let preview_resizer = $state()
+  let preview_resizer: HTMLElement | undefined = $state()
   let preview_hd = $state(true)
-  let box_width = $state()
-  let box_height = $state()
-  let metatag
-  let svgicon
+  let box_width: number | undefined = $state()
+  let box_height: number | undefined = $state()
+  let metatag: HTMLMetaElement | null = null
+  let svgicon: HTMLLinkElement | null = null
   let restoring = $state(true)
-  let importRef
+  let importRef: any
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -55,30 +55,30 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     const restore = restoreStateFromUrl()
 
     // Track last known explicit positions to persist across type changes
-    let lastRadialPos = { x: null, y: null }
-    let lastConicPos = { x: null, y: null }
+    let lastRadialPos: { x: number | null; y: number | null } = { x: null, y: null }
+    let lastConicPos: { x: number | null; y: number | null } = { x: null, y: null }
 
     // Cache explicit positions when available
-    radial_position.subscribe(pos => {
+    radial_position.subscribe((pos) => {
       if (pos && (pos.x ?? null) !== null && (pos.y ?? null) !== null) {
-        lastRadialPos = { x: pos.x, y: pos.y }
+        lastRadialPos = { x: pos.x as number, y: pos.y as number }
       }
     })
-    conic_position.subscribe(pos => {
+    conic_position.subscribe((pos) => {
       if (pos && (pos.x ?? null) !== null && (pos.y ?? null) !== null) {
-        lastConicPos = { x: pos.x, y: pos.y }
+        lastConicPos = { x: pos.x as number, y: pos.y as number }
       }
     })
 
-    metatag = document.querySelector('#browsertheme')
-    svgicon = document.querySelector('#svgicon')
+    metatag = document.querySelector('#browsertheme') as HTMLMetaElement | null
+    svgicon = document.querySelector('#svgicon') as HTMLLinkElement | null
 
     if (restore) {
       // Multi-layer restore path
       if (restore.layers && Array.isArray(restore.layers)) {
         try {
-          const restored = restore.layers.map((l) => {
-            const layer = {
+          const restored = restore.layers.map((l: any) => {
+            const layer: any = {
               id: crypto?.randomUUID?.() ?? `layer-${Date.now()}-${Math.random().toString(36).slice(2)}`,
               name: l.name ?? 'Layer',
               visible: l.visible ?? true,
@@ -114,7 +114,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         if (restore.interpolation)      $gradient_interpolation = restore.interpolation
 
         if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
-        if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
+        if (restore.linear_angle)       $linear_angle = String(parseInt(restore.linear_angle))
 
         if (restore.radial_shape)       $radial_shape = restore.radial_shape
         // Prefer explicit coordinates over named position to avoid overwrite from subscriptions
@@ -138,7 +138,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         }
 
         // last, to kickoff render
-        if (restore.stops)              $gradient_stops = updateStops(restore.stops)
+        if (restore.stops)              $gradient_stops = updateStops(restore.stops as any) as any
         restoring = false
       }
     }
@@ -148,20 +148,20 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false
-    let pendingUrlState = null
+    let pendingUrlState: string | null = null
 
-    function scheduleUrlWrite(state, delay = 350) {
-      clearTimeout(window.syncStateTimer)
+    function scheduleUrlWrite(state: string | null, delay = 350): void {
+      clearTimeout(window.syncStateTimer as NodeJS.Timeout)
       window.syncStateTimer = setTimeout(() => {
         state && replaceState('#' + state, {})
       }, delay)
     }
 
-    const startInteract = () => {
+    const startInteract = (): void => {
       isInteracting = true
-      clearTimeout(window.syncStateTimer)
+      clearTimeout(window.syncStateTimer as NodeJS.Timeout)
     }
-    const endInteract = () => {
+    const endInteract = (): void => {
       isInteracting = false
       if (pendingUrlState != null) {
         // Write as soon as the interaction ends
@@ -177,7 +177,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     window.addEventListener('keydown', startInteract)
     window.addEventListener('keyup', endInteract)
 
-    stateAsString.subscribe(state => {
+    stateAsString.subscribe((state: string | null) => {
       if (isInteracting) {
         // Defer writing until after the interaction ends
         pendingUrlState = state
@@ -186,16 +186,16 @@ import GradientImportDialog from './GradientImportDialog.svelte'
       scheduleUrlWrite(state, 350)
     })
 
-    gradient_stops.subscribe(state => {
+    gradient_stops.subscribe((state: any) => {
       if (!metatag || !svgicon) return
       try {
-        clearTimeout(window.syncColorTimer)
+        clearTimeout(window.syncColorTimer as NodeJS.Timeout)
         window.syncColorTimer = setTimeout(() => {
-          const [first] = state
-          const newmeta = new Color(first.color)
+          const [first] = state as any[]
+          const newmeta = new Color(first?.color)
 
-          metatag.content = newmeta.to('srgb').toString({ format: 'hex' })
-          svgicon.href = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><mask id='stripes'><rect height='40%' width='100%' fill='white' /><rect height='7%' y='41%' width='100%' fill='white' /><rect height='6%' y='50%' width='100%' fill='white' /><rect height='5%' y='59%' width='100%' fill='white' /><rect height='4%' y='68%' width='100%' fill='white' /><rect height='3%' y='78%' width='100%' fill='white' /><rect height='2%' y='90%' width='100%' fill='white' /><rect height='1%' y='99%' width='100%' fill='white' /></mask><circle mask='url(%23stripes)' fill='${newmeta.to('srgb').toString()}' cx='50' cy='50' r='50'/></svg>`
+          if (metatag) metatag.content = newmeta.to('srgb').toString({ format: 'hex' })
+          if (svgicon) svgicon.href = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><mask id='stripes'><rect height='40%' width='100%' fill='white' /><rect height='7%' y='41%' width='100%' fill='white' /><rect height='6%' y='50%' width='100%' fill='white' /><rect height='5%' y='59%' width='100%' fill='white' /><rect height='4%' y='68%' width='100%' fill='white' /><rect height='3%' y='78%' width='100%' fill='white' /><rect height='2%' y='90%' width='100%' fill='white' /><rect height='1%' y='99%' width='100%' fill='white' /></mask><circle mask='url(%23stripes)' fill='${newmeta.to('srgb').toString()}' cx='50' cy='50' r='50'/></svg>`
           // Use the leading stop color to tint global proximity glows.
           document.documentElement.style.setProperty('--gs-glow-color', newmeta.to('srgb').toString())
         }, 500)
@@ -203,16 +203,18 @@ import GradientImportDialog from './GradientImportDialog.svelte'
       catch (err) {}
     })
 
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
       const entry = entries.at(0)
-      box_width = entry.contentBoxSize[0].inlineSize
-      box_height = entry.contentBoxSize[0].blockSize
+      if (entry && preview_resizer) {
+        box_width = entry.contentBoxSize[0].inlineSize
+        box_height = entry.contentBoxSize[0].blockSize
+      }
     })
 
-    resizeObserver.observe(preview_resizer)
+    if (preview_resizer) resizeObserver.observe(preview_resizer)
 
     // When switching gradient types, carry over the last known x/y between radial and conic
-    gradient_type.subscribe(type => {
+    gradient_type.subscribe((type: string) => {
       if (type === 'radial') {
         // Prefer explicit cached conic position if radial is missing
         if (($radial_position?.x ?? null) === null || ($radial_position?.y ?? null) === null) {
@@ -240,7 +242,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   const gensyntax = {
     'linear': () =>
       `linear-gradient(
-    ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()},
+    ${linearAngleToString($linear_angle ?? '', $linear_named_angle)} ${spaceToString()},
     ${stopsToStrings({new_lines: false})}
   )`,
     'radial': () =>
@@ -257,7 +259,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   const genClassicSyntax = {
     'linear': () =>
-      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
+      `linear-gradient(${linearAngleToString($linear_angle ?? '', $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
     'radial': () =>
       `radial-gradient(
     ${$radial_size} ${$radial_shape} at ${radialPositionToString()},
@@ -270,25 +272,25 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   )`
   }
 
-  function spaceToString() {
+  function spaceToString(): string {
     return isCylindricalSpace($gradient_space) && $gradient_interpolation !== 'shorter'
       ? `in ${$gradient_space} ${$gradient_interpolation} hue`
       : `in ${$gradient_space}`
   }
 
-  function maybeConvertColor(color, convert_colors) {
+  function maybeConvertColor(color: string, convert_colors?: boolean): string {
     if (convert_colors) {
       try {
         return new Color(color).toGamut({space: 'srgb', method: 'clip'}).to('srgb').toString({ format: 'hex' })
       }
-      catch {}
+      catch {
+        return color
+      }
     }
-    else {
-      return color
-    }
+    return color
   }
 
-  function stopsToStrings({convert_colors, new_lines} = {convert_colors: false, new_lines: true}) {
+  function stopsToStrings({convert_colors = false, new_lines = true}: {convert_colors?: boolean, new_lines?: boolean} = {convert_colors: false, new_lines: true}): string {
     // Identify first/last stop indices in the full list (including hints)
     const stopIndices = $gradient_stops
       .map((s, i) => (s?.kind === 'stop' ? i : null))
@@ -296,7 +298,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     const firstStopIdx = stopIndices.at(0)
     const lastStopIdx = stopIndices.at(-1)
 
-    function fmtPos(p) {
+    function fmtPos(p: string | number | null | undefined): string | null {
       if (p == null) return null
       const str = String(p)
       // If already has a unit (includes any letter) or %, keep as-is
@@ -305,13 +307,13 @@ import GradientImportDialog from './GradientImportDialog.svelte'
       return str + '%'
     }
 
-    function isPctZero(p) {
+    function isPctZero(p: string | number | null | undefined): boolean {
       if (p == null) return false
       const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
       return !!(m && Number(m[1]) === 0)
     }
 
-    function isPctHundred(p) {
+    function isPctHundred(p: string | number | null | undefined): boolean {
       if (p == null) return false
       const m = String(p).match(/^(-?\d+(?:\.\d+)?)%$/)
       return !!(m && Number(m[1]) === 100)
@@ -324,11 +326,11 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           let p2 = s.position2
 
           // Omit values equal to tool defaults only if explicitly stored in stop.auto
-          if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
+          if (p1 != null && s.auto != null && p1 == s.auto) p1 = null as any
 
           // Omit browser default edges only when explicitly percentages
-          if (i === firstStopIdx && isPctZero(p1)) p1 = null
-          if (i === lastStopIdx && isPctHundred(p2)) p2 = null
+          if (i === firstStopIdx && isPctZero(p1)) p1 = null as any
+          if (i === lastStopIdx && isPctHundred(p2)) p2 = null as any
 
           // If both positions exist
           if (p1 != null && p2 != null) {
@@ -365,7 +367,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
       .join(new_lines == true ? ',\n      ' : ', ')
   }
 
-  function radialPositionToString() {
+  function radialPositionToString(): string {
     if ($radial_position.x != null) {
       const y = $radial_position.y ?? '50'
       return $radial_position.x + '% ' + y + '%'
@@ -375,7 +377,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     }
   }
 
-  function conicPositionToString() {
+  function conicPositionToString(): string {
     if ($conic_position.x != null) {
       const y = $conic_position.y ?? '50'
       return $conic_position.x + '% ' + y + '%'
@@ -385,28 +387,31 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     }
   }
 
-  function addStop() {
-    const newList = [
+  function addStop(): void {
+    const newList: any[] = [
       ...$gradient_stops,
       {kind: 'hint', percentage: null},
       {kind: 'stop', color: `oklch(80% 0.3 ${randomNumber(0,360)})`, position1: null, position2: null},
     ]
-    $gradient_stops = updateStops(newList)
+    $gradient_stops = updateStops(newList as any) as any
   }
 
-  function showCodePane() {
-    document.querySelector('.code-preview-panel .panel-actions button').focus()
+  function showCodePane(): void {
+    const el = document.querySelector('.code-preview-panel .panel-actions button') as HTMLButtonElement | null
+    if (el) el.focus()
   }
 
-  function showEditorPane() {
-    document.querySelector('.preview-panel .panel-actions button').focus()
+  function showEditorPane(): void {
+    const el = document.querySelector('.preview-panel .panel-actions button') as HTMLButtonElement | null
+    if (el) el.focus()
   }
 
   import { copyToClipboard } from '../utils/clipboard.ts'
   import { layers as layersStore, active_layer_index as activeLayerIndex, defaultLayer, selectLayer as selectLayerFn } from '../store/layers.ts'
 
-  function globalAction(event) {
-    switch (event.target.value) {
+  function globalAction(event: Event): void {
+    const target = event.target as HTMLSelectElement
+    switch (target.value) {
       case 'Start new':
         // Reset to a single default linear layer and sync stores
         layersStore.set([defaultLayer()])
@@ -441,38 +446,12 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     }
 
     // reset
-    event.target.selectedIndex = 0
+    target.selectedIndex = 0
   }
 
-let user_gradient = $derived(gensyntax[$gradient_type](
-    $gradient_space,
-    $gradient_interpolation,
-    $gradient_stops,
-    $linear_named_angle,
-    $linear_angle,
-    $radial_shape,
-    $radial_size,
-    $radial_position,
-    $radial_named_position,
-    $conic_angle,
-    $conic_position,
-    $conic_named_position
-  ))
+let user_gradient = $derived(gensyntax[$gradient_type as keyof typeof gensyntax]())
 
-  let classic_gradient = $derived(genClassicSyntax[$gradient_type](
-    $gradient_space,
-    $gradient_interpolation,
-    $gradient_stops,
-    $linear_named_angle,
-    $linear_angle,
-    $radial_shape,
-    $radial_size,
-    $radial_position,
-    $radial_named_position,
-    $conic_angle,
-    $conic_position,
-    $conic_named_position
-  ))
+  let classic_gradient = $derived(genClassicSyntax[$gradient_type as keyof typeof genClassicSyntax]())
 
   // Multi-layer joined strings for preview and output
   let user_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.modern || '').filter(Boolean).join(', '))
@@ -500,7 +479,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     <div class="inline-snap-panels">
       <section class="preview-panel">
         <div class="panel-actions">
-          <button onclick={e => showCodePane()} use:tooltip={{content: "Get the CSS"}}>
+          <button onclick={(e: MouseEvent) => showCodePane()} use:tooltip={{content: "Get the CSS"}}>
             <span class="sr-only">Get the CSS code</span>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path fill="currentColor" d="M16.7 17.3q-.275.275-.688.275t-.712-.3q-.3-.3-.3-.712t.3-.713l3.875-3.875l-3.9-3.9Q15 7.8 15.012 7.388T15.3 6.7q.275-.275.7-.275t.7.275l4.6 4.6q.3.3.3.7t-.3.7l-4.6 4.6Zm-9.4 0l-4.6-4.6q-.3-.3-.3-.7t.3-.7l4.6-4.6q.275-.275.7-.287t.725.287q.3.3.3.713t-.3.712l-3.9 3.9l3.9 3.9q.275.275.263.688T8.7 17.3q-.275.275-.7.275t-.7-.275Z"/>
@@ -541,7 +520,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       </section>
       <section class="code-preview-panel">
         <div class="panel-actions">
-          <button onclick={e => showEditorPane()} use:tooltip={{content: "Back to the editor"}}>
+          <button onclick={(e: MouseEvent) => showEditorPane()} use:tooltip={{content: "Back to the editor"}}>
             <span class="sr-only">Back to editor</span>
             <svg viewBox="0 0 24 24">
               <path fill="currentColor" d="m10.875 19.3l-6.6-6.6q-.15-.15-.213-.325T4 12q0-.2.063-.375t.212-.325l6.6-6.6q.275-.275.688-.287t.712.287q.3.275.313.688T12.3 6.1L7.4 11h11.175q.425 0 .713.288t.287.712q0 .425-.287.713t-.713.287H7.4l4.9 4.9q.275.275.288.7t-.288.7q-.275.3-.7.3t-.725-.3Z"/>
