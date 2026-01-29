@@ -622,7 +622,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 		display: grid;
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-3);
-    overflow: hidden;
+    overflow: clip;
 	}
 
 	@media (prefers-color-scheme: light) {
@@ -743,7 +743,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     display: grid;
     place-content: center;
     inline-size: 100cqi;
-    overflow: hidden;
+    overflow: clip;
     position: relative;
   }
 
@@ -1170,7 +1170,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   .global-actions {
     position: relative;
     inline-size: var(--size-7);
-    overflow: hidden;
+    overflow: clip;
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;

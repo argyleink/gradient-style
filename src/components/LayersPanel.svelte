@@ -193,7 +193,7 @@
 .layer-actions {
     position: relative;
     inline-size: var(--size-5);
-    overflow: hidden;
+    overflow: clip;
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
