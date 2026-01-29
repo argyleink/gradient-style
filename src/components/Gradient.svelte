@@ -997,6 +997,110 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     cursor: not-allowed;
   }
 
+  /* -----------------------------------------------
+   * Customizable Select (base-select) Styles
+   * ----------------------------------------------- */
+  @supports (appearance: base-select) {
+    :global(select) {
+      appearance: base-select;
+      background-image: none;
+      padding-inline-end: 1.75ch;
+    }
+
+    :global(select::picker(select)) {
+      --_picker-bg-light: #fff;
+      --_picker-bg-dark: var(--surface-3);
+      --_picker-bg: var(--_picker-bg-light);
+
+      background: var(--_picker-bg);
+      border: 1px solid var(--surface-4);
+      border-radius: var(--radius-2);
+      box-shadow: var(--shadow-4);
+      padding: var(--size-1);
+      margin-block-start: var(--size-1);
+      
+      /* Transitions */
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      transition: 
+        opacity 150ms var(--ease-3),
+        transform 150ms var(--ease-3),
+        overlay 150ms var(--ease-3) allow-discrete,
+        display 150ms var(--ease-3) allow-discrete;
+    }
+
+    :global(select:open::picker(select)) {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @starting-style {
+      :global(select:open::picker(select)) {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+      }
+    }
+
+    :global(select option) {
+      padding: var(--size-2) var(--size-3);
+      border-radius: var(--radius-2);
+      cursor: pointer;
+      transition: 
+        background-color 100ms var(--ease-2),
+        color 100ms var(--ease-2);
+    }
+
+    :global(select option:hover) {
+      background-color: var(--surface-2);
+    }
+
+    :global(select option:checked),
+    :global(select option:focus) {
+      background-color: var(--link);
+      color: white;
+    }
+
+    :global(select option::checkmark) {
+      display: none;
+    }
+
+    :global(select optgroup) {
+      padding-block: var(--size-1);
+    }
+
+    :global(select optgroup::before) {
+      content: attr(label);
+      display: block;
+      font-size: var(--font-size-0);
+      font-weight: var(--font-weight-6);
+      color: var(--text-2);
+      padding: var(--size-1) var(--size-3);
+      text-transform: uppercase;
+      letter-spacing: var(--font-letterspacing-2);
+    }
+
+    :global(select optgroup:not(:first-of-type)) {
+      border-block-start: 1px solid var(--surface-3);
+      margin-block-start: var(--size-1);
+      padding-block-start: var(--size-2);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :global(select::picker(select)) {
+        --_picker-bg: var(--_picker-bg-dark);
+        border-color: var(--surface-4);
+      }
+
+      :global(select option:hover) {
+        background-color: var(--surface-4);
+      }
+
+      :global(select optgroup:not(:first-of-type)) {
+        border-block-start-color: var(--surface-4);
+      }
+    }
+  }
+
   :global(.sr-only) {
     inline-size: 0;
     block-size: 0;
