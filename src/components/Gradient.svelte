@@ -1050,6 +1050,10 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         color 100ms var(--ease-2);
     }
 
+    :global(select option:not(:last-child)) {
+      margin-block-end: 1px;
+    }
+
     :global(select option:hover) {
       background-color: var(--surface-2);
     }
