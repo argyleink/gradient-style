@@ -7,9 +7,11 @@ import { conic_angle, conic_position, conic_named_position } from './conic'
 
 import { buildGradientStrings } from '../utils/gradientString'
 
-// Debounce timer for batching rapid store updates
+// Batching timer for coalescing rapid store updates into a single layer update
 let batchUpdateTimer: ReturnType<typeof setTimeout> | null = null
-let pendingLayerUpdate: ((l: GradientLayer) => void)[] = []
+let pendingLayerUpdates: ((l: GradientLayer) => void)[] = []
+// Track the target layer index when updates are queued to prevent applying to wrong layer
+let pendingLayerIndex: number | null = null
 
 // Minimal layer shape mirroring the single-store shape
 export type GradientLayer = {
@@ -95,38 +97,59 @@ function applyLayerToStores(layer: GradientLayer) {
 
 // Batch multiple rapid store updates into a single layer update to reduce renders
 function updateActiveLayer(mutator: (l: GradientLayer) => void) {
-  pendingLayerUpdate.push(mutator)
+  const currentIdx = get(active_layer_index) ?? 0
+  
+  // If layer changed since pending updates were queued, discard stale updates
+  if (pendingLayerIndex !== null && pendingLayerIndex !== currentIdx) {
+    pendingLayerUpdates = []
+    if (batchUpdateTimer !== null) {
+      clearTimeout(batchUpdateTimer)
+      batchUpdateTimer = null
+    }
+    pendingLayerIndex = null
+  }
+  
+  // Track which layer these updates are for
+  if (pendingLayerIndex === null) {
+    pendingLayerIndex = currentIdx
+  }
+  
+  pendingLayerUpdates.push(mutator)
   
   if (batchUpdateTimer !== null) {
     clearTimeout(batchUpdateTimer)
   }
   
-  // Use requestAnimationFrame timing (via setTimeout 0) for batching slider updates
+  // Use setTimeout(0) to batch updates in the next event loop tick
   batchUpdateTimer = setTimeout(() => {
+    const targetIdx = pendingLayerIndex
     const list = get(layers)
-    const idx = get(active_layer_index) ?? 0
-    if (!list.length || idx < 0 || idx >= list.length) {
-      pendingLayerUpdate = []
+    
+    // Verify target layer still exists and is valid
+    if (targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
+      pendingLayerUpdates = []
       batchUpdateTimer = null
+      pendingLayerIndex = null
       return
     }
     
     const copy = [...list]
-    const layer = { ...copy[idx],
-      linear: { ...copy[idx].linear },
-      radial: { ...copy[idx].radial, position: { ...copy[idx].radial.position } },
-      conic: { ...copy[idx].conic, position: { ...copy[idx].conic.position } },
+    const layer = { ...copy[targetIdx],
+      linear: { ...copy[targetIdx].linear },
+      radial: { ...copy[targetIdx].radial, position: { ...copy[targetIdx].radial.position } },
+      conic: { ...copy[targetIdx].conic, position: { ...copy[targetIdx].conic.position } },
     }
     
     // Apply all pending mutations in order
-    for (const m of pendingLayerUpdate) {
+    for (const m of pendingLayerUpdates) {
       m(layer)
     }
-    pendingLayerUpdate = []
+    pendingLayerUpdates = []
     batchUpdateTimer = null
+    pendingLayerIndex = null
     
     layer.cachedCss = buildGradientStrings(layer)
-    copy[idx] = layer
+    copy[targetIdx] = layer
     layers.set(copy)
   }, 0)
 }
