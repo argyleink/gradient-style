@@ -2,7 +2,7 @@
 // @ts-nocheck
   import {flip} from 'svelte/animate'
   import {fade,scale} from 'svelte/transition'
-  import {onDestroy} from 'svelte'
+  import {tick} from 'svelte'
 
   import { tooltip } from 'svooltip'
 
@@ -247,8 +247,9 @@
   }
 
   // Batched update for sliding position to reduce store updates during rapid slider changes
-  let slidingTimer: ReturnType<typeof setTimeout> | null = null
-  function slidingPosition(e, stop) {
+  // Uses Svelte's tick() to defer store update until after pending state changes
+  let slidingPending = false
+  async function slidingPosition(e, stop) {
     const range = [
       stop.position1 + 1,
       stop.position1 + 2,
@@ -258,23 +259,14 @@
     if (range.includes(stop.position2)) {
       stop.position2 = stop.position1
     }
-    // Batch rapid slider updates using setTimeout(0) to coalesce in next event loop tick
-    if (slidingTimer !== null) {
-      clearTimeout(slidingTimer)
-    }
-    slidingTimer = setTimeout(() => {
+    // Schedule a batched store update via Svelte's tick() if not already pending
+    if (!slidingPending) {
+      slidingPending = true
+      await tick()
       $gradient_stops = [...$gradient_stops]
-      slidingTimer = null
-    }, 0)
-  }
-
-  // Clean up pending timer on component unmount to prevent stale updates
-  onDestroy(() => {
-    if (slidingTimer !== null) {
-      clearTimeout(slidingTimer)
-      slidingTimer = null
+      slidingPending = false
     }
-  })
+  }
 </script>
 
 <section class="gradient-stops">

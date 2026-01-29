@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store'
+import { tick } from 'svelte'
 
 import { gradient_type, gradient_space, gradient_interpolation, gradient_stops, gradient_angles } from './gradient'
 import { linear_angle, linear_named_angle } from './linear'
@@ -7,11 +8,12 @@ import { conic_angle, conic_position, conic_named_position } from './conic'
 
 import { buildGradientStrings } from '../utils/gradientString'
 
-// Batching timer for coalescing rapid store updates into a single layer update
-let batchUpdateTimer: ReturnType<typeof setTimeout> | null = null
+// Pending mutations for batching rapid store updates via Svelte's tick()
 let pendingLayerUpdates: ((l: GradientLayer) => void)[] = []
 // Track the target layer index when updates are queued to prevent applying to wrong layer
 let pendingLayerIndex: number | null = null
+// Track whether a tick-based flush is already scheduled
+let flushScheduled = false
 
 // Minimal layer shape mirroring the single-store shape
 export type GradientLayer = {
@@ -95,6 +97,42 @@ function applyLayerToStores(layer: GradientLayer) {
   }
 }
 
+// Flush pending layer updates - called via tick() to batch multiple store changes
+async function flushPendingUpdates() {
+  // Wait for Svelte to finish processing current reactive updates
+  await tick()
+  
+  const targetIdx = pendingLayerIndex
+  const list = get(layers)
+  
+  // Reset state before processing (allows new updates to queue while we process)
+  const updates = pendingLayerUpdates
+  pendingLayerUpdates = []
+  flushScheduled = false
+  pendingLayerIndex = null
+  
+  // Verify target layer still exists and is valid
+  if (targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
+    return
+  }
+  
+  const copy = [...list]
+  const layer = { ...copy[targetIdx],
+    linear: { ...copy[targetIdx].linear },
+    radial: { ...copy[targetIdx].radial, position: { ...copy[targetIdx].radial.position } },
+    conic: { ...copy[targetIdx].conic, position: { ...copy[targetIdx].conic.position } },
+  }
+  
+  // Apply all pending mutations in order
+  for (const m of updates) {
+    m(layer)
+  }
+  
+  layer.cachedCss = buildGradientStrings(layer)
+  copy[targetIdx] = layer
+  layers.set(copy)
+}
+
 // Batch multiple rapid store updates into a single layer update to reduce renders
 function updateActiveLayer(mutator: (l: GradientLayer) => void) {
   const currentIdx = get(active_layer_index) ?? 0
@@ -102,10 +140,6 @@ function updateActiveLayer(mutator: (l: GradientLayer) => void) {
   // If layer changed since pending updates were queued, discard stale updates
   if (pendingLayerIndex !== null && pendingLayerIndex !== currentIdx) {
     pendingLayerUpdates = []
-    if (batchUpdateTimer !== null) {
-      clearTimeout(batchUpdateTimer)
-      batchUpdateTimer = null
-    }
     pendingLayerIndex = null
   }
   
@@ -116,42 +150,12 @@ function updateActiveLayer(mutator: (l: GradientLayer) => void) {
   
   pendingLayerUpdates.push(mutator)
   
-  if (batchUpdateTimer !== null) {
-    clearTimeout(batchUpdateTimer)
+  // Schedule a flush via Svelte's tick() if not already scheduled
+  // tick() returns a promise that resolves after pending state changes are applied
+  if (!flushScheduled) {
+    flushScheduled = true
+    flushPendingUpdates()
   }
-  
-  // Use setTimeout(0) to batch updates in the next event loop tick
-  batchUpdateTimer = setTimeout(() => {
-    const targetIdx = pendingLayerIndex
-    const list = get(layers)
-    
-    // Verify target layer still exists and is valid
-    if (targetIdx === null || !list.length || targetIdx < 0 || targetIdx >= list.length) {
-      pendingLayerUpdates = []
-      batchUpdateTimer = null
-      pendingLayerIndex = null
-      return
-    }
-    
-    const copy = [...list]
-    const layer = { ...copy[targetIdx],
-      linear: { ...copy[targetIdx].linear },
-      radial: { ...copy[targetIdx].radial, position: { ...copy[targetIdx].radial.position } },
-      conic: { ...copy[targetIdx].conic, position: { ...copy[targetIdx].conic.position } },
-    }
-    
-    // Apply all pending mutations in order
-    for (const m of pendingLayerUpdates) {
-      m(layer)
-    }
-    pendingLayerUpdates = []
-    batchUpdateTimer = null
-    pendingLayerIndex = null
-    
-    layer.cachedCss = buildGradientStrings(layer)
-    copy[targetIdx] = layer
-    layers.set(copy)
-  }, 0)
 }
 
 // Public API
