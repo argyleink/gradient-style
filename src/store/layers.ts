@@ -7,6 +7,10 @@ import { conic_angle, conic_position, conic_named_position } from './conic'
 
 import { buildGradientStrings } from '../utils/gradientString'
 
+// Debounce timer for batching rapid store updates
+let batchUpdateTimer: ReturnType<typeof setTimeout> | null = null
+let pendingLayerUpdate: ((l: GradientLayer) => void)[] = []
+
 // Minimal layer shape mirroring the single-store shape
 export type GradientLayer = {
   id: string
@@ -40,7 +44,7 @@ function snapshotFromStores(): GradientLayer {
     type: get(gradient_type),
     space: get(gradient_space),
     interpolation: get(gradient_interpolation),
-    stops: JSON.parse(JSON.stringify(get(gradient_stops))),
+    stops: structuredClone(get(gradient_stops)),
     linear: {
       named_angle: get(linear_named_angle),
       angle: get(linear_angle),
@@ -81,7 +85,7 @@ function applyLayerToStores(layer: GradientLayer) {
     conic_named_position.set(layer.conic.named_position)
     conic_position.set({ ...layer.conic.position })
 
-    gradient_stops.set(JSON.parse(JSON.stringify(layer.stops)))
+    gradient_stops.set(structuredClone(layer.stops))
   }
   finally {
     // release in next microtask to let subscribers flush
@@ -89,20 +93,42 @@ function applyLayerToStores(layer: GradientLayer) {
   }
 }
 
+// Batch multiple rapid store updates into a single layer update to reduce renders
 function updateActiveLayer(mutator: (l: GradientLayer) => void) {
-  const list = get(layers)
-  const idx = get(active_layer_index) ?? 0
-  if (!list.length || idx < 0 || idx >= list.length) return
-  const copy = [...list]
-  const layer = { ...copy[idx],
-    linear: { ...copy[idx].linear },
-    radial: { ...copy[idx].radial, position: { ...copy[idx].radial.position } },
-    conic: { ...copy[idx].conic, position: { ...copy[idx].conic.position } },
+  pendingLayerUpdate.push(mutator)
+  
+  if (batchUpdateTimer !== null) {
+    clearTimeout(batchUpdateTimer)
   }
-  mutator(layer)
-  layer.cachedCss = buildGradientStrings(layer)
-  copy[idx] = layer
-  layers.set(copy)
+  
+  // Use requestAnimationFrame timing (via setTimeout 0) for batching slider updates
+  batchUpdateTimer = setTimeout(() => {
+    const list = get(layers)
+    const idx = get(active_layer_index) ?? 0
+    if (!list.length || idx < 0 || idx >= list.length) {
+      pendingLayerUpdate = []
+      batchUpdateTimer = null
+      return
+    }
+    
+    const copy = [...list]
+    const layer = { ...copy[idx],
+      linear: { ...copy[idx].linear },
+      radial: { ...copy[idx].radial, position: { ...copy[idx].radial.position } },
+      conic: { ...copy[idx].conic, position: { ...copy[idx].conic.position } },
+    }
+    
+    // Apply all pending mutations in order
+    for (const m of pendingLayerUpdate) {
+      m(layer)
+    }
+    pendingLayerUpdate = []
+    batchUpdateTimer = null
+    
+    layer.cachedCss = buildGradientStrings(layer)
+    copy[idx] = layer
+    layers.set(copy)
+  }, 0)
 }
 
 // Public API
@@ -290,4 +316,5 @@ radial_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer
 conic_angle.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.angle = v as any }) })
 conic_named_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.named_position = v }) })
 conic_position.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.conic.position = { ...(v as any) } }) })
-gradient_stops.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.stops = JSON.parse(JSON.stringify(v)) }) })
+// Use structuredClone for a faster deep clone than JSON.parse/stringify
+gradient_stops.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.stops = structuredClone(v) }) })

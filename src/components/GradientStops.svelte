@@ -245,6 +245,8 @@
     dropPos = null
   }
 
+  // Debounced update for sliding position to reduce store updates during rapid slider changes
+  let slidingTimer: ReturnType<typeof setTimeout> | null = null
   function slidingPosition(e, stop) {
     const range = [
       stop.position1 + 1,
@@ -255,7 +257,14 @@
     if (range.includes(stop.position2)) {
       stop.position2 = stop.position1
     }
-    $gradient_stops = [...$gradient_stops]
+    // Batch rapid slider updates using requestAnimationFrame timing
+    if (slidingTimer !== null) {
+      clearTimeout(slidingTimer)
+    }
+    slidingTimer = setTimeout(() => {
+      $gradient_stops = [...$gradient_stops]
+      slidingTimer = null
+    }, 0)
   }
 </script>
 
