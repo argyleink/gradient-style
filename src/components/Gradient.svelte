@@ -1036,6 +1036,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     }
 
     :global(select::picker(select)) {
+      appearance: base-select;
       --_picker-bg-light: #fff;
       --_picker-bg-dark: var(--surface-3);
       --_picker-bg: var(--_picker-bg-light);
