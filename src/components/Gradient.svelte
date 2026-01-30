@@ -1013,13 +1013,13 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       align-items: center;
       gap: 0.5ch;
       cursor: pointer;
-      padding-inline: 1.75ch 0;
-      padding-block: 0.75ch;
+      white-space: nowrap;
     }
 
     /* Style the selected content display */
     :global(select selectedcontent) {
       display: inline;
+      white-space: nowrap;
     }
 
     /* Style the picker icon to use the same arrow icons */
@@ -1027,7 +1027,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       content: var(--icon-arrow-down);
       inline-size: 3ex;
       block-size: 3ex;
-      padding-inline: 0.5ch;
+      padding-inline-start: 0.5ch;
       transition: rotate 150ms var(--ease-3);
     }
 
