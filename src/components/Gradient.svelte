@@ -1058,6 +1058,13 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         display 150ms var(--ease-3) allow-discrete;
     }
 
+    /* Style hr elements inside the picker */
+    :global(select::picker(select) hr) {
+      margin-block: var(--size-1);
+      border: none;
+      border-block-start: 1px solid var(--surface-3);
+    }
+
     :global(select:open::picker(select)) {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -1093,23 +1100,12 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       color: white;
     }
 
-    :global(select option::checkmark) {
-      display: none;
-    }
-
     :global(select optgroup) {
       padding-block: var(--size-1);
     }
 
-    :global(select optgroup::before) {
-      content: attr(label);
-      display: block;
-      font-size: var(--font-size-0);
-      font-weight: var(--font-weight-6);
-      color: var(--text-2);
-      padding: var(--size-1) var(--size-3);
-      text-transform: uppercase;
-      letter-spacing: var(--font-letterspacing-2);
+    :global(select optgroup:last-of-type) {
+      padding-block-end: 0;
     }
 
     :global(select optgroup:not(:first-of-type)) {
