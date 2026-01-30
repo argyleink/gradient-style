@@ -438,6 +438,10 @@
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    background-image: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
   }
 
   /* Drag handle to initiate reordering */

@@ -1022,17 +1022,9 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       white-space: nowrap;
     }
 
-    /* Style the picker icon to use the same arrow icons */
+    /* Hide the picker icon */
     :global(select::picker-icon) {
-      content: var(--icon-arrow-down);
-      inline-size: 3ex;
-      block-size: 3ex;
-      padding-inline-start: 0.5ch;
-      transition: rotate 150ms var(--ease-3);
-    }
-
-    :global(select:open::picker-icon) {
-      rotate: 180deg;
+      display: none;
     }
 
     :global(select::picker(select)) {
@@ -1044,7 +1036,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       background: var(--_picker-bg);
       border: 1px solid var(--surface-4);
       border-radius: var(--radius-2);
-      box-shadow: var(--shadow-4);
+      box-shadow: var(--shadow-6);
       padding: var(--size-1);
       margin-block-start: var(--size-1);
       
@@ -1078,6 +1070,8 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     }
 
     :global(select option) {
+      display: flex;
+      align-items: center;
       padding: var(--size-2) var(--size-3);
       border-radius: var(--radius-2);
       cursor: pointer;
@@ -1098,6 +1092,12 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     :global(select option:focus) {
       background-color: var(--link);
       color: white;
+    }
+
+    /* Position checkmark on inline-end */
+    :global(select option::checkmark) {
+      margin-inline-start: auto;
+      padding-inline-start: var(--size-2);
     }
 
     :global(select optgroup) {
