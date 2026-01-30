@@ -1004,7 +1004,35 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     :global(select) {
       appearance: base-select;
       background-image: none;
-      padding-inline-end: 1.75ch;
+    }
+
+    /* Style the button that activates the picker */
+    :global(select > button) {
+      all: unset;
+      display: flex;
+      align-items: center;
+      gap: 0.5ch;
+      cursor: pointer;
+      padding-inline: 1.75ch 0;
+      padding-block: 0.75ch;
+    }
+
+    /* Style the selected content display */
+    :global(select selectedcontent) {
+      display: inline;
+    }
+
+    /* Style the picker icon to use the same arrow icons */
+    :global(select::picker-icon) {
+      content: var(--icon-arrow-down);
+      inline-size: 3ex;
+      block-size: 3ex;
+      padding-inline: 0.5ch;
+      transition: rotate 150ms var(--ease-3);
+    }
+
+    :global(select:open::picker-icon) {
+      rotate: 180deg;
     }
 
     :global(select::picker(select)) {

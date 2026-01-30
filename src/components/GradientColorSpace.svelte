@@ -17,6 +17,9 @@
       Color Space
     </label>
     <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
+      <button>
+        <selectedcontent></selectedcontent>
+      </button>
       <optgroup label="Default">
         <option selected>oklab</option>
       </optgroup>

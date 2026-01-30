@@ -12,6 +12,9 @@
       Hue Path
     </label>
     <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation}> 
+      <button>
+        <selectedcontent></selectedcontent>
+      </button>
       <optgroup label="Default interpolation">
         <option selected>shorter</option>
       </optgroup>

@@ -32,6 +32,9 @@
     <NamedDirections id="linear-angle" bind:selected={$linear_named_angle} mode="angle" />
     <div class="select-wrap">
       <select name="named-directions" bind:value={$linear_named_angle}>
+        <button>
+          <selectedcontent></selectedcontent>
+        </button>
         <option disabled>--</option>
         {#each linear_directions as dir}
           <option value={dir}>{dir}</option>

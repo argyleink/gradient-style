@@ -29,6 +29,9 @@
     <label>Position</label>
     <NamedDirections id="conic-position" bind:selected={$conic_named_position} mode="position" />
     <select name="conic-position" bind:value={$conic_named_position}>
+      <button>
+        <selectedcontent></selectedcontent>
+      </button>
       <option disabled>--</option>
       {#each gradient_positions as pos}
         <option value={pos}>{pos}</option>  

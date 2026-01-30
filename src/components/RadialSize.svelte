@@ -64,6 +64,9 @@
   <div class="label-select-combo">
     <label>Size</label>
     <select name="radial-size" bind:value={$radial_size}>
+      <button>
+        <selectedcontent></selectedcontent>
+      </button>
       {#if !optionExists($radial_size)}
         <option value={$radial_size}>{$radial_size}</option>
       {/if}

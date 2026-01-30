@@ -29,6 +29,9 @@
     <label>Position</label>
     <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" />
     <select name="radial-position" bind:value={$radial_named_position}>
+      <button>
+        <selectedcontent></selectedcontent>
+      </button>
       <option disabled>--</option>
       {#each gradient_positions as pos}
         <option value={pos}>{pos}</option>  
