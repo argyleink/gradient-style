@@ -12,10 +12,10 @@
 
 	onMount(() => {
 		/**
-		 * Pointer-based proximity glow for buttons, selects and .stop components.
+		 * Pointer-based proximity glow for .stop components (color stop cards).
 		 * Extends detection beyond the element bounds so near-edge hover still shines.
 		 */
-		const SELECTOR = 'button, select, .stop';
+		const SELECTOR = '.stop';
 		const SEARCH_RADIUS = 96; // px beyond the element bounds
 		let activeEl = /** @type {HTMLElement | null} */ (null);
 		const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -143,8 +143,6 @@
 	 * Proximity-aware gradient border shine
 	 * ------------------------------------------ */
 
-	:global(button),
-	:global(select),
 	:global(.stop) {
 		position: relative;
 		isolation: isolate;
@@ -155,8 +153,6 @@
 		--gs-pointer-opacity: 0;
 	}
 
-	:global(button)::before,
-	:global(select)::before,
 	:global(.stop)::before {
 		content: "";
 		position: absolute;
