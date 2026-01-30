@@ -1027,6 +1027,17 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       display: none;
     }
 
+    /* Action button selects: fit to parent and hide content so parent icon shows */
+    :global(.global-actions > select),
+    :global(.layer-actions > select),
+    :global(.stop-actions > select) {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      opacity: 0;
+    }
+
     :global(select::picker(select)) {
       appearance: base-select;
       --_picker-bg-light: #fff;
@@ -1212,11 +1223,8 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     --_bg: transparent;
   }
 
-  .global-actions:not(:active,:focus) select {
-    opacity: 0;
-  }
-
   .global-actions > select {
     position: absolute;
+    inset: 0;
   }
 </style>

@@ -481,7 +481,7 @@
     --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     position: absolute;
-    inset-inline-end: -1.1ch;
+    inset: 0;
   }
 
   .chip {
