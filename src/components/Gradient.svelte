@@ -1096,6 +1096,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 
     /* Position checkmark on inline-end */
     :global(select option::checkmark) {
+      order: 2;
       margin-inline-start: auto;
       padding-inline-start: var(--size-2);
     }
