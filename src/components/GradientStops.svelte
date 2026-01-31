@@ -330,13 +330,11 @@
         <button class="stop-actions" use:tooltip={{content: "Actions", offset: 15}}>
           <select tabindex="-1" onchange={(e) => colorAction(e,i)}>
             <option disabled selected>Color Stop Actions</option>
-            <hr>
-            <option>Duplicate</option>
-            <option>Copy CSS color</option>
-            <option>Random color</option>
-            <hr>
-            <option>Reset</option>
-            <option disabled={colorStopCount() <= 1}>Remove</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Duplicate</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy CSS color</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg> Random color</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6s-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8s-3.58-8-8-8z"/></svg> Reset</option>
+            <option disabled={colorStopCount() <= 1}><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Remove</option>
           </select>
         </button>
         <div class="drag-handle" use:tooltip={{content: 'Drag to reorder'}} draggable="true" ondragstart={(e) => beginDrag(e, i)} role="button" aria-label="Drag to reorder" tabindex="0"></div>
@@ -438,6 +436,10 @@
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    background-image: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
   }
 
   /* Drag handle to initiate reordering */
@@ -477,7 +479,7 @@
     --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     position: absolute;
-    inset-inline-end: -1.1ch;
+    inset: 0;
   }
 
   .chip {

@@ -21,7 +21,7 @@
 
 	@media (min-width: 1024px) {
 		:global(html) {
-			overflow: hidden;
+			overflow: clip;
 		}
 	}
 </style>

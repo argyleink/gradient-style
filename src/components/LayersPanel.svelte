@@ -58,14 +58,12 @@
         <button class="layer-actions" aria-label="Layer actions" use:tooltip={{content: "Layer Actions"}}>
           <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
             <option disabled selected>Layer Actions</option>
-            <hr>
-            <option>Move up</option>
-            <option>Move down</option>
-            <option>Move to top</option>
-            <option>Move to bottom</option>
-            <hr>
-            <option>Toggle visibility</option>
-            <option disabled={$layers.length<=1}>Remove</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6l1.41 1.41z"/></svg> Move up</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6l1.41-1.41z"/></svg> Move down</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 11h3v10h2V11h3l-4-4l-4 4zM4 3v2h16V3H4z"/></svg> Move to top</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 13h-3V3h-2v10H8l4 4l4-4zM4 19v2h16v-2H4z"/></svg> Move to bottom</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/></svg> Toggle visibility</option>
+            <option disabled={$layers.length<=1}><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Remove</option>
           </select>
         </button>
       </div>
@@ -193,19 +191,23 @@
 .layer-actions {
     position: relative;
     inline-size: var(--size-5);
-    overflow: hidden;
+    overflow: clip;
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
+    background-image: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 75%;
   }
 
   .layer-actions > select {
     --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
     position: absolute;
-    inset-inline-end: -1.1ch;
+    inset: 0;
   }
 
   .end-of-layers {

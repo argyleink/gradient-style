@@ -560,17 +560,15 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
-            <hr>
-            <option>Start new</option>
-            <option>Import gradient</option>
-            <option>Copy modern CSS</option>
-            <option>Copy classic CSS</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Start new</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3h-7z"/></svg> Import gradient</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy modern CSS</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy classic CSS</option>
             <!-- <option disabled>Reset all stops to auto</option> -->
-            <hr>
             <!-- <option disabled>Toggle light & dark</option> -->
-            <option>Tips & tricks</option>
-            <option>Help & feedback</option>
-            <option>GitHub</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Tips & tricks</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4z"/></svg> Help & feedback</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> GitHub</option>
           </select>
         </button>
       </div>
@@ -622,7 +620,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 		display: grid;
     border-radius: var(--radius-3);
     box-shadow: var(--shadow-3);
-    overflow: hidden;
+    overflow: clip;
 	}
 
 	@media (prefers-color-scheme: light) {
@@ -743,7 +741,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     display: grid;
     place-content: center;
     inline-size: 100cqi;
-    overflow: hidden;
+    overflow: clip;
     position: relative;
   }
 
@@ -997,6 +995,161 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     cursor: not-allowed;
   }
 
+  /* -----------------------------------------------
+   * Customizable Select (base-select) Styles
+   * ----------------------------------------------- */
+  @supports (appearance: base-select) {
+    :global(select) {
+      appearance: base-select;
+    }
+
+    /* Style the button that activates the picker */
+    :global(select > button) {
+      all: unset;
+      display: flex;
+      align-items: center;
+      gap: 0.5ch;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Style the selected content display */
+    :global(select selectedcontent) {
+      display: inline;
+      white-space: nowrap;
+    }
+
+    /* Hide the picker icon */
+    :global(select::picker-icon) {
+      display: none;
+    }
+
+    /* Action button selects: fit to parent and hide content so parent icon shows */
+    :global(.global-actions > select),
+    :global(.layer-actions > select),
+    :global(.stop-actions > select) {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      opacity: 0;
+    }
+
+    /* Selects inside buttons should have no padding */
+    :global(button > select) {
+      padding: 0;
+    }
+
+    :global(select::picker(select)) {
+      appearance: base-select;
+      --_picker-bg-light: #fff;
+      --_picker-bg-dark: var(--surface-3);
+      --_picker-bg: var(--_picker-bg-light);
+
+      background: var(--_picker-bg);
+      border: 1px solid var(--surface-4);
+      border-radius: var(--radius-2);
+      box-shadow: var(--shadow-6);
+      padding: var(--size-1);
+      margin-block-start: var(--size-1);
+      
+      /* Transitions */
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      transition: 
+        opacity 150ms var(--ease-3),
+        transform 150ms var(--ease-3),
+        overlay 150ms var(--ease-3) allow-discrete,
+        display 150ms var(--ease-3) allow-discrete;
+    }
+
+    :global(select:open::picker(select)) {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @starting-style {
+      :global(select:open::picker(select)) {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+      }
+    }
+
+    /* Hide disabled options in base-select mode */
+    :global(select option[disabled]) {
+      display: none;
+    }
+
+    :global(select option) {
+      display: flex;
+      align-items: center;
+      gap: var(--size-3);
+      padding: var(--size-2) var(--size-2);
+      border-radius: var(--radius-2);
+      cursor: pointer;
+      transition: 
+        background-color 100ms var(--ease-2),
+        color 100ms var(--ease-2);
+    }
+
+    /* Style icons inside options */
+    :global(select option > svg) {
+      inline-size: 1.25em;
+      block-size: 1.25em;
+      flex-shrink: 0;
+    }
+
+    :global(select option:not(:last-child)) {
+      margin-block-end: 1px;
+    }
+
+    :global(select option:hover) {
+      background-color: var(--surface-2);
+    }
+
+    :global(select option:checked),
+    :global(select option:focus) {
+      background-color: var(--link);
+      color: white;
+    }
+
+    /* Position checkmark on inline-end */
+    :global(select option::checkmark) {
+      order: 2;
+      margin-inline-start: auto;
+      padding-inline-start: var(--size-2);
+    }
+
+    :global(select optgroup) {
+      padding-block: var(--size-1);
+    }
+
+    :global(select optgroup:last-of-type) {
+      padding-block-end: 0;
+    }
+
+    :global(select optgroup:not(:first-of-type)) {
+      border-block-start: 1px solid var(--surface-3);
+      margin-block-start: var(--size-1);
+      padding-block-start: var(--size-2);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :global(select::picker(select)) {
+        --_picker-bg: var(--_picker-bg-dark);
+        border-color: var(--surface-4);
+      }
+
+      :global(select option:hover) {
+        background-color: var(--surface-4);
+      }
+
+      :global(select optgroup:not(:first-of-type)) {
+        border-block-start-color: var(--surface-4);
+      }
+    }
+  }
+
   :global(.sr-only) {
     inline-size: 0;
     block-size: 0;
@@ -1062,7 +1215,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   .global-actions {
     position: relative;
     inline-size: var(--size-7);
-    overflow: hidden;
+    overflow: clip;
     border-radius: var(--radius-round);
     padding-inline: 0;
     aspect-ratio: 1;
@@ -1078,11 +1231,8 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     --_bg: transparent;
   }
 
-  .global-actions:not(:active,:focus) select {
-    opacity: 0;
-  }
-
   .global-actions > select {
     position: absolute;
+    inset: 0;
   }
 </style>
