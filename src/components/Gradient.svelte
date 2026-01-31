@@ -560,13 +560,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
-            <hr>
             <option>Start new</option>
             <option>Import gradient</option>
             <option>Copy modern CSS</option>
             <option>Copy classic CSS</option>
             <!-- <option disabled>Reset all stops to auto</option> -->
-            <hr>
             <!-- <option disabled>Toggle light & dark</option> -->
             <option>Tips & tricks</option>
             <option>Help & feedback</option>
@@ -1060,13 +1058,6 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         display 150ms var(--ease-3) allow-discrete;
     }
 
-    /* Style hr elements inside the picker */
-    :global(select::picker(select) hr) {
-      margin-block: var(--size-1);
-      border: none;
-      border-block-start: 1px solid var(--surface-3);
-    }
-
     :global(select:open::picker(select)) {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -1077,6 +1068,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         opacity: 0;
         transform: translateY(-8px) scale(0.96);
       }
+    }
+
+    /* Hide disabled options in base-select mode */
+    :global(select option[disabled]) {
+      display: none;
     }
 
     :global(select option) {

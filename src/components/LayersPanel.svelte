@@ -58,12 +58,10 @@
         <button class="layer-actions" aria-label="Layer actions" use:tooltip={{content: "Layer Actions"}}>
           <select tabindex="-1" onchange={(e)=>{ const v=e.currentTarget.value; e.currentTarget.selectedIndex=0; if(v==='Move up') moveLayerUp(i); else if(v==='Move down') moveLayerDown(i); else if(v==='Move to top') moveLayerToTop(i); else if(v==='Move to bottom') moveLayerToBottom(i); else if(v==='Toggle visibility') onToggleVisibility(i); else if(v==='Remove') onDelete(i); }}>
             <option disabled selected>Layer Actions</option>
-            <hr>
             <option>Move up</option>
             <option>Move down</option>
             <option>Move to top</option>
             <option>Move to bottom</option>
-            <hr>
             <option>Toggle visibility</option>
             <option disabled={$layers.length<=1}>Remove</option>
           </select>
