@@ -316,10 +316,16 @@
         }
       }
       else if (dragulaState.moving) {
-        let wpercent = (size.w / 2) / 100
-        let hpercent = (size.h / 2) / 100
-        dragulaState.left += e.movementX / wpercent
-        dragulaState.top += e.movementY / hpercent
+        // Use absolute cursor position relative to the preview element
+        // to avoid drift from accumulated movementX/Y rounding errors
+        const previewEl = node.closest('.preview')
+        if (previewEl) {
+          const rect = previewEl.getBoundingClientRect()
+          const x = ((e.clientX - rect.left) / rect.width) * 100
+          const y = ((e.clientY - rect.top) / rect.height) * 100
+          dragulaState.left = x
+          dragulaState.top = y
+        }
 
         $radial_position.x = Math.round(dragulaState.left)
         $radial_position.y = Math.round(dragulaState.top)
