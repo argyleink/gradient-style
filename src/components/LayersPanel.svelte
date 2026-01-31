@@ -60,8 +60,8 @@
             <option disabled selected>Layer Actions</option>
             <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6l1.41 1.41z"/></svg> Move up</option>
             <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6l1.41-1.41z"/></svg> Move down</option>
-            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 18.59L8.83 20L12 16.83L15.17 20l1.41-1.41L12 14l-4.59 4.59zM16.59 5.41L15.17 4L12 7.17L8.83 4L7.41 5.41L12 10l4.59-4.59z"/></svg> Move to top</option>
-            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 5.41L8.83 4L12 7.17L15.17 4l1.41 1.41L12 10L7.41 5.41zM16.59 18.59L15.17 20L12 16.83L8.83 20l-1.42-1.41L12 14l4.59 4.59z"/></svg> Move to bottom</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 11h3v10h2V11h3l-4-4l-4 4zM4 3v2h16V3H4z"/></svg> Move to top</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 13h-3V3h-2v10H8l4 4l4-4zM4 19v2h16v-2H4z"/></svg> Move to bottom</option>
             <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/></svg> Toggle visibility</option>
             <option disabled={$layers.length<=1}><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Remove</option>
           </select>
