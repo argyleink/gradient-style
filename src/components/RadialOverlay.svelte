@@ -316,8 +316,8 @@
         }
       }
       else if (dragulaState.moving) {
-        let wpercent = w / 100
-        let hpercent = h / 100
+        let wpercent = (size.w / 2) / 100
+        let hpercent = (size.h / 2) / 100
         dragulaState.left += e.movementX / wpercent
         dragulaState.top += e.movementY / hpercent
 
