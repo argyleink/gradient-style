@@ -287,6 +287,7 @@
             { kind: 'hint', percentage: 50 },
             { kind: 'stop', color: 'oklch(60% 0.2 200)', position1: 100, position2: 100 },
           ]);
+          close();
           return;
         }
         
@@ -325,7 +326,7 @@
         if (gradientData.radial_position) {
           const rx = gradientData.radial_position.x;
           const ry = gradientData.radial_position.y;
-          radial_position.set({ x: rx == null ? null : clamp01(rx), y: ry == null ? null : clamp01(ry) });
+          radial_position.set({ x: rx === null ? null : clamp01(rx), y: ry === null ? null : clamp01(ry) });
           radial_named_position.set('--'); // Set to custom position indicator
         } else {
           // Default to center if no position specified
@@ -342,7 +343,7 @@
         if (gradientData.conic_position) {
           const cx = gradientData.conic_position.x;
           const cy = gradientData.conic_position.y;
-          conic_position.set({ x: cx == null ? null : clamp01(cx), y: cy == null ? null : clamp01(cy) });
+          conic_position.set({ x: cx === null ? null : clamp01(cx), y: cy === null ? null : clamp01(cy) });
           conic_named_position.set('--'); // Set to custom position indicator
         } else {
           // Default to center if no position specified
