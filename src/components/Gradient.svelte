@@ -560,15 +560,15 @@ let user_gradient = $derived(gensyntax[$gradient_type](
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
-            <option>Start new</option>
-            <option>Import gradient</option>
-            <option>Copy modern CSS</option>
-            <option>Copy classic CSS</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Start new</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3h-7z"/></svg> Import gradient</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy modern CSS</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy classic CSS</option>
             <!-- <option disabled>Reset all stops to auto</option> -->
             <!-- <option disabled>Toggle light & dark</option> -->
-            <option>Tips & tricks</option>
-            <option>Help & feedback</option>
-            <option>GitHub</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Tips & tricks</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5c0-2.21-1.79-4-4-4z"/></svg> Help & feedback</option>
+            <option><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg> GitHub</option>
           </select>
         </button>
       </div>
@@ -1078,12 +1078,20 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     :global(select option) {
       display: flex;
       align-items: center;
+      gap: var(--size-2);
       padding: var(--size-2) var(--size-3);
       border-radius: var(--radius-2);
       cursor: pointer;
       transition: 
         background-color 100ms var(--ease-2),
         color 100ms var(--ease-2);
+    }
+
+    /* Style icons inside options */
+    :global(select option > svg) {
+      inline-size: 1.25em;
+      block-size: 1.25em;
+      flex-shrink: 0;
     }
 
     :global(select option:not(:last-child)) {
