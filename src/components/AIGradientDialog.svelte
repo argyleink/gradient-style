@@ -116,6 +116,11 @@
     }
   }
   
+  // Export availability check for parent components to conditionally render UI
+  export function isAvailable() {
+    return modelAvailable;
+  }
+  
   function close() {
     if (dialog) {
       dialog.close();

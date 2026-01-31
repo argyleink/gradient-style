@@ -49,8 +49,21 @@ import AIGradientDialog from './AIGradientDialog.svelte'
   let restoring = $state(true)
   let importRef
   let aiDialogRef
+  let aiAvailable = $state(false)
 
   onMount(async () => {
+    // Check if Chrome's Prompt API is available for AI features
+    // @ts-ignore - LanguageModel is a new Chrome API
+    if ('LanguageModel' in window) {
+      try {
+        // @ts-ignore - LanguageModel is a new Chrome API
+        const avail = await window.LanguageModel.availability();
+        aiAvailable = avail !== 'unavailable';
+      } catch {
+        aiAvailable = false;
+      }
+    }
+    
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
 
     const {stateAsString, restoreStateFromUrl} = await import('../store/url.ts')
@@ -563,9 +576,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <div class="menu-bar">
-        <button class="ai-button" onclick={() => openAI()} use:tooltip={{content: "Generate gradient with AI"}}>
-          <span class="sr-only">AI Generate</span>
-        </button>
+        {#if aiAvailable}
+          <button class="ai-button" onclick={() => openAI()} use:tooltip={{content: "Generate gradient with AI"}}>
+            <span class="sr-only">AI Generate</span>
+          </button>
+        {/if}
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
