@@ -377,7 +377,12 @@
       <div class="error-message">{error}</div>
     {/if}
     
-    {#if modelAvailable && !loading}
+    {#if loading}
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Preparing AI model...</p>
+      </div>
+    {:else}
       <p class="description">
         Describe the gradient you want to create in natural language.
       </p>
@@ -397,7 +402,7 @@
         placeholder="Describe your gradient..."
         rows="4"
         onkeydown={handleKeydown}
-        disabled={loading}
+        disabled={loading || !modelAvailable}
       ></textarea>
       
       <div class="dialog-actions">
@@ -406,24 +411,11 @@
         </button>
         <button 
           onclick={() => generateGradient()} 
-          disabled={loading || !userPrompt.trim()}
+          disabled={loading || !modelAvailable || !userPrompt.trim()}
           type="submit"
         >
-          {#if loading}
-            Generating...
-          {:else}
-            Generate Gradient
-          {/if}
+          Generate Gradient
         </button>
-      </div>
-    {:else if loading}
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Preparing AI model...</p>
-      </div>
-    {:else}
-      <div class="dialog-actions">
-        <button onclick={() => close()}>Close</button>
       </div>
     {/if}
   </div>
