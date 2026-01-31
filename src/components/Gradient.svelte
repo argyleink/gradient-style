@@ -1003,7 +1003,6 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   @supports (appearance: base-select) {
     :global(select) {
       appearance: base-select;
-      background-image: none;
     }
 
     /* Style the button that activates the picker */
