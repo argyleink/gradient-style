@@ -36,6 +36,7 @@
   import Presets from './Presets.svelte'
 import Prism from './PrismJS.svelte'
 import GradientImportDialog from './GradientImportDialog.svelte'
+import AIGradientDialog from './AIGradientDialog.svelte'
 
   import Hint from './Hint.svelte'
 
@@ -47,6 +48,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   let svgicon
   let restoring = $state(true)
   let importRef
+  let aiDialogRef
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -235,6 +237,10 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   function openImport() {
     importRef?.show()
+  }
+
+  function openAI() {
+    aiDialogRef?.open()
   }
 
   const gensyntax = {
@@ -557,6 +563,9 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <div class="menu-bar">
+        <button class="ai-button" onclick={() => openAI()} use:tooltip={{content: "Generate gradient with AI"}}>
+          <span class="sr-only">AI Generate</span>
+        </button>
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
@@ -597,6 +606,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     </section>
   </contain-er>
   <GradientImportDialog bind:this={importRef} />
+  <AIGradientDialog bind:this={aiDialogRef} />
 </main>
 </div>
 
@@ -1084,5 +1094,31 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 
   .global-actions > select {
     position: absolute;
+  }
+  
+  .menu-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .ai-button {
+    inline-size: var(--size-6);
+    border-radius: var(--radius-round);
+    padding-inline: 0;
+    aspect-ratio: 1;
+    background-image: url(https://api.iconify.design/material-symbols:auto-awesome.svg?color=%23777777);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 50%;
+  }
+  
+  .ai-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  }
+  
+  .ai-button:active {
+    transform: scale(0.95);
   }
 </style>
