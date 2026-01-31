@@ -63,7 +63,7 @@
 <fieldset class="control-set">
   <div class="label-select-combo">
     <label>Size</label>
-    <select name="radial-size" bind:value={$radial_size}>
+    <select name="radial-size" bind:value={$radial_size} oninput={(e) => $radial_size = e.currentTarget.value}>
       <button>
         <selectedcontent></selectedcontent>
       </button>

@@ -11,7 +11,7 @@
       </svg>
       Hue Path
     </label>
-    <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation}> 
+    <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation} oninput={(e) => $gradient_interpolation = e.currentTarget.value}> 
       <button>
         <selectedcontent></selectedcontent>
       </button>

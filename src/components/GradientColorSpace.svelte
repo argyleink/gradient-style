@@ -16,7 +16,7 @@
       </a>
       Color Space
     </label>
-    <select name="colorspace" id="in-colorspace" bind:value={$gradient_space}> 
+    <select name="colorspace" id="in-colorspace" bind:value={$gradient_space} oninput={(e) => $gradient_space = e.currentTarget.value}> 
       <button>
         <selectedcontent></selectedcontent>
       </button>

@@ -28,7 +28,7 @@
   <div class="label-select-combo">
     <label>Position</label>
     <NamedDirections id="conic-position" bind:selected={$conic_named_position} mode="position" />
-    <select name="conic-position" bind:value={$conic_named_position}>
+    <select name="conic-position" bind:value={$conic_named_position} oninput={(e) => $conic_named_position = e.currentTarget.value}>
       <button>
         <selectedcontent></selectedcontent>
       </button>

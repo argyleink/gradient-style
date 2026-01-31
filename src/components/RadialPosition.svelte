@@ -28,7 +28,7 @@
   <div class="label-select-combo">
     <label>Position</label>
     <NamedDirections id="radial-position" bind:selected={$radial_named_position} mode="position" />
-    <select name="radial-position" bind:value={$radial_named_position}>
+    <select name="radial-position" bind:value={$radial_named_position} oninput={(e) => $radial_named_position = e.currentTarget.value}>
       <button>
         <selectedcontent></selectedcontent>
       </button>
