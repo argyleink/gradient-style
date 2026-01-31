@@ -1035,6 +1035,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       opacity: 0;
     }
 
+    /* Selects inside buttons should have no padding */
+    :global(button > select) {
+      padding: 0;
+    }
+
     :global(select::picker(select)) {
       appearance: base-select;
       --_picker-bg-light: #fff;
@@ -1078,8 +1083,8 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     :global(select option) {
       display: flex;
       align-items: center;
-      gap: var(--size-2);
-      padding: var(--size-2) var(--size-3);
+      gap: var(--size-3);
+      padding: var(--size-2) var(--size-2);
       border-radius: var(--radius-2);
       cursor: pointer;
       transition: 
