@@ -40,15 +40,15 @@ describe('round-trip: builder output parses back into app format', () => {
       linear: { named_angle: 'to right top', angle: null },
       stops: [
         stop('#fff'),                            // leading white, no positions
-        hint(0),                                 // midpoint (auto-managed)
+        hint(11),
         stop('#000', 0, 20),
-        hint(0),
+        hint(31),
         stop('#fff', 0, 40),
-        hint(0),
+        hint(51),
         stop('#000', 0, 60),
-        hint(0),
+        hint(71),
         stop('#fff', 0, 80),
-        hint(0),
+        hint(91),
         stop('#000', 0, 100),
       ],
     })
@@ -62,6 +62,11 @@ describe('round-trip: builder output parses back into app format', () => {
     expect(modern.replace(/\s+/g, ' ')).toContain('#000 0% 60%')
     expect(modern.replace(/\s+/g, ' ')).toContain('#fff 0% 80%')
     expect(modern.replace(/\s+/g, ' ')).toContain('#000 0% 100%')
+    expect(modern.replace(/\s+/g, ' ')).toContain('11%')
+    expect(modern.replace(/\s+/g, ' ')).toContain('31%')
+    expect(modern.replace(/\s+/g, ' ')).toContain('51%')
+    expect(modern.replace(/\s+/g, ' ')).toContain('71%')
+    expect(modern.replace(/\s+/g, ' ')).toContain('91%')
   })
 
   it('radial and conic builder outputs also parse successfully', () => {
