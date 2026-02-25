@@ -323,8 +323,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           let p1 = s.position1
           let p2 = s.position2
 
-          // Omit values equal to tool defaults only if explicitly stored in stop.auto
-          if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
+          // Omit values equal to tool defaults only if auto-assigned (number === number).
+          // String positions from presets/user input are preserved even when numerically equal.
+          if (p1 != null && s.auto != null && p1 === s.auto) {
+            p1 = null
+            // Also suppress auto-assigned p2 for the first stop so a
+            // no-position leading color renders cleanly without a trailing 0%.
+            if (i === firstStopIdx && p2 != null && p2 === s.auto) p2 = null
+          }
 
           // Omit browser default edges only when explicitly percentages
           if (i === firstStopIdx && isPctZero(p1)) p1 = null
@@ -356,6 +362,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         }
         else if (s.kind === 'hint') {
           if (s.percentage == null) return null
+          // Skip auto-computed midpoints (same as gradientString.ts) – they are
+          // the browser default and add noise to the output without changing rendering.
+          if (s.auto != null && s.percentage == s.auto) return null
           // s.percentage is unitless; add % here
           return s.percentage + '%'
         }
