@@ -106,15 +106,19 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines }: { convert_c
       let p1: any = s.position1
       let p2: any = s.position2
 
-      // Only ever suppress the "auto" value for the primary position.
-      // Secondary positions are kept even when they equal the auto value so
-      // that explicit spans from presets/URL imports (like the Stripes preset)
-      // are preserved.
-      if (p1 != null && s.auto != null && String(p1) == String(s.auto)) p1 = null
+      // Only ever suppress the "auto" value for the primary position when it was
+      // auto-assigned (a number). String positions from presets/user input are kept
+      // even when they numerically equal the auto value, preserving explicit spans.
+      if (p1 != null && s.auto != null && p1 === s.auto) p1 = null
 
-      // Omit browser default *leading* endpoint only when explicitly authored as 0%.
+      // Omit browser default *leading* endpoint only when explicitly authored as 0%
+      // and the stop is a point (no span end). Preserve the 0% start when p2 also
+      // exists so that a span like "0% 12%" stays fully described.
       if (i === firstStopIdx) {
-        if (isPctZero(p1)) p1 = null
+        if (isPctZero(p1) && p2 == null) p1 = null
+        // Also suppress an auto-assigned p2 when p1 was already suppressed,
+        // so a no-position first stop renders cleanly without a trailing 0%.
+        if (p1 == null && p2 != null && p2 === s.auto) p2 = null
       }
 
       const colorStr = maybeConvertColor(s.color, convert_colors)
