@@ -25,10 +25,12 @@ export function updateStops(stops: Stop[]): Stop[] {
         const p1Unset = (stop.position1 == null) || (prevAuto != null && String(stop.position1) == String(prevAuto))
         const p2Unset = (stop.position2 == null)
 
-        // Detect whether position2 was effectively "linked" to position1 or to the prior auto value
+        // Detect whether position2 was effectively "linked" to position1 or to the prior auto value.
+        // Only consider prevAuto linkage when position1 itself is auto-managed (p1Unset),
+        // otherwise an explicit position2 that happens to equal prevAuto would be overwritten.
         const hadLinked = (!p2Unset) && (
           String(stop.position2) === String(stop.position1) ||
-          (prevAuto != null && String(stop.position2) === String(prevAuto))
+          (p1Unset && prevAuto != null && String(stop.position2) === String(prevAuto))
         )
 
         // Only assign auto for position1 when it is unset or previously auto-managed
