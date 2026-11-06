@@ -231,11 +231,12 @@ export function redo() {
   return ok
 }
 
+let teardown: (() => void) | null = null
+
 /**
  * Start recording. Call once the initial state (URL restore) has landed.
  * Returns a teardown function.
  */
-let teardown: (() => void) | null = null
 
 export function initHistory(): () => void {
   teardown?.()

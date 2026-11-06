@@ -82,7 +82,8 @@
     picker.showModal()
 
     // Ignore the seeded emission and the picker re-serializing the color while it
-    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit
+    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit.
+    // The picker's $effect echoes in a microtask, so it always lands before this timer.
     let opening = true
     setTimeout(() => { opening = false }, 0)
     const unsub = picker_value.subscribe(value => {
