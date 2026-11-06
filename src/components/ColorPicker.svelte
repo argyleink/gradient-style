@@ -258,7 +258,7 @@ let gamut = $derived(whatsTheGamutDamnit($picker_value))
 <dialog id="color-picker">
   <div class="hd-color-picker" style="accent-color: {$picker_value}; --contrast-color: {bg_overlay}; --counter-contrast-color: {text_overlay}">
     <div class="preview" style={`--user-color:${$picker_value}`}>
-      <select class="colorspace" onchange={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color={text_overlay});">
+      <select class="colorspace" onchange={spaceChange} title="Colorspace" style="--icon-arrow-up: url(https://api.iconify.design/ic/keyboard-arrow-up.svg?color={text_overlay}); --icon-arrow-down: url(https://api.iconify.design/ic/keyboard-arrow-down.svg?color={text_overlay});">
         <button>
           <selectedcontent></selectedcontent>
         </button>

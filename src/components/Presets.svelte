@@ -310,9 +310,12 @@
 					$linear_named_angle = 'to ' + preset.angle_name
 				}
 				else
-					$linear_angle = 'to ' + preset.angle
+					$linear_angle = String(preset.angle ?? 180)
 				break
 			case 'radial':
+				if (preset.shape) {
+					$radial_shape = preset.shape
+				}
 				if (preset.named_position) {
 					$radial_named_position = preset.named_position
 					$radial_position.x = null
@@ -329,6 +332,7 @@
 				}
 				break
 			case 'conic':
+				$conic_angle = String(preset.angle ?? 0)
 				if (preset.named_position) {
 					$conic_named_position = preset.named_position
 					$conic_position.x = null

@@ -436,7 +436,7 @@
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
-    background-image: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    background-image: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 75%;
@@ -476,8 +476,8 @@
   .stop-actions { z-index: 2; }
 
   .stop-actions > select {
-    --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
-    --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    --icon-arrow-down: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
+    --icon-arrow-up: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
     position: absolute;
     inset: 0;
   }
@@ -514,7 +514,7 @@
 
   .chip.color-stop::after {
     opacity: 0;
-    content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
+    content: url(https://api.iconify.design/material-symbols/edit.svg?color=%23ffffff);
     block-size: 20px;
     right: var(--size-8);
     position: absolute;
@@ -527,7 +527,7 @@
 
   @media (prefers-color-scheme: light) {
     .chip.color-stop::after {
-      content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
+      content: url(https://api.iconify.design/material-symbols/edit.svg?color=%23111111);
     }
   }
 

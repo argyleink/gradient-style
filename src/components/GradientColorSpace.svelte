@@ -5,7 +5,7 @@
 
 <fieldset class="control-set gradient-colorspace">
   <div class="label-select-combo">
-    <label>
+    <label for="in-colorspace">
       <a target="_blank" class="mini-link" href="https://developer.chrome.com/articles/high-definition-css-color-guide/" use:tooltip={{content: "Click to learn more about CSS color spaces"}}>
         <button class="info-icon" >
           <span class="sr-only">Learn more about color spaces</span>
