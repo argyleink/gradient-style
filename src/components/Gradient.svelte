@@ -50,7 +50,8 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   let restoring = $state(true)
   let importRef
   let stopHistory
-  onDestroy(() => stopHistory?.())
+  let destroyed = false
+  onDestroy(() => { destroyed = true; stopHistory?.() })
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -151,7 +152,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     }
 
     // Start recording undo/redo history once the restored state is in place
-    stopHistory = initHistory()
+    if (!destroyed) stopHistory = initHistory()
 
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false

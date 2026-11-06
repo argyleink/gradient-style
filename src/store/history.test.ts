@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createHistory, snapshotKey, type HistoryState } from './history'
 import { defaultLayer } from './layers'
-import { isSameColor } from '../utils/color'
 
 function setup() {
   let state: HistoryState = { layers: [defaultLayer()], active: 0 }
@@ -126,17 +125,5 @@ describe('undo/redo history', () => {
     const b = { ...structuredClone(a), id: 'b', cachedCss: undefined }
     expect(snapshotKey([a])).toBe(snapshotKey([b]))
     expect(snapshotKey([a])).not.toBe(snapshotKey([{ ...b, visible: false }]))
-  })
-})
-
-describe('isSameColor', () => {
-  it('treats re-serialized colors as the same', () => {
-    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(70% 0.50 340)')).toBe(true)
-    expect(isSameColor('#ff0000', 'rgb(255 0 0)')).toBe(true)
-  })
-  it('detects real changes, including alpha', () => {
-    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(71% 0.5 340)')).toBe(false)
-    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(70% 0.5 340 / 50%)')).toBe(false)
-    expect(isSameColor('not a color', 'oklch(70% 0.5 340)')).toBe(false)
   })
 })

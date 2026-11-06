@@ -8,7 +8,6 @@
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient'
   import {picker_value} from '../store/colorpicker'
-  import {isSameColor} from '../utils/color'
 
   import {copyToClipboard} from '../utils/clipboard'
   import {randomNumber} from '../utils/numbers'
@@ -111,18 +110,20 @@
     picker.setColor(stop.color)
     picker.showModal()
 
-    // Ignore the initial emission from the store and only update on real changes
-    let isFirst = true
+    // Ignore the seeded emission and the picker re-serializing the color while it
+    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit
+    let opening = true
+    setTimeout(() => { opening = false }, 0)
     const unsub = picker_value.subscribe(value => {
-      if (isFirst) { isFirst = false; return }
-      if (isSameColor(value, stop.color)) return
+      if (opening) return
+      if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })
 
     picker.addEventListener('closing', () => {
       unsub()
-    })
+    }, { once: true })
   }
 
   function fieldsetInteractingStart(stop: GradientStop) {

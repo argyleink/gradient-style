@@ -7,7 +7,7 @@
   import {picker_value} from '../store/colorpicker.ts'
 
   import {namedPosToPercent} from '../utils/radial.ts'
-  import {contrast_color_prefer_white, isSameColor} from '../utils/color.ts'
+  import {contrast_color_prefer_white} from '../utils/color.ts'
   import {updateStops, removeStop} from '../utils/stops.ts'
   import {randomNumber} from '../utils/numbers.ts'
 
@@ -505,11 +505,13 @@
     picker.setColor(stop.color)
     picker.showModal()
 
-    // Ignore the initial emission which may be the seeded value or a stale one
-    let isFirst = true
+    // Ignore the seeded emission and the picker re-serializing the color while it
+    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit
+    let opening = true
+    setTimeout(() => { opening = false }, 0)
     const unsub = picker_value.subscribe(value => {
-      if (isFirst) { isFirst = false; return }
-      if (isSameColor(value, stop.color)) return
+      if (opening) return
+      if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })
