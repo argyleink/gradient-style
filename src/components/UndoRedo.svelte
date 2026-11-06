@@ -38,10 +38,11 @@
   }
 
   function onKeydown(e) {
-    if (e.defaultPrevented || e.altKey) return
+    if (e.defaultPrevented || e.altKey || e.isComposing) return
     const mod = e.metaKey || e.ctrlKey
     if (!mod) return
-    const key = e.key.toLowerCase()
+    // e.key respects the user's layout; fall back to the physical key for non-Latin layouts
+    const key = /^[a-z]$/i.test(e.key) ? e.key.toLowerCase() : ({ KeyZ: 'z', KeyY: 'y' })[e.code]
     const isUndo = key === 'z' && !e.shiftKey
     const isRedo = (key === 'z' && e.shiftKey) || (key === 'y' && e.ctrlKey && !e.shiftKey)
     if (!isUndo && !isRedo) return
@@ -58,7 +59,7 @@
   <button
     class="history-btn"
     onclick={doUndo}
-    disabled={!$can_undo}
+    aria-disabled={!$can_undo}
     aria-keyshortcuts={isMac ? 'Meta+Z' : 'Control+Z'}
     use:tooltip={{content: undoLabel}}
   >
@@ -70,7 +71,7 @@
   <button
     class="history-btn"
     onclick={doRedo}
-    disabled={!$can_redo}
+    aria-disabled={!$can_redo}
     aria-keyshortcuts={isMac ? 'Meta+Shift+Z' : 'Control+Shift+Z Control+Y'}
     use:tooltip={{content: redoLabel}}
   >
@@ -108,13 +109,17 @@
     block-size: var(--size-5);
   }
 
-  .history-btn:is(:hover, :focus-visible):not(:disabled) {
+  .history-btn:is(:hover, :focus-visible):not([aria-disabled="true"]) {
     color: var(--text-1);
   }
 
-  .history-btn:disabled {
+  /* aria-disabled (not disabled) so keyboard focus isn't dropped when a stack empties */
+  .history-btn[aria-disabled="true"] {
     opacity: .35;
     cursor: not-allowed;
+  }
+
+  .history-btn[aria-disabled="true"]:not(:focus-visible) {
     box-shadow: none;
   }
 
@@ -123,7 +128,7 @@
       transition: transform .15s var(--ease-3);
     }
 
-    .history-btn:not(:disabled):active > svg {
+    .history-btn:not([aria-disabled="true"]):active > svg {
       transform: scale(.85);
     }
   }

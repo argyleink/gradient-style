@@ -51,3 +51,19 @@ export function contrast_color_prefer_white(c: string): string {
     return 'black'
   }
 }
+/**
+ * True when two CSS color strings describe the same color, even if they're
+ * formatted differently ("0.5" vs "0.50"). Used to keep the color picker from
+ * rewriting a stop just because it re-serialized the color on open.
+ */
+export function isSameColor(a: string, b: string): boolean {
+  if (a === b) return true
+  try {
+    const ca = new Color(a)
+    const cb = new Color(b)
+    return Math.abs(ca.alpha - cb.alpha) < 0.001 && ca.deltaE(cb, 'OK') < 0.0005
+  }
+  catch {
+    return false
+  }
+}

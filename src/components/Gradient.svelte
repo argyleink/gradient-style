@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { replaceState } from '$app/navigation'
 
   import Color from 'colorjs.io'
@@ -49,6 +49,8 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   let svgicon
   let restoring = $state(true)
   let importRef
+  let stopHistory
+  onDestroy(() => stopHistory?.())
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -149,7 +151,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     }
 
     // Start recording undo/redo history once the restored state is in place
-    initHistory()
+    stopHistory = initHistory()
 
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false

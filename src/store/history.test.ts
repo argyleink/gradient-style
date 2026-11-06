@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { createHistory, snapshotKey, type HistoryState } from './history'
 import { defaultLayer } from './layers'
+import { isSameColor } from '../utils/color'
 
 function setup() {
   let state: HistoryState = { layers: [defaultLayer()], active: 0 }
@@ -87,6 +88,18 @@ describe('undo/redo history', () => {
     expect(t.writes.at(-1)).toBe(0)
   })
 
+  it('undoing a layer reorder keeps the moved layer focused', () => {
+    const t = setup()
+    t.edit(s => { s.layers.push(defaultLayer()); s.layers[1].space = 'srgb'; s.active = 1 }); t.history.record()
+    const movedId = t.state.layers[1].id
+    // move layer 1 to the top, it stays active
+    t.edit(s => { s.layers.reverse(); s.active = 0 }); t.history.record()
+    t.history.undo()
+    expect(t.state.layers[t.writes.at(-1)!].id).toBe(movedId)
+    t.history.redo()
+    expect(t.state.layers[t.writes.at(-1)!].id).toBe(movedId)
+  })
+
   it('rebase adopts normalization without adding a step', () => {
     const t = setup()
     t.edit(s => { s.layers[0].space = 'oklch' }); t.history.record()
@@ -113,5 +126,17 @@ describe('undo/redo history', () => {
     const b = { ...structuredClone(a), id: 'b', cachedCss: undefined }
     expect(snapshotKey([a])).toBe(snapshotKey([b]))
     expect(snapshotKey([a])).not.toBe(snapshotKey([{ ...b, visible: false }]))
+  })
+})
+
+describe('isSameColor', () => {
+  it('treats re-serialized colors as the same', () => {
+    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(70% 0.50 340)')).toBe(true)
+    expect(isSameColor('#ff0000', 'rgb(255 0 0)')).toBe(true)
+  })
+  it('detects real changes, including alpha', () => {
+    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(71% 0.5 340)')).toBe(false)
+    expect(isSameColor('oklch(70% 0.5 340)', 'oklch(70% 0.5 340 / 50%)')).toBe(false)
+    expect(isSameColor('not a color', 'oklch(70% 0.5 340)')).toBe(false)
   })
 })

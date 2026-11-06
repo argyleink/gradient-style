@@ -8,6 +8,7 @@
 
   import {gradient_stops, gradient_space, active_stop_index} from '../store/gradient'
   import {picker_value} from '../store/colorpicker'
+  import {isSameColor} from '../utils/color'
 
   import {copyToClipboard} from '../utils/clipboard'
   import {randomNumber} from '../utils/numbers'
@@ -114,7 +115,7 @@
     let isFirst = true
     const unsub = picker_value.subscribe(value => {
       if (isFirst) { isFirst = false; return }
-      if (value === stop.color) return
+      if (isSameColor(value, stop.color)) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })

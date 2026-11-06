@@ -8,7 +8,7 @@
   import {updateStops, removeStop} from '../utils/stops.ts'
   import {linear_keywords} from'../utils/linear.ts'
   import {degToRad, radToDeg} from '../utils/radial.ts'
-  import {contrast_color_prefer_white} from '../utils/color.ts'
+  import {contrast_color_prefer_white, isSameColor} from '../utils/color.ts'
   import {randomNumber} from '../utils/numbers.ts'
 
   /**
@@ -85,7 +85,7 @@
     let isFirst = true
     const unsub = picker_value.subscribe(value => {
       if (isFirst) { isFirst = false; return }
-      if (value === stop.color) return
+      if (isSameColor(value, stop.color)) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
     })
