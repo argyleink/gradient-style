@@ -52,4 +52,17 @@ describe('updateStops keeps explicit spans (#119)', () => {
     expect(four[2].position1).toBe(four[2].position2)
     expect(four[2].position1).not.toBe(50)
   })
+
+  it('keeps a span whose start sits on the old auto slot', () => {
+    const three = updateStops([
+      { kind: 'stop', color: 'red' },
+      { kind: 'hint', percentage: null },
+      { kind: 'stop', color: 'green' },
+      { kind: 'hint', percentage: null },
+      { kind: 'stop', color: 'blue' },
+    ] as any[])
+    three[2].position2 = 80 // drag the 2nd handle: green 50% 80%
+    const four = updateStops([...three, { kind: 'hint', percentage: null }, { kind: 'stop', color: 'white' }] as any[])
+    expect([four[2].position1, four[2].position2]).toEqual([50, 80])
+  })
 })

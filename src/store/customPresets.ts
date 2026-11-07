@@ -1,7 +1,6 @@
 import { writable, get } from 'svelte/store'
 
-import { layers, active_layer_index, selectLayer, type GradientLayer } from './layers'
-import { snapshotKey } from './history'
+import { layers, active_layer_index, selectLayer, defaultLayer, type GradientLayer } from './layers'
 import { buildGradientStrings } from '../utils/gradientString'
 
 /*
@@ -30,16 +29,38 @@ function uid(prefix: string) {
   catch { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}` }
 }
 
+const isObj = (v: any) => v != null && typeof v === 'object' && !Array.isArray(v)
+
 function isPreset(p: any): p is CustomPreset {
-  return p && typeof p.id === 'string' && Array.isArray(p.layers) && p.layers.length > 0
-    && p.layers.every((l: any) => l && typeof l.type === 'string' && Array.isArray(l.stops))
+  return isObj(p) && typeof p.id === 'string' && Array.isArray(p.layers) && p.layers.length > 0
+    && p.layers.every((l: any) => isObj(l) && typeof l.type === 'string' && Array.isArray(l.stops))
+}
+
+// Fill in any layer fields an older or hand-edited entry is missing, so rendering
+// a swatch or applying it can't throw on e.g. `layer.radial.size`
+function normalizeLayer(l: any): SavedLayer {
+  const { id, cachedCss, ...base } = defaultLayer()
+  return {
+    ...base,
+    ...l,
+    linear: { ...base.linear, ...(isObj(l.linear) ? l.linear : {}) },
+    radial: { ...base.radial, ...(isObj(l.radial) ? l.radial : {}), position: { ...base.radial.position, ...(isObj(l.radial?.position) ? l.radial.position : {}) } },
+    conic: { ...base.conic, ...(isObj(l.conic) ? l.conic : {}), position: { ...base.conic.position, ...(isObj(l.conic?.position) ? l.conic.position : {}) } },
+    stops: l.stops.filter(isObj),
+  }
 }
 
 export function parseStored(raw: string | null): CustomPreset[] {
   if (!raw) return []
   try {
     const list = JSON.parse(raw)
-    return Array.isArray(list) ? list.filter(isPreset) : []
+    if (!Array.isArray(list)) return []
+    return list.filter(isPreset).map(p => ({
+      id: p.id,
+      created: Number(p.created) || 0,
+      active: Number.isFinite(p.active) ? p.active : 0,
+      layers: p.layers.map(normalizeLayer),
+    }))
   }
   catch { return [] }
 }
@@ -49,27 +70,25 @@ function load(): CustomPreset[] {
   catch { return [] }
 }
 
-function persist(list: CustomPreset[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)) }
-  catch {} // private mode / quota: keep working in memory
+/** false when the browser refused the write (private mode, quota): the change only lives in memory */
+function persist(list: CustomPreset[]): boolean {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); return true }
+  catch { return false }
 }
 
 export const custom_presets = writable<CustomPreset[]>([])
 
-let started = false
+let listeners = 0
+function onStorage(e: StorageEvent) {
+  if (e.key === STORAGE_KEY) custom_presets.set(parseStored(e.newValue))
+}
 
 /** Load saved presets and follow edits made in other tabs. Call from onMount. */
 export function initCustomPresets(): () => void {
   custom_presets.set(load())
-  if (started) return () => {}
-  started = true
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) custom_presets.set(parseStored(e.newValue))
-  }
-  window.addEventListener('storage', onStorage)
+  if (listeners++ === 0) window.addEventListener('storage', onStorage)
   return () => {
-    started = false
-    window.removeEventListener('storage', onStorage)
+    if (--listeners === 0) window.removeEventListener('storage', onStorage)
   }
 }
 
@@ -77,9 +96,12 @@ function strip(list: GradientLayer[]): SavedLayer[] {
   return list.map(({ id, cachedCss, ...rest }) => structuredClone(rest))
 }
 
-/** Identity of a preset's content, so saving the same gradient twice is a no-op. */
+/**
+ * Identity of a preset: the CSS each layer renders (plus its visibility), so the
+ * same-looking gradient counts as a duplicate however it was built.
+ */
 export function presetKey(p: { layers: SavedLayer[] }) {
-  return snapshotKey(p.layers as GradientLayer[])
+  return JSON.stringify(p.layers.map(l => [buildGradientStrings(l as any).modern, l.visible !== false]))
 }
 
 /** The CSS a preset renders, for its swatch. Hidden layers are skipped, like the preview. */
@@ -100,11 +122,17 @@ export function presetLabel(p: CustomPreset): string {
   return `${kind}, ${colors} colors`
 }
 
+export type SaveResult =
+  | { status: 'saved'; preset: CustomPreset; persisted: boolean }
+  | { status: 'duplicate'; preset: CustomPreset }
+  | { status: 'full' }
+
 /**
- * Save the gradient currently in the editor. Returns the saved preset, or the
- * existing one when an identical gradient is already saved.
+ * Save the gradient currently in the editor. An identical gradient that's
+ * already saved is returned instead of a copy; at MAX_PRESETS nothing is
+ * evicted, the caller is told the list is full.
  */
-export function saveCurrentAsPreset(): { preset: CustomPreset; duplicate: boolean } | null {
+export function saveCurrentAsPreset(): SaveResult | null {
   const list = get(layers)
   if (!list?.length) return null
 
@@ -118,16 +146,31 @@ export function saveCurrentAsPreset(): { preset: CustomPreset; duplicate: boolea
   const saved = get(custom_presets)
   const key = presetKey(candidate)
   const existing = saved.find(p => presetKey(p) === key)
-  if (existing) return { preset: existing, duplicate: true }
+  if (existing) return { status: 'duplicate', preset: existing }
+  if (saved.length >= MAX_PRESETS) return { status: 'full' }
 
-  const next = [candidate, ...saved].slice(0, MAX_PRESETS)
+  const next = [candidate, ...saved]
   custom_presets.set(next)
-  persist(next)
-  return { preset: candidate, duplicate: false }
+  return { status: 'saved', preset: candidate, persisted: persist(next) }
 }
 
-export function deleteCustomPreset(id: string) {
-  const next = get(custom_presets).filter(p => p.id !== id)
+/** Remove a saved gradient. Returns what's needed to put it back with restoreCustomPreset. */
+export function deleteCustomPreset(id: string): { preset: CustomPreset; index: number } | null {
+  const list = get(custom_presets)
+  const index = list.findIndex(p => p.id === id)
+  if (index === -1) return null
+  const next = list.filter(p => p.id !== id)
+  custom_presets.set(next)
+  persist(next)
+  return { preset: list[index], index }
+}
+
+/** Undo a delete: put the preset back where it was. */
+export function restoreCustomPreset({ preset, index }: { preset: CustomPreset; index: number }) {
+  const list = get(custom_presets)
+  if (list.some(p => p.id === preset.id)) return
+  const next = [...list]
+  next.splice(Math.min(index, next.length), 0, preset)
   custom_presets.set(next)
   persist(next)
 }

@@ -3,8 +3,8 @@ import { get } from 'svelte/store'
 
 import { layers, active_layer_index, defaultLayer } from './layers'
 import {
-  custom_presets, saveCurrentAsPreset, applyCustomPreset, deleteCustomPreset,
-  parseStored, presetLabel, STORAGE_KEY,
+  custom_presets, saveCurrentAsPreset, applyCustomPreset, deleteCustomPreset, restoreCustomPreset,
+  parseStored, presetLabel, presetCss, STORAGE_KEY, MAX_PRESETS,
 } from './customPresets'
 
 const stack = (n: number) => Array.from({ length: n }, (_, i) => {
@@ -47,15 +47,46 @@ describe('custom presets (#74)', () => {
   })
 
   it('does not save the same gradient twice', () => {
-    const first = saveCurrentAsPreset()!
-    const again = saveCurrentAsPreset()!
-    expect(again.duplicate).toBe(true)
+    const first = saveCurrentAsPreset() as any
+    const again = saveCurrentAsPreset() as any
+    expect(again.status).toBe('duplicate')
     expect(again.preset.id).toBe(first.preset.id)
     expect(get(custom_presets)).toHaveLength(1)
   })
 
+  it('treats the same-looking gradient as a duplicate even if its bookkeeping differs', () => {
+    saveCurrentAsPreset()
+    const l = defaultLayer()
+    l.stops[0].color = 'red'
+    l.stops.forEach((s: any) => s.auto = null) // same CSS, different internal auto values
+    layers.set([l])
+    expect((saveCurrentAsPreset() as any).status).toBe('duplicate')
+  })
+
+  it('refuses to save past the cap instead of evicting', () => {
+    for (let i = 0; i < MAX_PRESETS; i++) {
+      const l = defaultLayer()
+      l.stops[0].color = `oklch(50% .1 ${i})`
+      layers.set([l])
+      expect((saveCurrentAsPreset() as any).status).toBe('saved')
+    }
+    const oldest = get(custom_presets).at(-1)
+    layers.set(stack(2))
+    expect((saveCurrentAsPreset() as any).status).toBe('full')
+    expect(get(custom_presets)).toHaveLength(MAX_PRESETS)
+    expect(get(custom_presets).at(-1)).toEqual(oldest)
+  })
+
+  it('reports when storage refuses the write', () => {
+    vi.stubGlobal('localStorage', { ...memoryStorage(), setItem: () => { throw new Error('QuotaExceededError') } })
+    const res = saveCurrentAsPreset() as any
+    expect(res.status).toBe('saved')
+    expect(res.persisted).toBe(false)
+    expect(get(custom_presets)).toHaveLength(1)
+  })
+
   it('applies a single-layer preset to the active layer only', () => {
-    const { preset } = saveCurrentAsPreset()!
+    const { preset } = saveCurrentAsPreset() as any
     const three = stack(3)
     layers.set(three)
     active_layer_index.set(1)
@@ -74,7 +105,7 @@ describe('custom presets (#74)', () => {
   it('replaces the whole stack with a multi-layer preset', () => {
     layers.set(stack(3))
     active_layer_index.set(2)
-    const { preset } = saveCurrentAsPreset()!
+    const { preset } = saveCurrentAsPreset() as any
     layers.set(stack(1))
     active_layer_index.set(0)
 
@@ -83,21 +114,34 @@ describe('custom presets (#74)', () => {
     expect(get(active_layer_index)).toBe(2)
   })
 
-  it('deletes', () => {
-    const { preset } = saveCurrentAsPreset()!
-    deleteCustomPreset(preset.id)
-    expect(get(custom_presets)).toEqual([])
-    expect(localStorage.getItem(STORAGE_KEY)).toBe('[]')
+  it('deletes and restores in place', () => {
+    saveCurrentAsPreset()
+    layers.set(stack(2)); saveCurrentAsPreset()
+    layers.set(stack(3)); saveCurrentAsPreset()
+    const before = get(custom_presets)
+
+    const removal = deleteCustomPreset(before[1].id)!
+    expect(removal.index).toBe(1)
+    expect(get(custom_presets).map(p => p.id)).toEqual([before[0].id, before[2].id])
+
+    restoreCustomPreset(removal)
+    restoreCustomPreset(removal) // idempotent
+    expect(get(custom_presets)).toEqual(before)
+    expect(parseStored(localStorage.getItem(STORAGE_KEY))).toEqual(before)
   })
 
   it('ignores corrupt storage', () => {
     expect(parseStored('{nope')).toEqual([])
     expect(parseStored('{"a":1}')).toEqual([])
-    expect(parseStored('[{"id":"x","layers":[]}, null, {"id":"y","layers":[{"type":"linear","stops":[]}]}]')).toHaveLength(1)
+    const [p] = parseStored('[{"id":"x","layers":[]}, null, {"id":"y","layers":[{"type":"radial","stops":[]}]}]')
+    expect(p.id).toBe('y')
+    // missing sub-objects are filled in, so building its CSS can't throw
+    expect(p.layers[0].radial.size).toBe('farthest-corner')
+    expect(() => presetCss(p)).not.toThrow()
   })
 
   it('labels presets', () => {
-    const { preset } = saveCurrentAsPreset()!
+    const { preset } = saveCurrentAsPreset() as any
     expect(presetLabel(preset)).toBe('linear, 2 colors')
   })
 })

@@ -13,58 +13,117 @@
 	} from '../store/conic.ts'
 	import {updateStops} from '../utils/stops.ts'
 	import {custom_presets, initCustomPresets, saveCurrentAsPreset, deleteCustomPreset,
-	        applyCustomPreset, presetCss, presetLabel
+	        restoreCustomPreset, applyCustomPreset, presetCss, presetLabel, MAX_PRESETS
 	} from '../store/customPresets.ts'
 
 	let savedRow = $state()
 	let saveBtn = $state()
+	let undoBtn = $state()
 	let flashId = $state(null)
 	let flashKind = $state('')
 	let announcement = $state('')
-	let flashTimer
+	// visible note next to the "Saved" label; `removed` offers an Undo
+	let status = $state('')
+	let removed = $state(null)
+	let flashTimer, flashFrame, statusTimer
 
-	onMount(() => initCustomPresets())
+	onMount(() => {
+		const stop = initCustomPresets()
+		return () => {
+			stop()
+			clearTimeout(flashTimer)
+			clearTimeout(statusTimer)
+			cancelAnimationFrame(flashFrame)
+		}
+	})
 
 	function announce(msg) {
 		announcement = ''
 		queueMicrotask(() => announcement = msg)
 	}
 
+	function showStatus(text, { undo = null, ms = 4000 } = {}) {
+		clearTimeout(statusTimer)
+		status = text
+		removed = undo
+		statusTimer = setTimeout(() => {
+			if (undoBtn && document.activeElement === undoBtn) saveBtn?.focus()
+			status = ''
+			removed = null
+		}, ms)
+	}
+
 	function flash(id, kind) {
 		clearTimeout(flashTimer)
+		cancelAnimationFrame(flashFrame)
 		flashId = null
-		// re-trigger the animation when the same swatch flashes twice in a row
-		requestAnimationFrame(() => {
+		// next frame, so the animation re-runs when the same swatch flashes twice in a row
+		flashFrame = requestAnimationFrame(() => {
 			flashId = id
 			flashKind = kind
 			flashTimer = setTimeout(() => flashId = null, 1200)
 		})
 	}
 
-	async function saveCurrent() {
-		const result = saveCurrentAsPreset()
-		if (!result) return
-		const { preset, duplicate } = result
-		announce(duplicate ? 'This gradient is already saved' : 'Gradient saved')
-		flash(preset.id, duplicate ? 'duplicate' : 'added')
-		await tick()
-		savedRow?.querySelector(`[data-preset-id="${preset.id}"]`)
+	function reveal(id) {
+		savedRow?.querySelector(`[data-preset-id="${id}"]`)
 			?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
 	}
 
+	async function saveCurrent() {
+		const result = saveCurrentAsPreset()
+		if (!result) return
+
+		if (result.status === 'full') {
+			showStatus(`Full, remove one to save more`)
+			announce(`You have ${MAX_PRESETS} saved gradients. Remove one to save more.`)
+			return
+		}
+
+		if (result.status === 'duplicate') {
+			showStatus('Already saved')
+			announce('This gradient is already saved')
+		}
+		else if (!result.persisted) {
+			showStatus('Saved for this visit only', { ms: 6000 })
+			announce('Gradient saved, but this browser blocked storage so it won’t be kept after reload')
+		}
+		else {
+			showStatus('')
+			announce('Gradient saved')
+		}
+
+		flash(result.preset.id, result.status === 'duplicate' ? 'duplicate' : 'added')
+		await tick()
+		reveal(result.preset.id)
+	}
+
 	async function removePreset(preset) {
-		const list = $custom_presets
-		const i = list.findIndex(p => p.id === preset.id)
-		deleteCustomPreset(preset.id)
-		announce('Saved gradient removed')
+		const removal = deleteCustomPreset(preset.id)
+		if (!removal) return
+		showStatus('Removed', { undo: removal, ms: 8000 })
+		announce('Saved gradient removed. Undo is next to the Saved label.')
 		await tick()
 		// keep keyboard users in the row: next swatch, else previous, else the save button
 		const swatches = savedRow?.querySelectorAll('.custom > .preset')
-		const next = swatches?.[Math.min(i, swatches.length - 1)] ?? saveBtn
+		const next = swatches?.[Math.min(removal.index, swatches.length - 1)] ?? saveBtn
 		next?.focus()
 	}
 
+	async function undoRemove() {
+		if (!removed) return
+		const { preset } = removed
+		restoreCustomPreset(removed)
+		showStatus('')
+		announce('Saved gradient restored')
+		await tick()
+		savedRow?.querySelector(`[data-preset-id="${preset.id}"] > .preset`)?.focus()
+		flash(preset.id, 'added')
+		reveal(preset.id)
+	}
+
 	function onSwatchKeydown(e, preset) {
+		// Backspace too: it's the "delete" key on Mac keyboards. Removal is undoable.
 		if (e.key === 'Delete' || e.key === 'Backspace') {
 			e.preventDefault()
 			removePreset(preset)
@@ -411,8 +470,18 @@
 
 <section class="presets">
 	<div class="row" bind:this={savedRow}>
-		<p id="saved-presets-label">Saved</p>
-		<div class="scroller" role="group" aria-labelledby="saved-presets-label">
+		<div class="row-head">
+			<p id="saved-presets-label">Saved</p>
+			{#if status}
+				<span class="status">
+					{status}
+					{#if removed}
+						<button bind:this={undoBtn} class="undo" onclick={undoRemove}>Undo</button>
+					{/if}
+				</span>
+			{/if}
+		</div>
+		<div class="scroller saved" role="group" aria-labelledby="saved-presets-label">
 			<button bind:this={saveBtn} class="preset save" aria-label="Save this gradient" onclick={saveCurrent} use:tooltip={{content: 'Save this gradient'}}>
 				<svg aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/></svg>
 			</button>
@@ -424,7 +493,7 @@
 						class="preset"
 						style="background: {css.classic}; background: {css.modern};"
 						aria-label={label}
-						aria-keyshortcuts="Delete"
+						aria-keyshortcuts="Delete Backspace"
 						use:tooltip={{content: presetLabel(preset)}}
 						onclick={() => applyCustomPreset(preset)}
 						onkeydown={(e) => onSwatchKeydown(e, preset)}
@@ -474,12 +543,44 @@
 		padding-block-start: 0;
 	}
 
-	.row > p {
+	.row > p, .row-head {
 		font-size: var(--font-size-0);
-		text-transform: uppercase;
 		position: sticky;
 		inline-size: max-content;
 		inset-inline-start: 0;
+	}
+
+	.row p {
+		font-size: var(--font-size-0);
+		text-transform: uppercase;
+	}
+
+	.row-head {
+		display: flex;
+		align-items: baseline;
+		gap: var(--size-2);
+		/* keep the row height steady while the status note comes and goes */
+		min-block-size: 1lh;
+	}
+
+	.status {
+		color: var(--text-2);
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--size-1);
+	}
+
+	.undo {
+		font: inherit;
+		font-weight: var(--font-weight-6);
+		padding: 0 var(--size-1);
+		border: none;
+		background: none;
+		box-shadow: none;
+		color: var(--text-1);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		min-block-size: 24px;
 	}
 
 	.row .preset {
@@ -489,8 +590,12 @@
 	.scroller {
 		display: flex;
 		gap: var(--size-3);
-		/* room for the remove badges that poke out of the swatches */
+	}
+
+	/* room for the remove badges that poke out of the swatches */
+	.scroller.saved {
 		padding-block-start: var(--size-1);
+		padding-inline-end: var(--size-1);
 	}
 
 	.preset, .spacer {
@@ -547,6 +652,14 @@
 	.remove > svg {
 		inline-size: 10px;
 		block-size: 10px;
+	}
+
+	/* 24px hit target (WCAG 2.5.8) around the 20px badge */
+	.remove::before {
+		content: "";
+		position: absolute;
+		inset: -2px;
+		border-radius: inherit;
 	}
 
 	.remove:is(:hover, :focus-visible) {
