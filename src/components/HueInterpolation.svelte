@@ -4,14 +4,14 @@
 
 <fieldset class="control-set">
   <div class="label-select-combo">
-    <label class="icon-label">
+    <label class="icon-label" for="in-hue-interpolation">
       <svg viewBox="0 0 24 24">
         <path fill="none" stroke="currentColor" d="m15 10 5 5-5 5"></path>
         <path fill="none" stroke="currentColor" d="M4 4v7a4 4 0 0 0 4 4h12"></path>
       </svg>
       Hue Path
     </label>
-    <select name="colorspace" id="in-colorspace" bind:value={$gradient_interpolation} oninput={(e) => $gradient_interpolation = e.currentTarget.value}> 
+    <select name="hue-interpolation" id="in-hue-interpolation" bind:value={$gradient_interpolation} oninput={(e) => $gradient_interpolation = e.currentTarget.value}> 
       <button>
         <selectedcontent></selectedcontent>
       </button>

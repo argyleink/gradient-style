@@ -505,10 +505,13 @@
     picker.setColor(stop.color)
     picker.showModal()
 
-    // Ignore the initial emission which may be the seeded value or a stale one
-    let isFirst = true
+    // Ignore the seeded emission and the picker re-serializing the color while it
+    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit.
+    // The picker's $effect echoes in a microtask, so it always lands before this timer.
+    let opening = true
+    setTimeout(() => { opening = false }, 0)
     const unsub = picker_value.subscribe(value => {
-      if (isFirst) { isFirst = false; return }
+      if (opening) return
       if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]

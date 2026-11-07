@@ -110,10 +110,13 @@
     picker.setColor(stop.color)
     picker.showModal()
 
-    // Ignore the initial emission from the store and only update on real changes
-    let isFirst = true
+    // Ignore the seeded emission and the picker re-serializing the color while it
+    // opens (e.g. 0.5 -> 0.50), which would otherwise rewrite the stop as a phantom edit.
+    // The picker's $effect echoes in a microtask, so it always lands before this timer.
+    let opening = true
+    setTimeout(() => { opening = false }, 0)
     const unsub = picker_value.subscribe(value => {
-      if (isFirst) { isFirst = false; return }
+      if (opening) return
       if (value === stop.color) return
       stop.color = value
       $gradient_stops = [...$gradient_stops]
@@ -121,7 +124,7 @@
 
     picker.addEventListener('closing', () => {
       unsub()
-    })
+    }, { once: true })
   }
 
   function fieldsetInteractingStart(stop: GradientStop) {
@@ -436,7 +439,7 @@
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
-    background-image: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    background-image: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 75%;
@@ -476,8 +479,8 @@
   .stop-actions { z-index: 2; }
 
   .stop-actions > select {
-    --icon-arrow-down: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
-    --icon-arrow-up: url(https://api.iconify.design/mdi:dots-vertical.svg?color=%23adb5bd);
+    --icon-arrow-down: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
+    --icon-arrow-up: url(https://api.iconify.design/mdi/dots-vertical.svg?color=%23adb5bd);
     position: absolute;
     inset: 0;
   }
@@ -514,7 +517,7 @@
 
   .chip.color-stop::after {
     opacity: 0;
-    content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23ffffff);
+    content: url(https://api.iconify.design/material-symbols/edit.svg?color=%23ffffff);
     block-size: 20px;
     right: var(--size-8);
     position: absolute;
@@ -527,7 +530,7 @@
 
   @media (prefers-color-scheme: light) {
     .chip.color-stop::after {
-      content: url(https://api.iconify.design/material-symbols:edit.svg?color=%23111111);
+      content: url(https://api.iconify.design/material-symbols/edit.svg?color=%23111111);
     }
   }
 

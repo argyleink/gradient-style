@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { replaceState } from '$app/navigation'
 
   import Color from 'colorjs.io'
@@ -36,6 +36,8 @@
   import Presets from './Presets.svelte'
 import Prism from './PrismJS.svelte'
 import GradientImportDialog from './GradientImportDialog.svelte'
+  import UndoRedo from './UndoRedo.svelte'
+  import { initHistory } from '../store/history.ts'
 
   import Hint from './Hint.svelte'
 
@@ -47,6 +49,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   let svgicon
   let restoring = $state(true)
   let importRef
+  let stopHistory
+  let destroyed = false
+  onDestroy(() => { destroyed = true; stopHistory?.() })
 
   onMount(async () => {
     // preview_hd = window.matchMedia('(dynamic-range: high)').matches
@@ -145,6 +150,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     else {
       restoring = false
     }
+
+    // Start recording undo/redo history once the restored state is in place
+    if (!destroyed) stopHistory = initHistory()
 
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false
@@ -557,6 +565,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   <contain-er style="container: control-panel / inline-size; z-index: var(--layer-1)">
     <section class="controls">
       <div class="menu-bar">
+        <UndoRedo />
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
@@ -958,8 +967,8 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   }
 
   :global(select) {
-    --icon-arrow-down: url(https://api.iconify.design/ic:keyboard-arrow-down.svg?color=%23adb5bd);
-    --icon-arrow-up: url(https://api.iconify.design/ic:keyboard-arrow-up.svg?color=%23adb5bd);
+    --icon-arrow-down: url(https://api.iconify.design/ic/keyboard-arrow-down.svg?color=%23adb5bd);
+    --icon-arrow-up: url(https://api.iconify.design/ic/keyboard-arrow-up.svg?color=%23adb5bd);
     --_bg-light: #fff;
     --_bg-dark: var(--surface-3);
     --_bg: var(--_bg-light);
@@ -1221,7 +1230,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     aspect-ratio: 1;
     border: none;
     box-shadow: 0 0 0 var(--_highlight-size) var(--_highlight);
-    background-image: url(https://api.iconify.design/material-symbols:settings-rounded.svg?color=%23adb5bd);
+    background-image: url(https://api.iconify.design/material-symbols/settings-rounded.svg?color=%23adb5bd);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 75%;
