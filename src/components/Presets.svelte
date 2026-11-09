@@ -1,4 +1,5 @@
 <script>
+	import { onMount, tick } from 'svelte'
 	import { tooltip } from 'svooltip'
 
 	import {gradient_type, gradient_space, gradient_interpolation,
@@ -11,6 +12,123 @@
 	import {conic_angle, conic_position, conic_named_position
 	} from '../store/conic.ts'
 	import {updateStops} from '../utils/stops.ts'
+	import {custom_presets, initCustomPresets, saveCurrentAsPreset, deleteCustomPreset,
+	        restoreCustomPreset, applyCustomPreset, presetCss, presetLabel, MAX_PRESETS
+	} from '../store/customPresets.ts'
+
+	let savedRow = $state()
+	let saveBtn = $state()
+	let undoBtn = $state()
+	let flashId = $state(null)
+	let flashKind = $state('')
+	let announcement = $state('')
+	// visible note next to the "Saved" label; `removed` offers an Undo
+	let status = $state('')
+	let removed = $state(null)
+	let flashTimer, flashFrame, statusTimer
+
+	onMount(() => {
+		const stop = initCustomPresets()
+		return () => {
+			stop()
+			clearTimeout(flashTimer)
+			clearTimeout(statusTimer)
+			cancelAnimationFrame(flashFrame)
+		}
+	})
+
+	function announce(msg) {
+		announcement = ''
+		queueMicrotask(() => announcement = msg)
+	}
+
+	function showStatus(text, { undo = null, ms = 4000 } = {}) {
+		clearTimeout(statusTimer)
+		status = text
+		removed = undo
+		statusTimer = setTimeout(() => {
+			if (undoBtn && document.activeElement === undoBtn) saveBtn?.focus()
+			status = ''
+			removed = null
+		}, ms)
+	}
+
+	function flash(id, kind) {
+		clearTimeout(flashTimer)
+		cancelAnimationFrame(flashFrame)
+		flashId = null
+		// next frame, so the animation re-runs when the same swatch flashes twice in a row
+		flashFrame = requestAnimationFrame(() => {
+			flashId = id
+			flashKind = kind
+			flashTimer = setTimeout(() => flashId = null, 1200)
+		})
+	}
+
+	function reveal(id) {
+		savedRow?.querySelector(`[data-preset-id="${id}"]`)
+			?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+	}
+
+	async function saveCurrent() {
+		const result = saveCurrentAsPreset()
+		if (!result) return
+
+		if (result.status === 'full') {
+			showStatus(`Full, remove one to save more`)
+			announce(`You have ${MAX_PRESETS} saved gradients. Remove one to save more.`)
+			return
+		}
+
+		if (result.status === 'duplicate') {
+			showStatus('Already saved')
+			announce('This gradient is already saved')
+		}
+		else if (!result.persisted) {
+			showStatus('Saved for this visit only', { ms: 6000 })
+			announce('Gradient saved, but this browser blocked storage so it will not be kept after reload')
+		}
+		else {
+			showStatus('')
+			announce('Gradient saved')
+		}
+
+		flash(result.preset.id, result.status === 'duplicate' ? 'duplicate' : 'added')
+		await tick()
+		reveal(result.preset.id)
+	}
+
+	async function removePreset(preset) {
+		const removal = deleteCustomPreset(preset.id)
+		if (!removal) return
+		showStatus('Removed', { undo: removal, ms: 8000 })
+		announce('Saved gradient removed. Undo is next to the Saved label.')
+		await tick()
+		// keep keyboard users in the row: next swatch, else previous, else the save button
+		const swatches = savedRow?.querySelectorAll('.custom > .preset')
+		const next = swatches?.[Math.min(removal.index, swatches.length - 1)] ?? saveBtn
+		next?.focus()
+	}
+
+	async function undoRemove() {
+		if (!removed) return
+		const { preset } = removed
+		restoreCustomPreset(removed)
+		showStatus('')
+		announce('Saved gradient restored')
+		await tick()
+		savedRow?.querySelector(`[data-preset-id="${preset.id}"] > .preset`)?.focus()
+		flash(preset.id, 'added')
+		reveal(preset.id)
+	}
+
+	function onSwatchKeydown(e, preset) {
+		// Backspace too: it's the "delete" key on Mac keyboards. Removal is undoable.
+		if (e.key === 'Delete' || e.key === 'Backspace') {
+			e.preventDefault()
+			removePreset(preset)
+		}
+	}
 
 	const presets = [
 		{
@@ -351,24 +469,56 @@
 </script>
 
 <section class="presets">
-	<p>HD Examples</p>
-	<div class="scroller">
-		{#each presets as preset}
-			<button class="preset" style="background: {preset.gradient};" use:tooltip={{content: preset.name}} onclick={()=>presetClicked(preset)}></button>
-		{/each}
+	<div class="row" bind:this={savedRow}>
+		<div class="row-head">
+			<p id="saved-presets-label">Saved</p>
+			{#if status}
+				<span class="status">
+					{status}
+					{#if removed}
+						<button bind:this={undoBtn} class="undo" onclick={undoRemove}>Undo</button>
+					{/if}
+				</span>
+			{/if}
+		</div>
+		<div class="scroller saved" role="group" aria-labelledby="saved-presets-label">
+			<button bind:this={saveBtn} class="preset save" aria-label="Save this gradient" onclick={saveCurrent} use:tooltip={{content: 'Save this gradient'}}>
+				<svg aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+			</button>
+			{#each $custom_presets as preset, i (preset.id)}
+				{@const css = presetCss(preset)}
+				{@const label = `Saved gradient ${i + 1}: ${presetLabel(preset)}`}
+				<div class="custom" data-preset-id={preset.id} data-flash={flashId === preset.id ? flashKind : null}>
+					<button
+						class="preset"
+						style="background: {css.classic}; background: {css.modern};"
+						aria-label={label}
+						aria-keyshortcuts="Delete Backspace"
+						use:tooltip={{content: presetLabel(preset)}}
+						onclick={() => applyCustomPreset(preset)}
+						onkeydown={(e) => onSwatchKeydown(e, preset)}
+					></button>
+					<button class="remove" tabindex="-1" aria-label="Remove saved gradient {i + 1}" onclick={() => removePreset(preset)}>
+						<svg aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M7 7l10 10M17 7 7 17"/></svg>
+					</button>
+				</div>
+			{/each}
+		</div>
+		<span class="visually-hidden" aria-live="polite">{announcement}</span>
+	</div>
+	<div class="row">
+		<p>HD Examples</p>
+		<div class="scroller">
+			{#each presets as preset}
+				<button class="preset" style="background: {preset.gradient};" aria-label={preset.name} use:tooltip={{content: preset.name}} onclick={()=>presetClicked(preset)}></button>
+			{/each}
+		</div>
 	</div>
 </section>
 
 <style>
 	.presets {
 		display: grid;
-		gap: var(--size-2);
-		overflow-x: auto;
-		scroll-snap-type: x mandatory;
-		padding-block: var(--size-3);
-		padding-inline: var(--size-5);
-		scroll-padding-inline: var(--size-5);
-		scrollbar-width: thin;
 		border-block-start: 1px solid var(--surface-1);
 	}
 
@@ -378,21 +528,74 @@
 		}
 	}
 
-	.presets > p {
+	.row {
+		display: grid;
+		gap: var(--size-2);
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		padding-block: var(--size-3);
+		padding-inline: var(--size-5);
+		scroll-padding-inline: var(--size-5);
+		scrollbar-width: thin;
+	}
+
+	.row + .row {
+		padding-block-start: 0;
+	}
+
+	.row > p, .row-head {
 		font-size: var(--font-size-0);
-		text-transform: uppercase;
 		position: sticky;
 		inline-size: max-content;
 		inset-inline-start: 0;
 	}
 
-	.presets .preset {
+	.row p {
+		font-size: var(--font-size-0);
+		text-transform: uppercase;
+	}
+
+	.row-head {
+		display: flex;
+		align-items: baseline;
+		gap: var(--size-2);
+		/* keep the row height steady while the status note comes and goes */
+		min-block-size: 1lh;
+	}
+
+	.status {
+		color: var(--text-2);
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--size-1);
+	}
+
+	.undo {
+		font: inherit;
+		font-weight: var(--font-weight-6);
+		padding: 0 var(--size-1);
+		border: none;
+		background: none;
+		box-shadow: none;
+		color: var(--text-1);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		min-block-size: 24px;
+	}
+
+	.row .preset {
 		scroll-snap-align: start;
 	}
 
 	.scroller {
 		display: flex;
 		gap: var(--size-3);
+	}
+
+	/* room for the remove badges that poke out of the swatches */
+	.scroller.saved {
+		padding-block-start: var(--size-1);
+		padding-inline-end: var(--size-1);
 	}
 
 	.preset, .spacer {
@@ -403,5 +606,110 @@
 		padding: 0;
 		border: none;
 		border-radius: var(--radius-round);
+	}
+
+	.preset.save {
+		display: grid;
+		place-items: center;
+		background: transparent;
+		color: var(--text-2);
+		border: 2px dashed var(--surface-4);
+	}
+
+	.preset.save:is(:hover, :focus-visible) {
+		color: var(--text-1);
+		border-color: var(--text-2);
+	}
+
+	.preset.save > svg {
+		inline-size: var(--size-4);
+		block-size: var(--size-4);
+	}
+
+	.custom {
+		position: relative;
+		flex: 0 0 auto;
+		display: grid;
+		scroll-snap-align: start;
+	}
+
+	.remove {
+		position: absolute;
+		inset-block-start: calc(var(--size-1) * -1);
+		inset-inline-end: calc(var(--size-1) * -1);
+		inline-size: var(--size-4);
+		block-size: var(--size-4);
+		padding: 0;
+		border: none;
+		border-radius: var(--radius-round);
+		display: grid;
+		place-items: center;
+		color: var(--text-1);
+		background: var(--surface-1);
+		box-shadow: 0 0 0 1px var(--surface-4), var(--shadow-2);
+	}
+
+	.remove > svg {
+		inline-size: 10px;
+		block-size: 10px;
+	}
+
+	/* 24px hit target (WCAG 2.5.8) around the 20px badge */
+	.remove::before {
+		content: "";
+		position: absolute;
+		inset: -2px;
+		border-radius: inherit;
+	}
+
+	.remove:is(:hover, :focus-visible) {
+		color: var(--surface-1);
+		background: var(--text-1);
+	}
+
+	/* pointer devices reveal remove on hover/focus; touch always shows it */
+	@media (hover: hover) {
+		.custom:not(:hover, :focus-within) > .remove {
+			opacity: 0;
+			scale: .5;
+			pointer-events: none;
+		}
+	}
+
+	.custom[data-flash] > .preset {
+		outline: 2px solid var(--text-1);
+		outline-offset: 2px;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.remove {
+			transition: opacity .15s var(--ease-3), scale .15s var(--ease-3);
+		}
+
+		.custom[data-flash="added"] > .preset {
+			animation: pop-in .4s var(--ease-spring-3, var(--ease-3));
+		}
+
+		.custom[data-flash="duplicate"] > .preset {
+			animation: nudge .4s var(--ease-3);
+		}
+	}
+
+	@keyframes pop-in {
+		from { scale: .4; opacity: 0; }
+	}
+
+	@keyframes nudge {
+		25% { translate: -3px 0; }
+		75% { translate: 3px 0; }
+	}
+
+	.visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 </style>
