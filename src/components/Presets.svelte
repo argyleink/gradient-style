@@ -86,7 +86,7 @@
 		}
 		else if (!result.persisted) {
 			showStatus('Saved for this visit only', { ms: 6000 })
-			announce('Gradient saved, but this browser blocked storage so it won't be kept after reload')
+			announce('Gradient saved, but this browser blocked storage so it will not be kept after reload')
 		}
 		else {
 			showStatus('')
