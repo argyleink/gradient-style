@@ -32,6 +32,22 @@
     idleTimer = setTimeout(() => idle = true, 2500)
   }
 
+  // A touch tap's click is hit-tested after the controls reappear, so remember they were hidden
+  let revealTap = false
+
+  function onPointerDown() {
+    revealTap = idle
+    wake()
+  }
+
+  /** @param {MouseEvent} e */
+  function onClickCapture(e) {
+    if (!revealTap) return
+    revealTap = false
+    e.stopPropagation()
+    e.preventDefault()
+  }
+
   function show() {
     if (!dialog || dialog.open) return
     dialog.showModal()
@@ -64,7 +80,9 @@
   function onKeydown(e) {
     if (e.defaultPrevented || e.repeat || e.isComposing) return
     if (e.metaKey || e.ctrlKey || e.altKey) return
-    if (e.key.toLowerCase() !== 'f' && e.code !== 'KeyF') return
+    // e.key respects the user's layout; fall back to the physical key only for non-Latin layouts
+    const key = /^[a-z]$/i.test(e.key) ? e.key.toLowerCase() : (e.code === 'KeyF' ? 'f' : '')
+    if (key !== 'f') return
     if (!open && isTextEditing(document.activeElement)) return
     // Another modal (import, color picker) owns the keyboard
     if (!open && document.querySelector('dialog[open]')) return
@@ -96,14 +114,14 @@
   style={background}
   onclose={onClose}
   onpointermove={wake}
-  onpointerdown={wake}
-  onkeydown={wake}
+  onpointerdown={onPointerDown}
+  onclickcapture={onClickCapture}
+  onkeydown={() => { revealTap = false; wake() }}
 >
   <div class="fullscreen-actions">
     {#if canToggleHd}
-      <button class="pill" aria-pressed={hd} onclick={() => hd = !hd}>
-        {hd ? 'HDR' : 'SDR'}
-        <span class="sr-only">gradient, press to compare</span>
+      <button class="pill" aria-label="HDR gradient" aria-pressed={hd} onclick={() => hd = !hd}>
+        <span aria-hidden="true">{hd ? 'HDR' : 'SDR'}</span>
       </button>
     {/if}
     <button class="pill" onclick={hide} bind:this={exitBtn}>
