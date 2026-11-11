@@ -37,6 +37,7 @@
 import Prism from './PrismJS.svelte'
 import GradientImportDialog from './GradientImportDialog.svelte'
   import UndoRedo from './UndoRedo.svelte'
+  import FullscreenPreview from './FullscreenPreview.svelte'
   import { initHistory } from '../store/history.ts'
 
   import Hint from './Hint.svelte'
@@ -566,6 +567,11 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     <section class="controls">
       <div class="menu-bar">
         <UndoRedo />
+        <FullscreenPreview
+          modern={user_layers_joined || user_gradient}
+          classic={classic_layers_joined || classic_gradient}
+          bind:hd={preview_hd}
+          canToggleHd={$gradient_interpolation !== 'longer'} />
         <button class="global-actions">
           <select tabindex="-1" onchange={globalAction}>
             <option disabled selected>Global Actions</option>
@@ -1159,11 +1165,15 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     }
   }
 
+  /* Visually hidden but still read: visibility:hidden would drop these labels from the accessibility tree */
   :global(.sr-only) {
-    inline-size: 0;
-    block-size: 0;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
     overflow: hidden;
-    visibility: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
     position: absolute;
   }
