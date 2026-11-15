@@ -99,3 +99,33 @@ function genStopMap(stops: Stop[]): number[] {
 
   return genStops.reverse()
 }
+function numericPct(p: any): number | null {
+  if (p == null) return null
+  if (typeof p === 'number') return Number.isFinite(p) ? p : null
+  const m = String(p).trim().match(/^([-+]?\d*\.?\d+)%?$/)
+  return m ? Number(m[1]) : null
+}
+
+const round2 = (n: number) => String(Math.round(n * 100) / 100)
+
+/**
+ * A repeating gradient whose stops already span 0–100% looks identical to the
+ * non-repeating one, so turning "repeat" on would appear to do nothing. When
+ * that's the case, squeeze the stop list into the first `fraction` of the line
+ * so the pattern visibly tiles. Stops that already end short of 100%, or that
+ * use non-percent lengths (px, em...), are returned untouched.
+ */
+export function tileStops(stops: Stop[], fraction = 0.25): Stop[] {
+  const positions = stops.flatMap(s => s.kind === 'stop'
+    ? [numericPct(s.position1), numericPct(s.position2)]
+    : [numericPct(s.percentage)])
+  if (positions.some(p => p == null)) return stops
+  if (Math.max(...(positions as number[])) < 100) return stops
+
+  return stops.map(s => {
+    if (s.kind === 'stop') {
+      return { ...s, position1: round2(numericPct(s.position1)! * fraction), position2: round2(numericPct(s.position2)! * fraction) } as Stop
+    }
+    return { ...s, percentage: round2(numericPct(s.percentage)! * fraction) } as Stop
+  })
+}

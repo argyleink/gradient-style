@@ -1,4 +1,4 @@
-import { gradient_type, gradient_space, gradient_interpolation, gradient_stops } from '../store/gradient'
+import { gradient_type, gradient_space, gradient_interpolation, gradient_repeating, gradient_stops } from '../store/gradient'
 import { linear_angle, linear_named_angle } from '../store/linear'
 import { radial_shape, radial_position, radial_named_position, radial_size } from '../store/radial'
 import { conic_angle, conic_position, conic_named_position } from '../store/conic'
@@ -39,6 +39,7 @@ function normalizeNamedPosition(name: string): string {
 
 export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers?: boolean }) {
   gradient_type.set(parsed.type)
+  gradient_repeating.set(!!parsed.repeating)
   if (parsed.space) gradient_space.set(parsed.space)
   if (parsed.interpolation) gradient_interpolation.set(parsed.interpolation)
 

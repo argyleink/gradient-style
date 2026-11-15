@@ -2,6 +2,7 @@ import Color from 'colorjs.io'
 
 export type ParsedGradient = {
   type: 'linear' | 'radial' | 'conic'
+  repeating?: boolean
   space?: string
   interpolation?: 'shorter' | 'longer' | 'increasing' | 'decreasing'
   linear?: {
@@ -68,14 +69,13 @@ function isColorToken(token: string): boolean {
   }
 }
 
-function classifyFunction(input: string): 'linear'|'radial'|'conic' {
+function classifyFunction(input: string): { type: 'linear'|'radial'|'conic'; repeating: boolean } {
   if (!/\)$/.test(input)) throw new ParseError('Missing closing )')
   const m = input.match(/^([a-z-]+)\s*\(/i)
   if (!m) throw new ParseError('Missing ( after function name')
   const name = m[1].toLowerCase()
-  if (name === 'linear-gradient') return 'linear'
-  if (name === 'radial-gradient') return 'radial'
-  if (name === 'conic-gradient') return 'conic'
+  const f = name.match(/^(repeating-)?(linear|radial|conic)-gradient$/)
+  if (f) return { type: f[2] as 'linear'|'radial'|'conic', repeating: !!f[1] }
   throw new ParseError(`Unknown gradient function: ${name}`)
 }
 
@@ -101,7 +101,7 @@ function extractGradients(input: string): string[] {
     
     if (ch === ',' && depth === 0) {
       const trimmed = current.trim()
-      if (trimmed && /^(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
+      if (trimmed && /^(repeating-)?(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
         results.push(trimmed)
       }
       current = ''
@@ -113,7 +113,7 @@ function extractGradients(input: string): string[] {
   
   // Don't forget the last one
   const trimmed = current.trim()
-  if (trimmed && /^(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
+  if (trimmed && /^(repeating-)?(linear|radial|conic)-gradient\s*\(/i.test(trimmed)) {
     results.push(trimmed)
   }
   
@@ -128,7 +128,7 @@ export function parseGradient(input: string): ParsedGradient {
   const gradients = extractGradients(cleanedInput)
   const firstGradient = gradients[0]
   
-  const type = classifyFunction(firstGradient)
+  const { type, repeating } = classifyFunction(firstGradient)
   const body = innerContent(firstGradient)
 
   // split by top-level commas
@@ -309,6 +309,7 @@ export function parseGradient(input: string): ParsedGradient {
 
   return {
     type,
+    repeating,
     space,
     interpolation,
     linear,

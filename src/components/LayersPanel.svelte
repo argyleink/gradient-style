@@ -17,6 +17,7 @@
   import ConicAngle from './ConicAngle.svelte'
   import ConicPosition from './ConicPosition.svelte'
   import Hint from './Hint.svelte'
+  import GradientRepeat from './GradientRepeat.svelte'
   function onAddLayer() {
     addLayer({ seed: 'new', position: 'top' })
   }
@@ -83,6 +84,8 @@
             <ConicAngle />
             <ConicPosition />
           {/if}
+
+          <GradientRepeat />
         </div>
       {/if}
     </div>
