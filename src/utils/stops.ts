@@ -99,6 +99,7 @@ function genStopMap(stops: Stop[]): number[] {
 
   return genStops.reverse()
 }
+
 function numericPct(p: any): number | null {
   if (p == null) return null
   if (typeof p === 'number') return Number.isFinite(p) ? p : null

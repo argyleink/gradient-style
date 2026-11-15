@@ -3,6 +3,7 @@ import { parseGradient, parseMultipleGradients } from './parseGradient'
 import { buildGradientStrings } from '../utils/gradientString'
 import { tileStops, updateStops } from '../utils/stops'
 import { defaultLayer } from '../store/layers'
+import { serializeUrl, deserializeUrl } from '../store/url'
 
 describe('repeating gradients (#33)', () => {
   it('parses all three repeating-* functions', () => {
@@ -26,6 +27,13 @@ describe('repeating gradients (#33)', () => {
     }
     const { modern } = buildGradientStrings(defaultLayer())
     expect(modern.startsWith('linear-gradient(')).toBe(true)
+  })
+
+  it('survives the URL hash for single and multi-layer state', () => {
+    const single = deserializeUrl('#' + serializeUrl({ type: 'conic', repeating: 'true', stops: defaultLayer().stops })) as any
+    expect(single.repeating).toBe('true')
+    const multi = deserializeUrl('#' + serializeUrl({ layers: JSON.stringify([{ type: 'linear', repeating: true, stops: [] }]), active: '0' })) as any
+    expect(multi.layers[0].repeating).toBe(true)
   })
 
   it('round-trips output back through the parser', () => {
