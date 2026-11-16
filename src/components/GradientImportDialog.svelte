@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import { parseGradient, parseMultipleGradients, ParseError } from '../lib/parseGradient'
   import { applyParsedToStores } from '../lib/importGradient'
   import { layers, addLayer } from '../store/layers'
@@ -64,7 +64,7 @@
     }
   }
 
-  function onImportClick() {
+  async function onImportClick() {
     if (!valid || !gradientText.trim()) return
     try {
       const gradients = parseMultipleGradients(gradientText)
@@ -82,8 +82,11 @@
       // Import remaining gradients as new layers
       if (gradients.length > 1) {
         for (let i = 1; i < gradients.length; i++) {
-          applyParsedToStores(gradients[i])
+          // Add the layer first, then fill it (applying first overwrote the previous layer with
+          // this one). addLayer holds the store->layer sync off until the next microtask, so wait.
           addLayer({ seed: 'duplicate', position: 'bottom' })
+          await tick()
+          applyParsedToStores(gradients[i])
         }
       }
       
