@@ -44,7 +44,7 @@ describe('repeating gradients (#33)', () => {
 })
 
 describe('repeating output keeps the period intact', () => {
-  // the Sunburst preset: two hard-edged rays, `a 0 5%, b 0 10%`
+  // the Sun Rays preset: two hard-edged rays, `a 0 5%, b 0 10%`
   const rays = () => updateStops([
     { kind: 'stop', color: '#fc0', auto: null, position1: '0', position2: '5' },
     { kind: 'hint', auto: null, percentage: null },
@@ -92,5 +92,33 @@ describe('tileStops', () => {
     const px = full()
     px[2] = { ...px[2], position1: '100px', position2: '100px' }
     expect(tileStops(px)).toBe(px)
+  })
+})
+
+describe('importing hand-written repeating gradients', () => {
+  const stops = (css: string) => parseGradient(css).stops.map((s: any) => s.kind === 'stop' ? [s.color, s.position1, s.position2] : s.percentage)
+
+  it('keeps px, em and deg stop positions instead of dropping them', () => {
+    expect(stops('repeating-linear-gradient(45deg, #000 0 10px, #fff 10px 20px)')).toEqual([['#000', '0', '10px'], ['#fff', '10px', '20px']])
+    expect(stops('repeating-linear-gradient(to right, red, blue 2em)')).toEqual([['red', null, null], ['blue', '2em', null]])
+    expect(stops('repeating-conic-gradient(red 0deg 10deg, blue 10deg 20deg)')).toEqual([['red', '0deg', '10deg'], ['blue', '10deg', '20deg']])
+    expect(stops('repeating-linear-gradient(red 0, 4px, blue 10px)')).toEqual([['red', '0', null], '4px', ['blue', '10px', null]])
+  })
+
+  it('does not read a stop position or the `at` position as the radial size', () => {
+    expect(parseGradient('repeating-radial-gradient(circle, red 0%, blue 10%)').radial?.size).toBeNull()
+    expect(parseGradient('repeating-radial-gradient(circle at 25% 25%, red 0%, blue 10%)').radial).toMatchObject({ size: null, position: { x: '25%', y: '25%' } })
+    expect(parseGradient('radial-gradient(ellipse 40px 20px at 10% 20%, red, blue)').radial?.size).toBe('40px 20px')
+  })
+
+  it('reads conic from/at without swallowing the stops', () => {
+    expect(parseGradient('repeating-conic-gradient(from 45deg at 30% 40% in oklch, red 0% 5%, blue 5% 10%)').conic).toEqual({ fromDeg: '45deg', namedPosition: null, position: { x: '30%', y: '40%' } })
+    expect(parseGradient('linear-gradient(45deg, red, blue)').linear?.angleDeg).toBe('45deg')
+  })
+
+  it('round-trips length stops and length hints through the output', () => {
+    const p = parseGradient('repeating-linear-gradient(90deg, red 0 10px, 4px, blue 10px 20px)')
+    const layer = { ...defaultLayer(), type: 'linear', repeating: true, linear: { named_angle: 'to right', angle: 90 }, stops: updateStops(p.stops as any) }
+    expect(buildGradientStrings(layer).modern.replace(/\s+/g, ' ')).toContain('red 0% 10px, 4px, blue 10px 20px')
   })
 })

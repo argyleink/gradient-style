@@ -153,7 +153,7 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines, repeating }: 
       if (pct == null) continue
       if (s.auto != null && String(pct) == String(s.auto)) continue
       if (isPctFifty(pct)) continue
-      out.push({ kind: 'hint', text: pct + '%' })
+      out.push({ kind: 'hint', text: fmtPos(pct) as string })
     }
   }
 

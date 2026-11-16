@@ -368,7 +368,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         else if (s.kind === 'hint') {
           if (s.percentage == null) return null
           // s.percentage is unitless; add % here
-          return s.percentage + '%'
+          return fmtPos(s.percentage)
         }
         return null
       })
