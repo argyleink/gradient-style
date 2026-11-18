@@ -1,7 +1,7 @@
 import { writable, get } from 'svelte/store'
 import { tick } from 'svelte'
 
-import { gradient_type, gradient_space, gradient_interpolation, gradient_stops, gradient_angles } from './gradient'
+import { gradient_type, gradient_space, gradient_interpolation, gradient_repeating, gradient_stops, gradient_angles } from './gradient'
 import { linear_angle, linear_named_angle } from './linear'
 import { radial_shape, radial_position, radial_named_position, radial_size } from './radial'
 import { conic_angle, conic_position, conic_named_position } from './conic'
@@ -23,6 +23,7 @@ export type GradientLayer = {
   type: string
   space: string
   interpolation: string
+  repeating: boolean
   stops: any[]
   linear: { named_angle: string | null; angle: string | number | null }
   radial: { shape: string; size: string; named_position: string; position: { x: number | null; y: number | null } }
@@ -48,6 +49,7 @@ function snapshotFromStores(): GradientLayer {
     type: get(gradient_type),
     space: get(gradient_space),
     interpolation: get(gradient_interpolation),
+    repeating: get(gradient_repeating),
     stops: structuredClone(get(gradient_stops)),
     linear: {
       named_angle: get(linear_named_angle),
@@ -76,6 +78,7 @@ function applyLayerToStores(layer: GradientLayer) {
     gradient_type.set(layer.type)
     gradient_space.set(layer.space)
     gradient_interpolation.set(layer.interpolation)
+    gradient_repeating.set(!!layer.repeating)
 
     linear_named_angle.set((layer.linear.named_angle as any) ?? '--')
     linear_angle.set(layer.linear.angle as any)
@@ -314,6 +317,7 @@ export function defaultLayer(): GradientLayer {
     type: 'linear',
     space: 'oklab',
     interpolation: 'shorter',
+    repeating: false,
     stops: [
       { kind: 'stop', color: '#000', auto: '0', position1: '0', position2: '0' },
       { kind: 'hint', auto: '50', percentage: '50' },
@@ -337,6 +341,7 @@ if (get(layers).length === 0) {
 gradient_type.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.type = v }) })
 gradient_space.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.space = v }) })
 gradient_interpolation.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.interpolation = v }) })
+gradient_repeating.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.repeating = !!v }) })
 linear_named_angle.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.linear.named_angle = v as any }) })
 linear_angle.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.linear.angle = v as any }) })
 radial_shape.subscribe(v => { if (!isApplyingLayerToStores) updateActiveLayer(l => { l.radial.shape = v }) })

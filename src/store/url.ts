@@ -1,6 +1,6 @@
 import {derived} from 'svelte/store'
 
-import {gradient_type, gradient_space, gradient_interpolation, 
+import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating, 
         gradient_stops
 } from '../store/gradient.ts'
 import {linear_angle, linear_named_angle} from '../store/linear.ts'
@@ -14,14 +14,14 @@ import {isCylindricalSpace} from '../utils/colorspace.ts'
 
 export const stateAsString = derived(
 	[
-		gradient_type, gradient_space, gradient_stops, gradient_interpolation,
+		gradient_type, gradient_space, gradient_stops, gradient_interpolation, gradient_repeating,
 		linear_angle, linear_named_angle,
 		radial_shape, radial_position, radial_named_position, radial_size,
 		conic_angle, conic_position, conic_named_position,
     layers, active_layer_index,
 	],
 	([
-		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation,
+		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation, $gradient_repeating,
 		$linear_angle, $linear_named_angle,
 		$radial_shape, $radial_position, $radial_named_position, $radial_size,
 		$conic_angle, $conic_position, $conic_named_position,
@@ -37,6 +37,7 @@ export const stateAsString = derived(
           type: l.type,
           space: l.space,
           interpolation: l.interpolation,
+          ...(l.repeating ? { repeating: true } : {}),
           stops: l.stops,
           linear: l.linear,
           radial: l.radial,
@@ -50,6 +51,8 @@ export const stateAsString = derived(
 			type: $gradient_type,
 			space: $gradient_space,
 		} as any
+
+		if ($gradient_repeating) urlGradient.repeating = 'true'
 
 		if (isCylindricalSpace($gradient_space))
 			urlGradient.interpolation = $gradient_interpolation

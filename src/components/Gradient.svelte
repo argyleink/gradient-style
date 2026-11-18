@@ -6,7 +6,7 @@
   import { tooltip } from 'svooltip'
   import 'svooltip/styles.css'
 
-  import {gradient_type, gradient_space, gradient_interpolation,
+  import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating,
           gradient_stops, gradient_positions
   } from '../store/gradient.ts'
   import {linear_named_angle, linear_angle
@@ -90,6 +90,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
               type: l.type ?? 'linear',
               space: l.space ?? 'oklab',
               interpolation: l.interpolation ?? 'shorter',
+              repeating: !!l.repeating,
               stops: Array.isArray(l.stops) ? l.stops : [],
               linear: l.linear ?? { named_angle: 'to right', angle: null },
               radial: l.radial ?? { shape: 'circle', size: 'farthest-corner', named_position: 'center', position: { x: null, y: null } },
@@ -117,6 +118,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         if (restore.type)               $gradient_type = restore.type
         if (restore.space)              $gradient_space = restore.space
         if (restore.interpolation)      $gradient_interpolation = restore.interpolation
+        $gradient_repeating = restore.repeating === 'true'
 
         if (restore.linear_named_angle) $linear_named_angle = restore.linear_named_angle
         if (restore.linear_angle)       $linear_angle = parseInt(restore.linear_angle)
@@ -247,17 +249,17 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   const gensyntax = {
     'linear': () =>
-      `linear-gradient(
+      `${$gradient_repeating ? 'repeating-' : ''}linear-gradient(
     ${linearAngleToString($linear_angle, $linear_named_angle)} ${spaceToString()},
     ${stopsToStrings({new_lines: false})}
   )`,
     'radial': () =>
-      `radial-gradient(
+      `${$gradient_repeating ? 'repeating-' : ''}radial-gradient(
     ${$radial_size} ${$radial_shape} at ${radialPositionToString()} ${spaceToString()},
     ${stopsToStrings({new_lines: false})}
   )`,
     'conic': () =>
-      `conic-gradient(
+      `${$gradient_repeating ? 'repeating-' : ''}conic-gradient(
     from ${$conic_angle}deg at ${conicPositionToString()} ${spaceToString()},
     ${stopsToStrings({new_lines: false})}
   )`
@@ -265,14 +267,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
 
   const genClassicSyntax = {
     'linear': () =>
-      `linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
+      `${$gradient_repeating ? 'repeating-' : ''}linear-gradient(${linearAngleToString($linear_angle, $linear_named_angle)}, ${stopsToStrings({convert_colors: true, new_lines: false})})`,
     'radial': () =>
-      `radial-gradient(
+      `${$gradient_repeating ? 'repeating-' : ''}radial-gradient(
     ${$radial_size} ${$radial_shape} at ${radialPositionToString()},
     ${stopsToStrings({convert_colors: true, new_lines: false})}
   )`,
     'conic': () =>
-      `conic-gradient(
+      `${$gradient_repeating ? 'repeating-' : ''}conic-gradient(
     from ${$conic_angle}deg at ${conicPositionToString()},
     ${stopsToStrings({convert_colors: true, new_lines: false})}
   )`
@@ -335,7 +337,8 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
 
           // Omit browser default edges only when explicitly percentages
-          if (i === firstStopIdx && isPctZero(p1)) p1 = null
+          // (repeating gradients tile first→last stop, so their leading edge is never implied)
+          if (i === firstStopIdx && isPctZero(p1) && !$gradient_repeating) p1 = null
           if (i === lastStopIdx && isPctHundred(p2)) p2 = null
 
           // If both positions exist
@@ -453,6 +456,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   }
 
 let user_gradient = $derived(gensyntax[$gradient_type](
+    $gradient_repeating,
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,
@@ -468,6 +472,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   ))
 
   let classic_gradient = $derived(genClassicSyntax[$gradient_type](
+    $gradient_repeating,
     $gradient_space,
     $gradient_interpolation,
     $gradient_stops,

@@ -2,7 +2,7 @@
 	import { onMount, tick } from 'svelte'
 	import { tooltip } from 'svooltip'
 
-	import {gradient_type, gradient_space, gradient_interpolation,
+	import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating,
 	        gradient_stops, gradient_positions
 	} from '../store/gradient.ts'
 	import {linear_named_angle, linear_angle
@@ -205,6 +205,20 @@
 			],
 		},
 		{
+			name: 'Sunburst',
+			gradient: 'repeating-conic-gradient(in oklch, oklch(88% .2 90) 0% 5%, oklch(72% .25 50) 0% 10%)',
+			type: 'conic',
+			space: 'oklch',
+			repeating: true,
+			angle: 0,
+			named_position: 'center',
+			stops: [
+				{color: 'oklch(88% .2 90)', position1: '0', position2: '5'},
+				{kind: 'hint', auto: null, percentage: null},
+				{color: 'oklch(72% .25 50)', position1: '0', position2: '10'},
+			],
+		},
+		{
 			name: 'Chlorophyll',
 			gradient: 'conic-gradient(from 0deg at top left in oklch, oklch(75% 0.5 156), oklch(70% 0.5 261))',
 			type: 'conic',
@@ -401,6 +415,7 @@
 
 	function presetClicked(preset) {
 		$gradient_type = preset.type
+		$gradient_repeating = !!preset.repeating
 		$gradient_space = preset.space
 
 		if (preset.interpolation)
