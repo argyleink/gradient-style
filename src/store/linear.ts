@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export const linear_named_angle = writable('to right');
 export const linear_angle = writable(null);
@@ -28,34 +28,29 @@ linear_named_angle.subscribe(v => {
   }
 })
 
-// When the numeric angle matches a named direction, reflect it in the UI.
+// Only the side keywords are fixed angles (`to right` is exactly 90deg). The corner keywords
+// (`to top right`...) aim at the box's corner, so they only equal 45/135/225/315deg on a square:
+// a typed or imported 45deg must stay 45deg, or the output silently renders a different angle.
+const sideToDeg: Record<string, number> = {
+  'to top': 0,
+  'to right': 90,
+  'to bottom': 180,
+  'to left': 270,
+}
+
+// When the numeric angle matches a side keyword, reflect it in the UI.
 linear_angle.subscribe(v => {
   if (syncing) return
   if (v == null) return
   const n = Number(v)
   if (Number.isNaN(n)) return
   // Normalize to [0,360)
-  let a = ((n % 360) + 360) % 360
-  const entries = Object.entries(nameToDeg)
-  const tol = 0.5
-  for (const [name, deg] of entries) {
-    const d = Math.abs((((a - deg) % 360) + 540) % 360 - 180)
-    if (d <= tol) {
-      if (name !== 'to bottom' || deg !== 180) {
-        syncing = true
-        try { linear_named_angle.set(name) }
-        finally { syncing = false }
-      } else {
-        // default direction; show it explicitly too
-        syncing = true
-        try { linear_named_angle.set('to bottom') }
-        finally { syncing = false }
-      }
-      return
-    }
-  }
-  // Not a named angle; show custom
+  const a = ((n % 360) + 360) % 360
+  // a corner keyword set alongside its nominal angle (layer/URL restore) stays as is
+  const current = get(linear_named_angle)
+  if (current && nameToDeg[current] === a) return
+  const side = Object.keys(sideToDeg).find(name => sideToDeg[name] === a)
   syncing = true
-  try { linear_named_angle.set('--') }
+  try { linear_named_angle.set(side ?? '--') }
   finally { syncing = false }
 })
