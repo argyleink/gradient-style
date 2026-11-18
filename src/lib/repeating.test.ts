@@ -122,3 +122,15 @@ describe('importing hand-written repeating gradients', () => {
     expect(buildGradientStrings(layer).modern.replace(/\s+/g, ' ')).toContain('red 0% 10px, 4px, blue 10px 20px')
   })
 })
+
+describe('import keeps explicit at-positions', () => {
+  it('radial and conic `at x% y%` land in the custom position, not a named center', async () => {
+    const { applyParsedToStores } = await import('./importGradient')
+    const { get } = await import('svelte/store')
+    const g = { ...(await import('../store/radial')), ...(await import('../store/conic')) }
+    applyParsedToStores(parseGradient('radial-gradient(circle at 25% 75%, red, blue)'))
+    expect([get(g.radial_named_position), get(g.radial_position)]).toEqual(['--', { x: '25', y: '75' }])
+    applyParsedToStores(parseGradient('conic-gradient(from 45deg at 30% 40%, red, blue)'))
+    expect([get(g.conic_named_position), get(g.conic_position)]).toEqual(['--', { x: '30', y: '40' }])
+  })
+})
