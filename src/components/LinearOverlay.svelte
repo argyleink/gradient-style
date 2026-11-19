@@ -48,23 +48,20 @@
       : $linear_angle
   )
 
-  // Snap named angle when numeric angle matches a named value (e.g., via slider)
-  const NAMED_ANGLES = [
+  // Snap to a side keyword when the numeric angle matches one (e.g., via slider).
+  // Corner keywords aren't fixed angles (they aim at the box corner), so 45deg stays 45deg.
+  const SIDE_ANGLES = [
     ['to top', 0],
-    ['to top right', 45],
     ['to right', 90],
-    ['to bottom right', 135],
     ['to bottom', 180],
-    ['to bottom left', 225],
     ['to left', 270],
-    ['to top left', 315],
   ]
 
   $effect(() => {
     if (dragulaState.rotating) return
     const val = Number($linear_angle)
     if (Number.isNaN(val)) return
-    const match = NAMED_ANGLES.find(([_, deg]) => deg === ((val % 360) + 360) % 360)
+    const match = SIDE_ANGLES.find(([_, deg]) => deg === ((val % 360) + 360) % 360)
     if (match && $linear_named_angle !== match[0]) {
       // Update named angle so UI reflects the keyword state
       $linear_named_angle = match[0]
