@@ -69,6 +69,32 @@ function isColorToken(token: string): boolean {
   }
 }
 
+// <length-percentage> or <angle-percentage>: `10%`, `0`, `12px`, `2em`, `-5%`, `30deg`, `.25turn`
+const POSITION_RE = /^[-+]?\d*\.?\d+(?:%|[a-z]+)?$/i
+const PCT_RE = /^[-+]?\d*\.?\d+%?$/
+
+// The color at the start of a stop segment (`red 10px`, `oklch(70% .2 40) 5%`), or null.
+// Prelude segments (`to right`, `circle at 25% 25%`, `from 45deg in oklch`) never start with one.
+function leadingColorToken(seg: string): string | null {
+  const s = seg.trim()
+  if (s.startsWith('#')) {
+    const m = s.match(/^(#[0-9a-fA-F]{3,8})(?:\s|$)/)
+    return m && isColorToken(m[1]) ? m[1] : null
+  }
+  const fn = s.match(/^[a-zA-Z][a-zA-Z0-9-]*\(/)
+  if (fn) {
+    let depth = 0, idx = 0
+    for (; idx < s.length; idx++) {
+      if (s[idx] === '(') depth++
+      else if (s[idx] === ')') { depth--; if (depth === 0) { idx++; break } }
+    }
+    const color = s.slice(0, idx)
+    return isColorToken(color) ? color : null
+  }
+  const m = s.match(/^([a-zA-Z]+)(?:\s|$)/)
+  return m && isColorToken(m[1]) ? m[1] : null
+}
+
 function classifyFunction(input: string): { type: 'linear'|'radial'|'conic'; repeating: boolean } {
   if (!/\)$/.test(input)) throw new ParseError('Missing closing )')
   const m = input.match(/^([a-z-]+)\s*\(/i)
@@ -147,7 +173,7 @@ export function parseGradient(input: string): ParsedGradient {
     } else {
       // check first token of the segment for color
       const firstToken = s
-      if (isColorToken(firstToken) || /\)/.test(firstToken) && isColorToken(firstToken)) {
+      if (leadingColorToken(firstToken)) {
         firstColorIndex = i
         break
       } else {
@@ -211,10 +237,12 @@ export function parseGradient(input: string): ParsedGradient {
     // size keywords or length/percentage values
     const sizeKw = /(closest-side|closest-corner|farthest-side|farthest-corner)/i.exec(prelude)?.[1]
     let size: string | undefined = sizeKw?.toLowerCase()
+    // `circle at 25% 25%`: the lengths after `at` are the position, not the size
+    const sizePart = prelude.split(/\bat\b/i)[0]
     if (!size) {
       // Try to match explicit size: single length (for circle) or pair of lengths (for ellipse)
-      const singleSize = prelude.match(/\b(\d+(?:\.\d+)?(?:px|em|rem|vw|vh|%))(?!\s+\d)/i)
-      const pair = prelude.match(/\b(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\s+(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\b/)
+      const singleSize = sizePart.match(/\b(\d+(?:\.\d+)?(?:px|em|rem|vw|vh|%))(?!\s+\d)/i)
+      const pair = sizePart.match(/\b(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\s+(\d+(?:\.\d+)?(?:%|px|em|rem|vw|vh))\b/)
       if (pair) {
         size = `${pair[1]} ${pair[2]}`
       } else if (singleSize) {
@@ -245,7 +273,8 @@ export function parseGradient(input: string): ParsedGradient {
     if (!seg) continue
 
     // hint: a bare percentage value
-    if (/^[-+]?\d*\.?\d+%$/.test(seg)) {
+    if (PCT_RE.test(seg) || (repeating && POSITION_RE.test(seg))) {
+      // percentages are stored unitless, lengths keep their unit (`10px`)
       const pct = seg.trim().replace(/%$/,'')
       stops.push({ kind: 'hint', auto: null, percentage: pct })
       continue
@@ -293,8 +322,10 @@ export function parseGradient(input: string): ParsedGradient {
       const tokens = rest.split(/\s+/).filter(Boolean)
       const posTokens: string[] = []
       for (const t of tokens) {
-        // Accept only percentages or unitless numbers to match UI expectations
-        if (/^[-+]?\d*\.?\d+%$/.test(t) || /^[-+]?\d*\.?\d+$/.test(t)) {
+        // Percentages and unitless numbers. Lengths/angles (px, em, deg...) are left unset for
+        // normal gradients so the UI can auto-distribute them, but a repeating gradient's tile
+        // *is* its stop positions (`#000 0 10px, #fff 10px 20px`): drop them and it stops repeating.
+        if (PCT_RE.test(t) || (repeating && POSITION_RE.test(t))) {
           posTokens.push(t)
         }
       }

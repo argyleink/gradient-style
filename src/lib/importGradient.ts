@@ -37,6 +37,11 @@ function normalizeNamedPosition(name: string): string {
   return map[name] || name
 }
 
+// the position stores hold unitless percentages (`30`), the output appends the `%`
+function stripPct(v: string | null): any {
+  return v == null ? null : String(v).replace(/%$/, '')
+}
+
 export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers?: boolean }) {
   gradient_type.set(parsed.type)
   gradient_repeating.set(!!parsed.repeating)
@@ -63,8 +68,9 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
       radial_named_position.set(normalizeNamedPosition(parsed.radial.namedPosition))
       radial_position.set({ x: null, y: null })
     } else if (parsed.radial?.position) {
-      radial_named_position.set('center')
-      radial_position.set({ x: parsed.radial.position.x, y: parsed.radial.position.y })
+      // '--' = custom position; a named 'center' would win over x/y in the output
+      radial_named_position.set('--')
+      radial_position.set({ x: stripPct(parsed.radial.position.x), y: stripPct(parsed.radial.position.y) })
     }
   } else if (parsed.type === 'conic') {
     const from = parsed.conic?.fromDeg ? toDegreesString(parsed.conic.fromDeg) : '0'
@@ -73,8 +79,9 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
       conic_named_position.set(normalizeNamedPosition(parsed.conic.namedPosition))
       conic_position.set({ x: null, y: null })
     } else if (parsed.conic?.position) {
-      conic_named_position.set('center')
-      conic_position.set({ x: parsed.conic.position.x, y: parsed.conic.position.y })
+      // '--' = custom position; a named 'center' would win over x/y in the output
+      conic_named_position.set('--')
+      conic_position.set({ x: stripPct(parsed.conic.position.x), y: stripPct(parsed.conic.position.y) })
     }
   }
 

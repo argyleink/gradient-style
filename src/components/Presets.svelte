@@ -205,7 +205,7 @@
 			],
 		},
 		{
-			name: 'Sunburst',
+			name: 'Sun Rays',
 			gradient: 'repeating-conic-gradient(in oklch, oklch(88% .2 90) 0% 5%, oklch(72% .25 50) 0% 10%)',
 			type: 'conic',
 			space: 'oklch',

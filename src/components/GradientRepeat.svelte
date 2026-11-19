@@ -3,10 +3,22 @@
   import {tileStops} from '../utils/stops.ts'
   import Hint from './Hint.svelte'
 
+  // the stops from before auto-tiling, and the tiled result, so turning Repeat back off
+  // can put them back (unless they were edited in between)
+  let untiled = null
+
   function onToggle(e) {
     const on = e.currentTarget.checked
-    // a full 0–100% stop list repeats invisibly; tile it so the switch shows a change
-    if (on) $gradient_stops = tileStops($gradient_stops)
+    if (on) {
+      // a full 0–100% stop list repeats invisibly; tile it so the switch shows a change
+      const tiled = tileStops($gradient_stops)
+      untiled = tiled === $gradient_stops ? null : { before: $gradient_stops, after: JSON.stringify(tiled) }
+      $gradient_stops = tiled
+    }
+    else if (untiled && JSON.stringify($gradient_stops) === untiled.after) {
+      $gradient_stops = untiled.before
+      untiled = null
+    }
     $gradient_repeating = on
   }
 </script>
