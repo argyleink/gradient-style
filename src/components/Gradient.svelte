@@ -21,7 +21,7 @@
 
   import {linearAngleToString} from '../utils/linear.ts'
   import {isCylindricalSpace} from '../utils/colorspace.ts'
-  import {updateStops} from '../utils/stops.ts'
+  import {updateStops, reverseStops} from '../utils/stops.ts'
   import {randomNumber} from '../utils/numbers.ts'
 
   import GradientStops from './GradientStops.svelte'
@@ -334,7 +334,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
           let p2 = s.position2
 
           // Omit values equal to tool defaults only if explicitly stored in stop.auto
-          if (p1 != null && s.auto != null && p1 == s.auto) p1 = null
+          if (p1 != null && s.auto != null && p1 == s.auto && (p2 == null || String(p2) === String(p1))) p1 = null
 
           // Omit browser default edges only when explicitly percentages
           // (repeating gradients tile first→last stop, so their leading edge is never implied)
@@ -598,6 +598,12 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       {/if}
 
       <footer class="end-of-stops">
+        <button class="reverse-stops" onclick={() => $gradient_stops = reverseStops($gradient_stops)} disabled={$gradient_stops.filter(s => s.kind === 'stop').length < 2} aria-label="Reverse color stops" use:tooltip={{content: 'Reverse color stops: flips the colors end to end, positions and hints mirror with them', placement: 'top'}}>
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+          </svg>
+          Reverse
+        </button>
         <button class="add-color" onclick={() => addStop()}>
           Add a random color
           <svg viewBox="0 0 24 24">
@@ -615,6 +621,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
 <style>
   :global(html) {
     scrollbar-color: var(--surface-4) #0000;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .import-btn { align-self: start; }
@@ -911,6 +918,16 @@ let user_gradient = $derived(gensyntax[$gradient_type](
     align-self: end;
   }
 
+  .reverse-stops {
+    align-self: end;
+    padding-inline: var(--size-3);
+  }
+
+  .reverse-stops svg {
+    inline-size: 1.25em;
+    block-size: 1.25em;
+  }
+
   :global(.remove) {
     padding-block: var(--size-1);
     padding-inline: var(--size-2);
@@ -954,7 +971,10 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   }
 
 .end-of-stops {
-    place-content: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-2);
+    place-content: end center;
     padding: var(--size-3);
     margin-block-end: var(--size-fluid-2);
     text-align: center;

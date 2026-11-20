@@ -130,3 +130,60 @@ export function tileStops(stops: Stop[], fraction = 0.25): Stop[] {
     return { ...s, percentage: round2(numericPct(s.percentage)! * fraction) } as Stop
   })
 }
+
+function mirrorPos(p: any): any {
+  if (p == null) return p
+  const n = numericPct(p)
+  if (n != null) return round2(100 - n)
+  // A length (px, em, calc...) can't be mirrored without the line length; let calc() do it
+  const str = String(p).trim()
+  const inner = /^calc\(/i.test(str) ? str.slice(4) : str
+  return `calc(100% - ${inner})`
+}
+
+const isAuto = (value: any, auto: any) => value == null || (auto != null && String(value) === String(auto))
+
+/**
+ * Flip the gradient line end to end: the last color becomes the first and every
+ * position p moves to 100% - p (a span a..b becomes 100-b..100-a, hints mirror
+ * too, since a hint is a position on the line). That's an exact mirror for
+ * repeating gradients as well, the tile just shifts phase.
+ *
+ * Positions are mirrored *after* CSS's fixup (CSS Images 3 §3.5.3: a stop or hint
+ * placed before an earlier one is clamped up to it), because authored values like
+ * the Stripes preset's `0% 40%` only mean `20% 40%` in context. Auto-placed stops
+ * and hints stay auto so the output keeps its short `red, blue` form.
+ */
+export function reverseStops(stops: Stop[]): Stop[] {
+  if (stops.filter(s => s.kind === 'stop').length < 2) return stops
+  let floor = -Infinity
+  const effective = (p: any) => {
+    const n = numericPct(p)
+    if (n == null) return p
+    floor = Math.max(floor, n)
+    return floor
+  }
+
+  const resolved = stops.map((s: any) => {
+    if (s.kind === 'stop') {
+      const autoP1 = isAuto(s.position1, s.auto)
+      const linked = s.position2 == null || String(s.position2) === String(s.position1)
+      const p1 = effective(autoP1 ? s.auto : s.position1)
+      const p2 = effective(s.position2 == null ? p1 : s.position2)
+      return { s, auto: autoP1 && linked, p1, p2 }
+    }
+    // auto hints are never written to the CSS, so they don't take part in fixup
+    const auto = isAuto(s.percentage, s.auto)
+    return { s, auto, p1: auto ? null : effective(s.percentage) }
+  })
+
+  const reversed = resolved.reverse().map(({ s, auto, p1, p2 }: any) => {
+    if (s.kind === 'stop') {
+      if (auto) return { ...s, position1: null, position2: null, auto: undefined }
+      return { ...s, position1: mirrorPos(p2), position2: mirrorPos(p1), auto: undefined, _manual: true }
+    }
+    if (auto) return { ...s, percentage: null, auto: undefined }
+    return { ...s, percentage: mirrorPos(p1), auto: undefined }
+  })
+  return updateStops(reversed as Stop[])
+}
