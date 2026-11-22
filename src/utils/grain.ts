@@ -18,7 +18,8 @@ export function normalizeGrain(value: unknown): number {
 export function grainLayer(amount: unknown): string {
   const a = normalizeGrain(amount)
   if (!a) return ''
-  const opacity = String(Math.round(a) / 100)
+  // 100% maps to half-opacity noise: any heavier is a grey haze, not grain
+  const opacity = String(a / 200)
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>` +
       `<filter id='g'>` +

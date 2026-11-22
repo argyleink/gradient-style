@@ -9,6 +9,8 @@
   // two-way with the store, clamped, without echo loops
   $effect(() => { amount = $gradient_grain })
   $effect(() => {
+    // a cleared number field is mid-edit, not 0: wait for a value
+    if (amount == null || amount === '') return
     const next = normalizeGrain(amount)
     if (next !== $gradient_grain) $gradient_grain = next
   })

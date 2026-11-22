@@ -19,7 +19,8 @@ describe('grain', () => {
   it('builds a CSS-safe SVG noise layer with the amount as opacity', () => {
     const g = grainLayer(25)
     expect(g.startsWith('url("data:image/svg+xml,')).toBe(true)
-    expect(g).toContain("opacity='0.25'")
+    expect(g).toContain("opacity='0.125'")
+    expect(grainLayer(100)).toContain("opacity='0.5'")
     expect(g).toContain('feTurbulence')
     // raw # < > or a double quote inside would break the url() in some engines
     const body = g.slice('url("'.length, -2)
