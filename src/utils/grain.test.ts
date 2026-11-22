@@ -25,6 +25,9 @@ describe('grain', () => {
     // raw # < > or a double quote inside would break the url() in some engines
     const body = g.slice('url("'.length, -2)
     expect(body).not.toMatch(/[#<>"]/)
+    // every % must start a valid percent-escape (no raw width='100%')
+    expect(body).not.toMatch(/%(?![0-9A-F]{2})/i)
+    expect(() => decodeURIComponent(body)).not.toThrow()
   })
 
   it('stacks grain above every gradient layer', () => {

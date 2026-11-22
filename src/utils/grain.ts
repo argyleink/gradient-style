@@ -26,7 +26,7 @@ export function grainLayer(amount: unknown): string {
         `<feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/>` +
         `<feColorMatrix type='saturate' values='0'/>` +
       `</filter>` +
-      `<rect width='100%' height='100%' filter='url(#g)' opacity='${opacity}'/>` +
+      `<rect width='240' height='240' filter='url(#g)' opacity='${opacity}'/>` +
     `</svg>`
   const encoded = svg.replace(/#/g, '%23').replace(/</g, '%3C').replace(/>/g, '%3E')
   return `url("data:image/svg+xml,${encoded}")`

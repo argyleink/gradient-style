@@ -163,10 +163,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false
     let pendingUrlState = null
+    // the state a debounced write is still waiting to flush, if any
+    let scheduledUrlState = null
 
     function scheduleUrlWrite(state, delay = 350) {
       clearTimeout(window.syncStateTimer)
+      scheduledUrlState = state
       window.syncStateTimer = setTimeout(() => {
+        scheduledUrlState = null
         state && replaceState('#' + state, {})
       }, delay)
     }
@@ -174,6 +178,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     const startInteract = () => {
       isInteracting = true
       clearTimeout(window.syncStateTimer)
+      // keep a not-yet-written change (fill, autofill, wheel) for endInteract
+      if (scheduledUrlState != null && pendingUrlState == null) pendingUrlState = scheduledUrlState
+      scheduledUrlState = null
     }
     const endInteract = () => {
       isInteracting = false

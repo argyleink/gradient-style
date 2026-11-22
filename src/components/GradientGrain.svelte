@@ -14,6 +14,11 @@
     const next = normalizeGrain(amount)
     if (next !== $gradient_grain) $gradient_grain = next
   })
+
+  // leaving the field blank keeps the last real value, so show it again
+  function resyncIfBlank() {
+    if (amount == null || amount === '') amount = $gradient_grain
+  }
 </script>
 
 <fieldset class="control-set grain">
@@ -29,9 +34,9 @@
       <circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="13" r="1.5" fill="currentColor"/><circle cx="5" cy="15" r="1.5" fill="currentColor"/>
       <circle cx="11" cy="18" r="1.5" fill="currentColor"/><circle cx="19" cy="18" r="1" fill="currentColor"/>
     </svg>
-    <RangeSlider bind:value={amount} min="0" max={GRAIN_MAX} step="1" style="--accent-color: {amount ? 'var(--link)' : 'var(--gray-5)'}" />
+    <RangeSlider bind:value={amount} aria-label="Grain" aria-valuetext="{$gradient_grain}%" min="0" max={GRAIN_MAX} step="1" style="--accent-color: {amount ? 'var(--link)' : 'var(--gray-5)'}" />
     <div class="input-suffix">
-      <input id="gradient-grain" type="number" bind:value={amount} min="0" max={GRAIN_MAX} step="1" class="slider-percentage">
+      <input id="gradient-grain" type="number" bind:value={amount} onblur={resyncIfBlank} min="0" max={GRAIN_MAX} step="1" class="slider-percentage">
       <sup>%</sup>
     </div>
   </div>

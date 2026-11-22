@@ -21,7 +21,8 @@
     min = 0,
     max = 100,
     step = 1,
-    emptytrack = 'none'
+    emptytrack = 'none',
+    ...rest
   } = $props();
 
   function dispatchChange() {
@@ -30,6 +31,7 @@
 </script>
 
 <input 
+  {...rest}
   type="range" 
   class="range-slider {emptytrack && 'no-track-fill'}" 
   style="{style!='none'?style:''}; --track-fill: {value / (max || 100) * 100}%"
