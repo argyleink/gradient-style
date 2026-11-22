@@ -1,9 +1,11 @@
 <script>
   import { onMount, afterUpdate } from 'svelte'
   import { copyToClipboard } from '../utils/clipboard.ts'
+  import { grainLayer } from '../utils/grain.ts'
 
   export let modern_gradient = 'none'
   export let classic_gradient = 'none'
+  export let grain = 0
   let loaded = false
 
   afterUpdate(() => {
@@ -20,16 +22,26 @@
   }
 
   function makeSnippet() {
-    return `
+    const noise = grainLayer(grain)
+    if (!noise) return `
 :root {
   --hdr-gradient: ${modern_gradient};
   --sdr-gradient: ${classic_gradient};
 
   background: var(--hdr-gradient);
 }`.trim()
+
+    return `
+:root {
+  --hdr-gradient: ${modern_gradient};
+  --sdr-gradient: ${classic_gradient};
+  --grain: ${noise};
+
+  background: var(--grain), var(--hdr-gradient);
+}`.trim()
   }
 
-  $: snippet = makeSnippet(modern_gradient, classic_gradient)
+  $: snippet = makeSnippet(modern_gradient, classic_gradient, grain)
 </script>
 
 <div class="copyable-block">

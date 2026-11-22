@@ -1,7 +1,7 @@
 import {derived} from 'svelte/store'
 
 import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating, 
-        gradient_stops
+        gradient_stops, gradient_grain
 } from '../store/gradient.ts'
 import {linear_angle, linear_named_angle} from '../store/linear.ts'
 import {radial_shape, radial_position, radial_named_position, radial_size
@@ -11,6 +11,7 @@ import {conic_angle, conic_position, conic_named_position
 import { layers, active_layer_index } from './layers'
 
 import {isCylindricalSpace} from '../utils/colorspace.ts'
+import {normalizeGrain} from '../utils/grain.ts'
 
 export const stateAsString = derived(
 	[
@@ -18,15 +19,16 @@ export const stateAsString = derived(
 		linear_angle, linear_named_angle,
 		radial_shape, radial_position, radial_named_position, radial_size,
 		conic_angle, conic_position, conic_named_position,
-    layers, active_layer_index,
+    layers, active_layer_index, gradient_grain,
 	],
 	([
 		$gradient_type, $gradient_space, $gradient_stops, $gradient_interpolation, $gradient_repeating,
 		$linear_angle, $linear_named_angle,
 		$radial_shape, $radial_position, $radial_named_position, $radial_size,
 		$conic_angle, $conic_position, $conic_named_position,
-    $layers, $active_layer_index,
+    $layers, $active_layer_index, $gradient_grain,
 	]) => {
+    const grain = normalizeGrain($gradient_grain)
 		// Prefer serializing full layers when multiple are present
     if (Array.isArray($layers) && $layers.length > 1) {
       try {
@@ -43,7 +45,7 @@ export const stateAsString = derived(
           radial: l.radial,
           conic: l.conic,
         }))
-        return serializeUrl({ layers: JSON.stringify(compact), active: String($active_layer_index ?? 0) })
+        return serializeUrl({ layers: JSON.stringify(compact), active: String($active_layer_index ?? 0), ...(grain ? { grain: String(grain) } : {}) })
       } catch {}
     }
 
@@ -53,6 +55,7 @@ export const stateAsString = derived(
 		} as any
 
 		if ($gradient_repeating) urlGradient.repeating = 'true'
+		if (grain) urlGradient.grain = String(grain)
 
 		if (isCylindricalSpace($gradient_space))
 			urlGradient.interpolation = $gradient_interpolation

@@ -30,3 +30,6 @@ export const gradient_angles = [
   'to bottom left',
   'to left',
 ]
+
+// film grain over all layers, 0-100 (0 = off)
+export const gradient_grain = writable(0);

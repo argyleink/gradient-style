@@ -2,6 +2,7 @@ import { writable, get } from 'svelte/store'
 import { tick } from 'svelte'
 
 import { layers, active_layer_index, selectLayer, type GradientLayer } from './layers'
+import { gradient_grain } from './gradient'
 import { buildGradientStrings } from '../utils/gradientString'
 
 /*
@@ -9,7 +10,8 @@ import { buildGradientStrings } from '../utils/gradientString'
  *
  * The `layers` store is the single source of truth for everything a user can
  * edit (stops, angle, type, color space, interpolation, positions, layer
- * order/visibility/names), so history snapshots the layer list. The
+ * order/visibility/names), so history snapshots the layer list, plus the
+ * one global setting that sits outside it (grain). The
  * single-value stores (gradient_type, linear_angle, ...) are mirrors of the
  * active layer and get re-synced through selectLayer() when a snapshot is applied.
  *
@@ -23,10 +25,11 @@ import { buildGradientStrings } from '../utils/gradientString'
 export type HistorySnapshot = {
   layers: GradientLayer[]
   active: number
+  grain: number
   key: string
 }
 
-export type HistoryState = { layers: GradientLayer[]; active: number }
+export type HistoryState = { layers: GradientLayer[]; active: number; grain?: number }
 
 const LIMIT = 100
 const SETTLE_MS = 400
@@ -63,7 +66,8 @@ function takeSnapshot(state: HistoryState): HistorySnapshot {
   return {
     layers: cloneLayers(state.layers),
     active: state.active,
-    key: snapshotKey(state.layers),
+    grain: state.grain ?? 0,
+    key: snapshotKey(state.layers) + (state.grain ? `|grain:${state.grain}` : ''),
   }
 }
 
@@ -139,7 +143,7 @@ let pointerActive = false
 let settleTimer: ReturnType<typeof setTimeout> | undefined
 
 function readState(): HistoryState {
-  return { layers: get(layers), active: get(active_layer_index) ?? 0 }
+  return { layers: get(layers), active: get(active_layer_index) ?? 0, grain: get(gradient_grain) ?? 0 }
 }
 
 function writeState(snapshot: HistorySnapshot, focusIndex: number) {
@@ -152,6 +156,7 @@ function writeState(snapshot: HistorySnapshot, focusIndex: number) {
   const idx = Math.max(0, Math.min(restored.length - 1, focusIndex))
   layers.set(restored)
   active_layer_index.set(idx)
+  gradient_grain.set(snapshot.grain ?? 0)
   selectLayer(idx) // re-sync the single-value stores the editor UI reads
 
   // Mirrors and component effects may normalize the state on the way back in
@@ -247,7 +252,9 @@ export function initHistory(): () => void {
   tick().then(() => setTimeout(() => {
     if (!alive) return
     history = createHistory({ read: readState, write: writeState })
-    unsubscribe = layers.subscribe(onLayersChange)
+    const offLayers = layers.subscribe(onLayersChange)
+    const offGrain = gradient_grain.subscribe(onLayersChange)
+    unsubscribe = () => { offLayers(); offGrain() }
     dirty = false // the subscribe call fires immediately with the baseline
     syncFlags()
   }, 0))

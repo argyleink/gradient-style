@@ -6,7 +6,7 @@
   import { tooltip } from 'svooltip'
   import 'svooltip/styles.css'
 
-  import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating,
+  import {gradient_type, gradient_space, gradient_interpolation, gradient_repeating, gradient_grain,
           gradient_stops, gradient_positions
   } from '../store/gradient.ts'
   import {linear_named_angle, linear_angle
@@ -23,6 +23,7 @@
   import {isCylindricalSpace} from '../utils/colorspace.ts'
   import {updateStops, reverseStops} from '../utils/stops.ts'
   import {randomNumber} from '../utils/numbers.ts'
+  import {withGrain, normalizeGrain} from '../utils/grain.ts'
 
   import GradientStops from './GradientStops.svelte'
   import GradientColorSpace from './GradientColorSpace.svelte'
@@ -34,6 +35,7 @@
   import ColorPicker from './ColorPicker.svelte'
   import LayersPanel from './LayersPanel.svelte'
   import Presets from './Presets.svelte'
+  import GradientGrain from './GradientGrain.svelte'
 import Prism from './PrismJS.svelte'
 import GradientImportDialog from './GradientImportDialog.svelte'
   import UndoRedo from './UndoRedo.svelte'
@@ -79,6 +81,8 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     svgicon = document.querySelector('#svgicon')
 
     if (restore) {
+      $gradient_grain = normalizeGrain(restore.grain)
+
       // Multi-layer restore path
       if (restore.layers && Array.isArray(restore.layers)) {
         try {
@@ -159,10 +163,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     // Debounced URL syncing that pauses during active user interaction
     let isInteracting = false
     let pendingUrlState = null
+    // the state a debounced write is still waiting to flush, if any
+    let scheduledUrlState = null
 
     function scheduleUrlWrite(state, delay = 350) {
       clearTimeout(window.syncStateTimer)
+      scheduledUrlState = state
       window.syncStateTimer = setTimeout(() => {
+        scheduledUrlState = null
         state && replaceState('#' + state, {})
       }, delay)
     }
@@ -170,6 +178,9 @@ import GradientImportDialog from './GradientImportDialog.svelte'
     const startInteract = () => {
       isInteracting = true
       clearTimeout(window.syncStateTimer)
+      // keep a not-yet-written change (fill, autofill, wheel) for endInteract
+      if (scheduledUrlState != null && pendingUrlState == null) pendingUrlState = scheduledUrlState
+      scheduledUrlState = null
     }
     const endInteract = () => {
       isInteracting = false
@@ -422,13 +433,14 @@ import GradientImportDialog from './GradientImportDialog.svelte'
         // Reset to a single default linear layer and sync stores
         layersStore.set([defaultLayer()])
         activeLayerIndex.set(0)
+        gradient_grain.set(0)
         selectLayerFn(0)
         break
       case 'Copy modern CSS':
-        copyToClipboard(user_layers_joined || user_gradient)
+        copyToClipboard(modern_output)
         break
       case 'Copy classic CSS':
-        copyToClipboard(classic_layers_joined || classic_gradient)
+        copyToClipboard(classic_output)
         break
       case 'Import gradient':
         openImport()
@@ -490,9 +502,13 @@ let user_gradient = $derived(gensyntax[$gradient_type](
   // Multi-layer joined strings for preview and output
   let user_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.modern || '').filter(Boolean).join(', '))
   let classic_layers_joined = $derived(($layers || []).filter(l => l?.visible !== false).map(l => l?.cachedCss?.classic || '').filter(Boolean).join(', '))
+
+  // what the preview paints and the copy actions hand out: grain (if any) on top of every layer
+  let modern_output = $derived(withGrain(user_layers_joined || user_gradient, $gradient_grain))
+  let classic_output = $derived(withGrain(classic_layers_joined || classic_gradient, $gradient_grain))
 </script>
 
-<div class="color-wrap" style={`--user-classic: ${classic_layers_joined || classic_gradient}; --user-modern: ${user_layers_joined || user_gradient}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
+<div class="color-wrap" style={`--user-classic: ${classic_output}; --user-modern: ${modern_output}; background: var(--user-classic); background: ${preview_hd ? 'var(--user-modern)':'var(--user-classic)'};`}>
 <main class="gradient-builder">
 
   <contain-er style="container: layers-panel / inline-size; z-index: var(--layer-1)">
@@ -505,6 +521,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
       </header>
       <ColorPicker />
       <LayersPanel />
+      <GradientGrain />
       <Presets />
     </div>
   </contain-er>
@@ -537,7 +554,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
           <div
             bind:this={preview_resizer}
             class="resizer"
-            style={`background: ${classic_layers_joined || classic_gradient};  ${preview_hd == true ? `background: ${user_layers_joined || user_gradient};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
+            style={`background: ${classic_output};  ${preview_hd == true ? `background: ${modern_output};` : ''} ${box_width ? `width: ${box_width}px; height: ${box_height}px;`:'width: 75cqi;'}`}>
           </div>
           {#if !restoring}
             {#if $gradient_type === 'linear'}
@@ -562,7 +579,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
           </button>
         </div>
         <h4>Gradient CSS</h4>
-<Prism modern_gradient={user_layers_joined || user_gradient} classic_gradient={classic_layers_joined || classic_gradient} />
+<Prism modern_gradient={user_layers_joined || user_gradient} classic_gradient={classic_layers_joined || classic_gradient} grain={$gradient_grain} />
       </section>
     </div>
   </contain-er>
