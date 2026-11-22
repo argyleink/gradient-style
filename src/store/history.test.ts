@@ -120,6 +120,21 @@ describe('undo/redo history', () => {
     expect(history.size.past).toBe(3)
   })
 
+  it('grain is its own undo step and comes back on undo/redo', () => {
+    let state: HistoryState = { layers: [defaultLayer()], active: 0, grain: 0 }
+    const history = createHistory({
+      read: () => state,
+      write: (snap, focus) => { state = { layers: structuredClone(snap.layers), active: focus, grain: snap.grain } },
+    })
+    state = { ...state, grain: 30 }
+    expect(history.record()).toBe(true)
+    expect(history.record()).toBe(false)
+    history.undo()
+    expect(state.grain).toBe(0)
+    history.redo()
+    expect(state.grain).toBe(30)
+  })
+
   it('snapshotKey ignores ids and cachedCss only', () => {
     const a = defaultLayer()
     const b = { ...structuredClone(a), id: 'b', cachedCss: undefined }
