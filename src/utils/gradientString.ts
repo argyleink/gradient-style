@@ -111,7 +111,10 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines, repeating }: 
       // Secondary positions are kept even when they equal the auto value so
       // that explicit spans from presets/URL imports (like the Stripes preset)
       // are preserved.
-      if (p1 != null && s.auto != null && String(p1) == String(s.auto)) p1 = null
+      // A span (p2 set and different) needs both ends, even when its start sits on the
+      // auto slot: `blue 50% 70%` written as `blue 70%` drops the solid 50-70% band.
+      const isSpan = p2 != null && String(p2) !== String(p1)
+      if (p1 != null && s.auto != null && String(p1) == String(s.auto) && !isSpan) p1 = null
 
       // Omit browser default *leading* endpoint only when explicitly authored as 0%.
       if (i === firstStopIdx) {
