@@ -73,6 +73,88 @@ function isColorToken(token: string): boolean {
 const POSITION_RE = /^[-+]?\d*\.?\d+(?:%|[a-z]+)?$/i
 const PCT_RE = /^[-+]?\d*\.?\d+%?$/
 
+// A conic stop position given as an angle (`90deg`, `.25turn`, `100grad`, `1.5708rad`)
+const ANGLE_RE = /^([-+]?\d*\.?\d+)(deg|turn|grad|rad)$/i
+const TURN_UNITS: Record<string, number> = { deg: 360, turn: 1, grad: 400, rad: 2 * Math.PI }
+
+// In a conic gradient a percentage is a fraction of the full turn, so `90deg` is exactly `25%`.
+// The stop store is percentage-based: converting keeps the stop where it was instead of
+// dropping it and letting the stop auto-distribute (which turns a hard-edged pie into a blend).
+function angleToTurnPct(token: string): string | null {
+  const m = ANGLE_RE.exec(token.trim())
+  if (!m) return null
+  const pct = (parseFloat(m[1]) / TURN_UNITS[m[2].toLowerCase()]) * 100
+  return parseFloat(pct.toFixed(4)) + '%'
+}
+
+const H_KW: Record<string, number> = { left: 0, center: 50, right: 100 }
+const V_KW: Record<string, number> = { top: 0, center: 50, bottom: 100 }
+
+// CSS <position> after `at` (radial/conic): 1-4 values, keywords in either order
+// (`center top`, `left top`), keyword + offset pairs (`right 10% bottom 20%`).
+// Two keywords become a named position the UI offers (`top`, `top left`); anything with an
+// offset becomes x/y percentages. Returns {} for anything the percentage-based position
+// controls can't hold (px/em offsets, invalid combos), which leaves the position at center.
+export function parsePosition(input: string): { namedPosition?: string; position?: { x: string; y: string } } {
+  const toks = input.trim().toLowerCase().split(/\s+/).filter(Boolean).map(t => (t === '0' ? '0%' : t))
+  const isKw = (t: string) => t in H_KW || t in V_KW
+  // the position stores are percentages (the output appends `%`), so only % or 0 offsets fit
+  const isVal = (t: string) => PCT_RE.test(t)
+  if (!toks.length || toks.length > 4 || !toks.every(t => isKw(t) || isVal(t))) return {}
+  const pct = (n: number) => parseFloat(n.toFixed(4)) + '%'
+
+  if (toks.every(isKw)) {
+    if (toks.length > 2) return {}
+    let h = 'center', v = 'center'
+    for (const t of toks) {
+      if (t === 'left' || t === 'right') { if (h !== 'center') return {}; h = t }
+      else if (t === 'top' || t === 'bottom') { if (v !== 'center') return {}; v = t }
+    }
+    const name = [v, h].filter(k => k !== 'center').join(' ')
+    return { namedPosition: name || 'center' }
+  }
+
+  if (toks.length <= 2) {
+    // 1-2 values with an offset: first is x, second is y (`30%`, `left 20%`, `25% top`)
+    const [a, b = 'center'] = toks
+    if (a in V_KW && !(a in H_KW)) return {}
+    if (b in H_KW && !(b in V_KW)) return {}
+    return {
+      position: {
+        x: a in H_KW ? pct(H_KW[a]) : a,
+        y: b in V_KW ? pct(V_KW[b]) : b,
+      },
+    }
+  }
+
+  // 3-4 values: keyword [offset] keyword [offset], axes given by the keywords
+  const pairs: Array<{ kw: string; off: string | null }> = []
+  for (let i = 0; i < toks.length; i++) {
+    const kw = toks[i]
+    if (!isKw(kw)) return {}
+    const off = isVal(toks[i + 1] ?? '') ? toks[++i] : null
+    if (off && kw === 'center') return {}
+    pairs.push({ kw, off })
+  }
+  if (pairs.length !== 2) return {}
+  let x: string | null = null, y: string | null = null
+  // `right 10%` is 10% in from the right edge
+  const resolve = (off: string | null, far: boolean) =>
+    off == null ? pct(far ? 100 : 0) : pct(far ? 100 - parseFloat(off) : parseFloat(off))
+  const assign = (axis: 'x'|'y', v: string) => {
+    if (axis === 'x') { if (x != null) return false; x = v } else { if (y != null) return false; y = v }
+    return true
+  }
+  let centers = 0
+  for (const p of pairs) {
+    if (p.kw === 'center') { centers++; continue }
+    const axis = p.kw === 'left' || p.kw === 'right' ? 'x' : 'y'
+    if (!assign(axis, resolve(p.off, p.kw === 'right' || p.kw === 'bottom'))) return {}
+  }
+  for (; centers > 0; centers--) if (!assign(x == null ? 'x' : 'y', pct(50))) return {}
+  return x != null && y != null ? { position: { x, y } } : {}
+}
+
 // The color at the start of a stop segment (`red 10px`, `oklch(70% .2 40) 5%`), or null.
 // Prelude segments (`to right`, `circle at 25% 25%`, `from 45deg in oklch`) never start with one.
 function leadingColorToken(seg: string): string | null {
@@ -204,19 +286,7 @@ export function parseGradient(input: string): ParsedGradient {
 
   function extractPosition(src: string): { namedPosition?: string|null; position?: {x:string|null;y:string|null} } {
     const posMatch = src.match(/\bat\s+(.+)$/i)
-    if (!posMatch) return {}
-    const rhs = posMatch[1].trim()
-    // try named positions
-    const named = ['center','top left','top','top right','right','bottom right','bottom','bottom left','left','top center','bottom center','left center','right center']
-    for (const n of named) {
-      if (rhs.toLowerCase().startsWith(n)) return { namedPosition: n }
-    }
-    // split into two tokens for x/y
-    const parts = rhs.split(/\s+/)
-    if (parts.length >= 2) {
-      return { position: { x: parts[0], y: parts[1] } }
-    }
-    return {}
+    return posMatch ? parsePosition(posMatch[1]) : {}
   }
 
   if (type === 'linear') {
@@ -267,15 +337,18 @@ export function parseGradient(input: string): ParsedGradient {
   }
 
   // Build stops/hints from remaining segments
+  // (a repeating gradient keeps its raw units: its tile *is* the stop positions)
+  const turnStops = type === 'conic' && !repeating
   const stops: ParsedGradient['stops'] = []
   for (let i = firstColorIndex; i < segments.length; i++) {
     const seg = segments[i].trim()
     if (!seg) continue
 
     // hint: a bare percentage value
-    if (PCT_RE.test(seg) || (repeating && POSITION_RE.test(seg))) {
+    const segTurnPct = turnStops ? angleToTurnPct(seg) : null
+    if (segTurnPct || PCT_RE.test(seg) || (repeating && POSITION_RE.test(seg))) {
       // percentages are stored unitless, lengths keep their unit (`10px`)
-      const pct = seg.trim().replace(/%$/,'')
+      const pct = (segTurnPct ?? seg.trim()).replace(/%$/,'')
       stops.push({ kind: 'hint', auto: null, percentage: pct })
       continue
     }
@@ -325,7 +398,10 @@ export function parseGradient(input: string): ParsedGradient {
         // Percentages and unitless numbers. Lengths/angles (px, em, deg...) are left unset for
         // normal gradients so the UI can auto-distribute them, but a repeating gradient's tile
         // *is* its stop positions (`#000 0 10px, #fff 10px 20px`): drop them and it stops repeating.
-        if (PCT_RE.test(t) || (repeating && POSITION_RE.test(t))) {
+        const turnPct = turnStops ? angleToTurnPct(t) : null
+        if (turnPct) {
+          posTokens.push(turnPct)
+        } else if (PCT_RE.test(t) || (repeating && POSITION_RE.test(t))) {
           posTokens.push(t)
         }
       }
