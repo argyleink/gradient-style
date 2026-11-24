@@ -4,6 +4,8 @@ import { radial_shape, radial_position, radial_named_position, radial_size } fro
 import { conic_angle, conic_position, conic_named_position } from '../store/conic'
 import type { ParsedGradient } from './parseGradient'
 import { updateStops } from '../utils/stops'
+import { namedPosToPercent } from '../utils/radial'
+import type { Writable } from 'svelte/store'
 
 function toDegreesString(valueWithUnit: string): string {
   if (!valueWithUnit) return '0'
@@ -42,6 +44,29 @@ function stripPct(v: string | null): any {
   return v == null ? null : String(v).replace(/%$/, '')
 }
 
+// Every branch leaves numeric x/y behind. Null x/y (a leftover of a previous import) is what
+// the position sliders coerce to 0, and the stores read 0,0 back as `top left`, so a 2nd import
+// would land in the corner instead of where the pasted CSS put it.
+function applyPosition(
+  named: Writable<string>,
+  position: Writable<any>,
+  parsed?: { namedPosition?: string | null; position?: { x: string | null; y: string | null } },
+) {
+  if (parsed?.namedPosition) {
+    const name = normalizeNamedPosition(parsed.namedPosition)
+    named.set(name)
+    position.set(namedPosToPercent(name))
+  } else if (parsed?.position?.x == null) {
+    // no usable position (none given, or one the percentage controls can't hold): center
+    named.set('center')
+    position.set({ x: 50, y: 50 })
+  } else {
+    // '--' = custom position; a named 'center' would win over x/y in the output
+    named.set('--')
+    position.set({ x: stripPct(parsed.position.x), y: stripPct(parsed.position.y) })
+  }
+}
+
 export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers?: boolean }) {
   gradient_type.set(parsed.type)
   gradient_repeating.set(!!parsed.repeating)
@@ -64,25 +89,11 @@ export function applyParsedToStores(parsed: ParsedGradient, opts?: { clearLayers
   } else if (parsed.type === 'radial') {
     radial_shape.set(parsed.radial?.shape ?? 'circle')
     radial_size.set(parsed.radial?.size ?? 'farthest-corner')
-    if (parsed.radial?.namedPosition) {
-      radial_named_position.set(normalizeNamedPosition(parsed.radial.namedPosition))
-      radial_position.set({ x: null, y: null })
-    } else if (parsed.radial?.position) {
-      // '--' = custom position; a named 'center' would win over x/y in the output
-      radial_named_position.set('--')
-      radial_position.set({ x: stripPct(parsed.radial.position.x), y: stripPct(parsed.radial.position.y) })
-    }
+    applyPosition(radial_named_position, radial_position, parsed.radial)
   } else if (parsed.type === 'conic') {
     const from = parsed.conic?.fromDeg ? toDegreesString(parsed.conic.fromDeg) : '0'
     conic_angle.set(from)
-    if (parsed.conic?.namedPosition) {
-      conic_named_position.set(normalizeNamedPosition(parsed.conic.namedPosition))
-      conic_position.set({ x: null, y: null })
-    } else if (parsed.conic?.position) {
-      // '--' = custom position; a named 'center' would win over x/y in the output
-      conic_named_position.set('--')
-      conic_position.set({ x: stripPct(parsed.conic.position.x), y: stripPct(parsed.conic.position.y) })
-    }
+    applyPosition(conic_named_position, conic_position, parsed.conic)
   }
 
   // Normalize position values: strip % suffix to get numeric strings
