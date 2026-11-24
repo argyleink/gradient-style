@@ -72,6 +72,9 @@ function isColorToken(token: string): boolean {
 // <length-percentage> or <angle-percentage>: `10%`, `0`, `12px`, `2em`, `-5%`, `30deg`, `.25turn`
 const POSITION_RE = /^[-+]?\d*\.?\d+(?:%|[a-z]+)?$/i
 const PCT_RE = /^[-+]?\d*\.?\d+%?$/
+// an `at` offset: the position controls hold percentages only (`0` is mapped to `0%` first)
+const POS_PCT_RE = /^[-+]?\d*\.?\d+%$/
+const LENGTH_RE = /^[-+]?\d*\.?\d+(?:px|r?em|r?ex|r?ch|r?lh|[sld]?v(?:w|h|i|b|min|max)|cq(?:w|h|i|b|min|max)|cm|mm|q|in|pt|pc)$/i
 
 // A conic stop position given as an angle (`90deg`, `.25turn`, `100grad`, `1.5708rad`)
 const ANGLE_RE = /^([-+]?\d*\.?\d+)(deg|turn|grad|rad)$/i
@@ -93,15 +96,30 @@ const V_KW: Record<string, number> = { top: 0, center: 50, bottom: 100 }
 // CSS <position> after `at` (radial/conic): 1-4 values, keywords in either order
 // (`center top`, `left top`), keyword + offset pairs (`right 10% bottom 20%`).
 // Two keywords become a named position the UI offers (`top`, `top left`); anything with an
-// offset becomes x/y percentages. Returns {} for anything the percentage-based position
-// controls can't hold (px/em offsets, invalid combos), which leaves the position at center.
+// offset becomes x/y percentages. A 1-2 value length offset (`20px 30%`) centers only that axis.
+// Returns {} for anything else the percentage-based controls can't hold (invalid CSS, px offsets
+// in a 3-4 value position), which leaves the position at center.
 export function parsePosition(input: string): { namedPosition?: string; position?: { x: string; y: string } } {
   const toks = input.trim().toLowerCase().split(/\s+/).filter(Boolean).map(t => (t === '0' ? '0%' : t))
   const isKw = (t: string) => t in H_KW || t in V_KW
-  // the position stores are percentages (the output appends `%`), so only % or 0 offsets fit
-  const isVal = (t: string) => PCT_RE.test(t)
-  if (!toks.length || toks.length > 4 || !toks.every(t => isKw(t) || isVal(t))) return {}
+  // the position stores are percentages (the output appends `%`), so only % or 0 offsets fit;
+  // a unitless number (`left 30`) is invalid CSS, not 30%
+  const isVal = (t: string) => POS_PCT_RE.test(t)
+  // a length offset (`20px`) is valid CSS the controls can't hold
+  const isLen = (t: string) => LENGTH_RE.test(t)
+  // gradient <position> has no 3-value form (`left 10% top` is a background-position only)
+  if (!toks.length || toks.length === 3 || toks.length > 4) return {}
+  if (!toks.every(t => isKw(t) || isVal(t) || (toks.length <= 2 && isLen(t)))) return {}
   const pct = (n: number) => parseFloat(n.toFixed(4)) + '%'
+  // 1-2 values: a length axis falls back to center, the other axis is kept (`20px 30%` = 50% 30%)
+  if (toks.length <= 2 && toks.some(isLen)) {
+    if (toks.every(t => isLen(t) || t === 'center')) return {}
+    const [a, b = 'center'] = toks
+    if (a in V_KW && !(a in H_KW)) return {}
+    if (b in H_KW && !(b in V_KW)) return {}
+    const axis = (t: string, kw: Record<string, number>) => (isLen(t) ? '50%' : t in kw ? pct(kw[t]) : t)
+    return { position: { x: axis(a, H_KW), y: axis(b, V_KW) } }
+  }
 
   if (toks.every(isKw)) {
     if (toks.length > 2) return {}

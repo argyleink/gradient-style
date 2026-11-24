@@ -61,12 +61,14 @@ describe('parsePosition (CSS <position> after `at`)', () => {
     ['20% top', '20%', '0%'],
     ['right 10% bottom 20%', '90%', '80%'],
     ['top 15% left 5%', '5%', '15%'],
-    ['center bottom 25%', '50%', '75%'],
+    ['20px 30%', '50%', '30%'],
+    ['left 2em', '0%', '50%'],
+    ['3rem top', '50%', '0%'],
   ])('%s -> %s %s', (input, x, y) => {
     expect(parsePosition(input)).toEqual({ position: { x, y } })
   })
 
-  it.each(['left right', 'top 20%', 'center 10% top', 'left 12px top', '20px 30px', 'foo bar'])('%s is rejected', input => {
+  it.each(['5foo 30%', 'left right', 'top 20%', 'center 10% top', 'left 12px top', '20px 30px', 'foo bar', 'left 30', '30', 'left 10% top', 'center bottom 25%', '30deg 20%', 'right 10px bottom 20%'])('%s is rejected', input => {
     expect(parsePosition(input)).toEqual({})
   })
 
