@@ -13,8 +13,10 @@ import type { ParsedGradient } from '../lib/parseGradient'
 
 // deltaE OK, ~1 just-noticeable difference is 0.02
 const TOLERANCE = 0.02
-// 2^5 = at most 32 sub-segments between two authored stops
+// 2^5 = at most 32 sub-segments between two authored stops, fewer when there are many stops
+// so the whole list stays under ~100 stops (it is rebuilt on every edit and pasted by people)
 const MAX_DEPTH = 5
+const STOP_BUDGET = 96
 
 const CSS_TO_COLORJS: Record<string, string> = {
   'display-p3': 'p3',
@@ -147,6 +149,9 @@ export function emulateStops(stops: ParsedGradient['stops'], space: string, inte
   const first = resolved[prevIdx] as Extract<Resolved, { kind: 'stop' }>
   push(toSrgb(first.color), first.pos)
 
+  const segments = colorStops.length - 1
+  const maxDepth = Math.max(2, Math.min(MAX_DEPTH, Math.floor(Math.log2(STOP_BUDGET / segments))))
+
   for (let i = prevIdx + 1; i < resolved.length; i++) {
     const r = resolved[i]
     if (r.kind !== 'stop') continue
@@ -172,15 +177,16 @@ export function emulateStops(stops: ParsedGradient['stops'], space: string, inte
     const range = Color.range(A.color, B.color, { space: spaceId, hue, premultiplied: true } as any)
     const truth = (t: number) => toSrgb(range(weight(t)) as any)
 
+    // runs on every edit: the midpoint sample is reused as the split point
     const split = (t0: number, c0: Rgba, t1: number, c1: Rgba, depth: number) => {
-      let worst = 0
-      for (const f of [0.25, 0.5, 0.75]) {
-        const t = t0 + (t1 - t0) * f
-        worst = Math.max(worst, deltaOK(truth(t), lerpLegacy(c0, c1, f)))
-      }
-      if (worst <= TOLERANCE || depth >= MAX_DEPTH) return
       const tm = (t0 + t1) / 2
       const cm = truth(tm)
+      let worst = deltaOK(cm, lerpLegacy(c0, c1, 0.5))
+      for (const f of [0.25, 0.75]) {
+        if (worst > TOLERANCE) break
+        worst = Math.max(worst, deltaOK(truth(t0 + (t1 - t0) * f), lerpLegacy(c0, c1, f)))
+      }
+      if (worst <= TOLERANCE || depth >= maxDepth) return
       split(t0, c0, tm, cm, depth + 1)
       push(cm, A.pos + span * tm)
       split(tm, cm, t1, c1, depth + 1)

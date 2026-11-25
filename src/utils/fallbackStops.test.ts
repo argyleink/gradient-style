@@ -16,11 +16,8 @@ const layer = (space: string, interpolation: string, stops: any[], repeating = f
 
 // what a browser without `in <space>` draws at `pos`: sRGB lerp between the classic stops
 function legacyAt(classic: string, pos: number) {
-  const list = emulateStops(parseGradient(classic).stops, 'oklab', 'shorter')!
-  // emulating an sRGB-only list in oklab would resample it; read the stops directly instead
   const stops = parseGradient(classic).stops.filter(s => s.kind === 'stop') as any[]
   const pts = stops.map((s, i) => ({ c: new Color(s.color).to('srgb'), p: s.position1 ? parseFloat(s.position1) : (i === 0 ? 0 : 100) }))
-  expect(list.length).toBeGreaterThan(1)
   const i = pts.findIndex(p => p.p >= pos)
   if (i <= 0) return pts[Math.max(0, i)].c
   const a = pts[i - 1], b = pts[i]
@@ -71,6 +68,13 @@ describe('classic (sRGB) fallback emulates the modern interpolation', () => {
     const { classic } = buildGradientStrings(layer('oklab', 'shorter', [stop('#00f', 0), hint(), stop('#ff0', 10)], true))
     expect(classic).toMatch(/^repeating-linear-gradient\(to right, #00f 0%,/)
     expect(classic).toMatch(/#ff0 10%\)$/)
+  })
+
+  it('keeps the list bounded for many stops (10-stop longer hue = 9 full hue turns)', () => {
+    const hues = [0, 40, 80, 120, 160, 200, 240, 280, 320, 359]
+    const l = layer('oklch', 'longer', hues.flatMap((h, i) => (i ? [hint(), stop(`oklch(70% .3 ${h})`)] : [stop(`oklch(70% .3 ${h})`)])))
+    const { classic } = buildGradientStrings(l)
+    expect(classic.split(',').length).toBeLessThanOrEqual(100)
   })
 
   it('falls back to the 1:1 copy for length positions it cannot place', () => {
