@@ -21,23 +21,25 @@
     copyToClipboard(snippet)
   }
 
+  // `--hdr-gradient` is valid in any browser (custom properties hold anything), so
+  // `background: var(--hdr-gradient)` alone leaves a browser without `in <colorspace>` support
+  // with no background at all; it has to start from the sRGB gradient and upgrade under @supports
   function makeSnippet() {
     const noise = grainLayer(grain)
-    if (!noise) return `
-:root {
-  --hdr-gradient: ${modern_gradient};
-  --sdr-gradient: ${classic_gradient};
-
-  background: var(--hdr-gradient);
-}`.trim()
-
+    const bg = (v) => (noise ? `var(--grain), var(${v})` : `var(${v})`)
     return `
 :root {
   --hdr-gradient: ${modern_gradient};
-  --sdr-gradient: ${classic_gradient};
-  --grain: ${noise};
+  --sdr-gradient: ${classic_gradient};${noise ? `
+  --grain: ${noise};` : ''}
 
-  background: var(--grain), var(--hdr-gradient);
+  background: ${bg('--sdr-gradient')};
+}
+
+@supports (background: linear-gradient(in oklch, red, red)) {
+  :root {
+    background: ${bg('--hdr-gradient')};
+  }
 }`.trim()
   }
 
