@@ -1,5 +1,7 @@
 import Color from 'colorjs.io'
 import { isCylindricalSpace } from './colorspace'
+import { emulateStops, fallbackStopsToString } from './fallbackStops'
+import { parseGradient } from '../lib/parseGradient'
 
 export type LayerSnapshot = {
   type: string
@@ -228,16 +230,31 @@ return `${fn(layer, 'conic')}(\n    ${tokens},\n    ${stopsToStrings(layer.stops
   }
 }
 
+// sRGB stops that look like the modern gradient (see fallbackStops.ts), else a 1:1 hex copy
+function classicStops(layer: LayerSnapshot) {
+  let emulated = null
+  // lengths (`10px`) can't be placed on the percentage line without the box size
+  const hasLength = (layer.stops || []).some((st: any) =>
+    [st?.position1, st?.position2, st?.percentage].some(v => v != null && /[a-z]/i.test(String(v))))
+  if (!hasLength) try {
+    // read the stops back out of the modern string: that is exactly what the browser renders
+    emulated = emulateStops(parseGradient(modernString(layer).replace(/\s+/g, ' ')).stops, layer.space, layer.interpolation)
+  } catch {}
+  return emulated
+    ? fallbackStopsToString(emulated, { repeating: layer.repeating })
+    : stopsToStrings(layer.stops, { convert_colors: true, repeating: layer.repeating })
+}
+
 function classicString(layer: LayerSnapshot) {
   if (layer.type === 'linear') {
     const angleToken = linearAngleToken(layer.linear)
     const header = angleToken ? angleToken + ', ' : ''
-return `${fn(layer, 'linear')}(${header}${stopsToStrings(layer.stops, { convert_colors: true, repeating: layer.repeating })})`
+return `${fn(layer, 'linear')}(${header}${classicStops(layer)})`
   }
   else if (layer.type === 'radial') {
     const pos = radialPositionToString(layer.radial)
     const posPart = pos && pos !== 'center' ? ' at ' + pos : ''
-return `${fn(layer, 'radial')}(${layer.radial.size} ${layer.radial.shape}${posPart}, ${stopsToStrings(layer.stops, { convert_colors: true, repeating: layer.repeating })})`
+return `${fn(layer, 'radial')}(${layer.radial.size} ${layer.radial.shape}${posPart}, ${classicStops(layer)})`
   }
   else {
     const pos = conicPositionToString(layer.conic)
@@ -245,7 +262,7 @@ return `${fn(layer, 'radial')}(${layer.radial.size} ${layer.radial.shape}${posPa
     const fromPart = (Number(layer.conic.angle) || 0) % 360 === 0 ? '' : `from ${layer.conic.angle}deg`
     // centered + 0deg has no prelude at all; don't leave a dangling comma
     const header = (fromPart + posPart).trim()
-return `${fn(layer, 'conic')}(${header ? header + ', ' : ''}${stopsToStrings(layer.stops, { convert_colors: true, repeating: layer.repeating })})`
+return `${fn(layer, 'conic')}(${header ? header + ', ' : ''}${classicStops(layer)})`
   }
 }
 
