@@ -40,10 +40,14 @@ function pctOf(v: any): number | null {
 
 // sRGB clipped the way browsers draw an out-of-gamut gradient on an sRGB screen (and how
 // the hex copy has always been made), so the fallback matches what people actually see
+// colorjs keeps parsed values as Number objects (`new Number(.2)` with a `raw` field) until they
+// go through a conversion, and Number.isFinite(new Number(.2)) is false: unwrap before testing,
+// or a parsed alpha reads as opaque and `color(srgb .5 .2 .1)` reads as black
 function toSrgb(c: Color): Rgba {
   const m = c.to('srgb').toGamut({ space: 'srgb', method: 'clip' })
-  const [r, g, b] = m.coords.map(v => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0))
-  const a = Number.isFinite(m.alpha as any) ? Number(m.alpha) : 1
+  const [r, g, b] = m.coords.map(v => Number(v)).map(v => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0))
+  const alpha = Number(m.alpha)
+  const a = Number.isFinite(alpha) ? Math.min(1, Math.max(0, alpha)) : 1
   return [r, g, b, a]
 }
 
@@ -116,6 +120,41 @@ function resolve(stops: ParsedGradient['stops']): Resolved[] | null {
   return items as Resolved[]
 }
 
+// CSS Color 4 §12 interpolation between two stops: missing (`none`/powerless) components borrow
+// the other side's value, hue is fixed up by the hue mode, and every component but hue is
+// premultiplied by alpha. Color.range() can't be used: colorjs 0.5 premultiplies the hue too,
+// which drags `in hsl`/`in oklch` fades between two hues onto the wrong hue.
+function interpolator(A: Color, B: Color, spaceId: string, hue: string) {
+  const space = Color.Space.get(spaceId)
+  const hueIdx = Object.values(space.coords as Record<string, any>).findIndex(c => c?.type === 'angle')
+  const a = A.to(spaceId).coords.map(Number), b = B.to(spaceId).coords.map(Number)
+  let aa = Number(A.alpha), ba = Number(B.alpha)
+  if (Number.isNaN(aa)) aa = Number.isNaN(ba) ? 1 : ba
+  if (Number.isNaN(ba)) ba = aa
+  for (let i = 0; i < a.length; i++) {
+    if (Number.isNaN(a[i])) a[i] = Number.isNaN(b[i]) ? 0 : b[i]
+    if (Number.isNaN(b[i])) b[i] = a[i]
+  }
+  if (hueIdx >= 0) {
+    let h1 = ((a[hueIdx] % 360) + 360) % 360, h2 = ((b[hueIdx] % 360) + 360) % 360
+    const d = h2 - h1
+    if (hue === 'longer') { if (d > 0 && d < 180) h1 += 360; else if (d > -180 && d <= 0) h2 += 360 }
+    else if (hue === 'increasing') { if (h2 < h1) h2 += 360 }
+    else if (hue === 'decreasing') { if (h1 < h2) h1 += 360 }
+    else { if (d > 180) h1 += 360; else if (d < -180) h2 += 360 }
+    a[hueIdx] = h1; b[hueIdx] = h2
+  }
+  return (t: number) => {
+    const alpha = aa + (ba - aa) * t
+    const coords = a.map((v, i) => {
+      if (i === hueIdx) return (v + (b[i] - v) * t) % 360
+      const pm = v * aa + (b[i] * ba - v * aa) * t
+      return alpha === 0 ? v + (b[i] - v) * t : pm / alpha
+    })
+    return new Color(spaceId, coords as [number, number, number], alpha)
+  }
+}
+
 export function needsEmulation(space: string): boolean {
   // legacy gradients already interpolate in sRGB; every other space (hsl included, even with
   // `shorter hue`) takes a different path between the same two colors
@@ -145,9 +184,10 @@ export function emulateStops(stops: ParsedGradient['stops'], space: string, inte
   }
 
   // walk pairs of adjacent color stops with the hint (if any) between them
+  // each stop is pushed from its segment's own interpolation, not converted on its own: a stop
+  // with a `none` component borrows it from the neighbour it blends with (so it can differ on
+  // each side), and an achromatic stop takes its neighbour's hue
   let prevIdx = resolved.findIndex(r => r.kind === 'stop')
-  const first = resolved[prevIdx] as Extract<Resolved, { kind: 'stop' }>
-  push(toSrgb(first.color), first.pos)
 
   const segments = colorStops.length - 1
   const maxDepth = Math.max(2, Math.min(MAX_DEPTH, Math.floor(Math.log2(STOP_BUDGET / segments))))
@@ -160,21 +200,23 @@ export function emulateStops(stops: ParsedGradient['stops'], space: string, inte
     const hintR = resolved.slice(prevIdx + 1, i).find(x => x.kind === 'hint') as Extract<Resolved, { kind: 'hint' }> | undefined
     prevIdx = i
 
+    const range = interpolator(A.color, B.color, spaceId, hue)
+    const c0 = toSrgb(range(0) as any), c1 = toSrgb(range(1) as any)
+    push(c0, A.pos)
+
     const span = B.pos - A.pos
     if (span <= 0) {
       // hard stop: both colors at the same position
-      push(toSrgb(B.color), B.pos)
+      push(c1, B.pos)
       continue
     }
 
     // transition hint as a fraction of the segment (CSS Images 4 §3.5.3)
     let H = hintR == null ? 0.5 : (hintR.pos - A.pos) / span
-    if (H <= 0) { push(toSrgb(B.color), A.pos); push(toSrgb(B.color), B.pos); continue }
-    if (H >= 1) { push(toSrgb(A.color), B.pos); push(toSrgb(B.color), B.pos); continue }
+    if (H <= 0) { push(c1, A.pos); push(c1, B.pos); continue }
+    if (H >= 1) { push(c0, B.pos); push(c1, B.pos); continue }
     const exp = Math.log(0.5) / Math.log(H)
     const weight = (t: number) => (H === 0.5 ? t : Math.pow(t, exp))
-
-    const range = Color.range(A.color, B.color, { space: spaceId, hue, premultiplied: true } as any)
     const truth = (t: number) => toSrgb(range(weight(t)) as any)
 
     // runs on every edit: the midpoint sample is reused as the split point
@@ -192,7 +234,6 @@ export function emulateStops(stops: ParsedGradient['stops'], space: string, inte
       split(tm, cm, t1, c1, depth + 1)
     }
 
-    const c0 = truth(0), c1 = truth(1)
     split(0, c0, 1, c1, 0)
     push(c1, B.pos)
   }
@@ -218,6 +259,12 @@ export function fallbackStopsToString(list: FallbackStop[], { repeating = false 
     }
     const isEnd = (isFirst && s.pos === 0) || (i === list.length - 1 && s.pos === 100)
     parts.push(isEnd && !repeating ? s.color : `${s.color} ${s.pos}%`)
+  }
+  // a solid gradient collapses to one stop, and `linear-gradient(#f00)` is only valid in browsers
+  // new enough to never see this fallback: keep two
+  if (parts.length < 2 && list.length) {
+    const s = list[0], e = list.at(-1)!
+    return `${s.color} ${s.pos}%, ${e.color} ${e.pos}%`
   }
   return parts.join(', ')
 }

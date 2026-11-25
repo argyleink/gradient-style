@@ -83,4 +83,37 @@ describe('classic (sRGB) fallback emulates the modern interpolation', () => {
     const { classic } = buildGradientStrings(layer('oklab', 'shorter', [stop('red', '10px'), hint(), stop('blue', '20px')], true))
     expect(classic).toBe('repeating-linear-gradient(to right, #f00 10px, #00f 20px)')
   })
+
+  it('keeps a typed alpha on the first stop and on hard stops', () => {
+    const { classic } = buildGradientStrings(layer('oklab', 'shorter', [stop('rgb(255 0 0 / .3)', '0%', '40%'), hint(), stop('rgb(0 0 255 / .6)', '40%', '100%')]))
+    // colorjs parses alpha as a Number object; it used to read as opaque (#f00 / #00f)
+    expect(classic).toBe('linear-gradient(to right, #ff00004d 40%, #00f9 40%)')
+  })
+
+  it('reads color(srgb ...) stops instead of turning them black', () => {
+    const out = emulateStops(parseGradient('linear-gradient(in oklab, color(srgb .5 .2 .1), color(srgb .1 .4 .9))').stops, 'oklab', 'shorter')!
+    expect(out[0].color).toBe('#7f331a')
+    expect(out.at(-1)!.color).toBe('#1966e5')
+  })
+
+  it('a `none` hue borrows the hue it blends with, on each side of the stop', () => {
+    const out = emulateStops(parseGradient('linear-gradient(in oklch, oklch(60% .2 30), oklch(70% .2 none), oklch(60% .2 250))').stops, 'oklch', 'shorter')!
+    const at50 = out.filter(s => s.pos === 50).map(s => new Color(s.color).to('oklch').coords[2])
+    // reddish coming in, blue going out: a jump at 50%, never the gray a hue-less stop converts to
+    expect(at50).toHaveLength(2)
+    expect(Math.abs(at50[0] - 30)).toBeLessThan(8)
+    expect(Math.abs(at50[1] - 250)).toBeLessThan(8)
+  })
+
+  it('fading between two hues does not premultiply the hue', () => {
+    const out = emulateStops(parseGradient('linear-gradient(in hsl, hsl(0 100% 50% / .1), hsl(240 100% 50% / .8))').stops, 'hsl', 'shorter')!
+    const mid = out.find(s => s.pos === 50)!
+    // shorter hue from 0 to 240 runs through 300 (magenta); premultiplied hue landed near 253
+    expect(Math.abs(new Color(mid.color).to('hsl').coords[0] - 300)).toBeLessThan(3)
+  })
+
+  it('a solid gradient still writes two stops (one-stop gradients are invalid where the fallback runs)', () => {
+    expect(buildGradientStrings(layer('oklab', 'shorter', [stop('red'), hint(), stop('red')])).classic).toBe('linear-gradient(to right, #f00 0%, #f00 100%)')
+    expect(buildGradientStrings(layer('oklab', 'shorter', [stop('red', '50%'), hint(), stop('red', '50%')])).classic).toBe('linear-gradient(to right, #f00 50%, #f00 50%)')
+  })
 })
