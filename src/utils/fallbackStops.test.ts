@@ -91,9 +91,9 @@ describe('classic (sRGB) fallback emulates the modern interpolation', () => {
   })
 
   it('reads color(srgb ...) stops instead of turning them black', () => {
-    const out = emulateStops(parseGradient('linear-gradient(in oklab, color(srgb .5 .2 .1), color(srgb .1 .4 .9))').stops, 'oklab', 'shorter')!
-    expect(out[0].color).toBe('#7f331a')
-    expect(out.at(-1)!.color).toBe('#1966e5')
+    const out = emulateStops(parseGradient('linear-gradient(in oklab, color(srgb .6 .4 .2), color(srgb .2 .4 .8))').stops, 'oklab', 'shorter')!
+    expect(out[0].color).toBe('#963')
+    expect(out.at(-1)!.color).toBe('#36c')
   })
 
   it('a `none` hue borrows the hue it blends with, on each side of the stop', () => {
