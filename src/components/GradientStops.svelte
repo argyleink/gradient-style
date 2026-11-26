@@ -11,6 +11,7 @@
 
   import {copyToClipboard} from '../utils/clipboard'
   import {randomNumber} from '../utils/numbers'
+  import {removeStopAt} from '../utils/stops'
   import {whatsTheGamutDamnit} from '../utils/colorspace'
 
   import RangeSlider from './RangeSlider.svelte'
@@ -39,10 +40,7 @@
     const target = event.target as HTMLSelectElement
     switch (target.value) {
       case 'Remove':
-        if (colorStopCount() <= 1) break
-        const newStops = [...$gradient_stops]
-        newStops.splice(position, 2)
-        $gradient_stops = newStops
+        $gradient_stops = removeStopAt($gradient_stops, position)
         break
       case 'Reset':
         const resetStops = [...$gradient_stops]
@@ -133,6 +131,30 @@
 
   function fieldsetInteractingEnd() {
     $active_stop_index = null
+  }
+
+  // Emptying a stop's color text and leaving the field deletes that stop (#81).
+  // The only color stop can't be deleted, so it gets the color it had on focus back.
+  let colorOnFocus = ''
+
+  function rememberColor(stop: GradientStop) {
+    colorOnFocus = stop.color
+  }
+
+  function removeIfColorEmptied(stop: GradientStop) {
+    if (String(stop.color ?? '').trim() !== '') return
+    // switching windows/tabs blurs the field too; wait for a real blur when the user comes back
+    if (!document.hasFocus()) return
+    const index = $gradient_stops.indexOf(stop)
+    if (index < 0) return
+
+    if (colorStopCount() > 1) {
+      $gradient_stops = removeStopAt($gradient_stops, index)
+    }
+    else {
+      stop.color = colorOnFocus
+      $gradient_stops = [...$gradient_stops]
+    }
   }
 
   function fixIfEmptied(stop: GradientStop) {
@@ -299,7 +321,7 @@
         {/if}
         <div class="chip color-stop" use:tooltip={{content: 'Gamut: '+ whatsTheGamutDamnit(stop.color), placement: 'top-start',}}>
           <button class="round" style="background-color: {stop.color}" onclick={e => pickColor(stop,e)} aria-label="Pick color"></button>
-          <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color}/>
+          <input type="text" class="color-string" style="caret-color: {stop.color}" bind:value={stop.color} onfocus={() => rememberColor(stop)} onblur={() => removeIfColorEmptied(stop)}/>
         </div>
         <div class="positions-pair">
           <button class="linked round" use:tooltip={{html: true, content: '<span class="rich-tooltip wide">A color can be a point in the line or span a chunk of it. Use the 2nd slider to span an area.<br><br>The sliders are 0 - 100% but you can manually input values beyond this.<br><br>Click to relink positions.</span>', placement: 'top-start',}} onclick={() => stop.position2 = stop.position1}>

@@ -187,3 +187,18 @@ export function reverseStops(stops: Stop[]): Stop[] {
   })
   return updateStops(reversed as Stop[])
 }
+
+// Remove the color stop at `index` along with one neighboring transition hint, so the list keeps
+// exactly one hint between each pair of stops. A stop's own hint follows it; the last stop has no
+// following hint, so it takes the one before it instead (otherwise a dangling hint would be left
+// at the end). Returns a new array, or the original when it isn't a removable stop.
+export function removeStopAt<T extends { kind: string }>(stops: T[], index: number): T[] {
+  if (stops[index]?.kind !== 'stop') return stops
+  if (stops.filter(s => s?.kind === 'stop').length <= 1) return stops
+
+  const next = [...stops]
+  if (next[index + 1]?.kind === 'hint') next.splice(index, 2)
+  else if (next[index - 1]?.kind === 'hint') next.splice(index - 1, 2)
+  else next.splice(index, 1)
+  return next
+}
