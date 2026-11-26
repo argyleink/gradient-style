@@ -152,7 +152,8 @@
       $gradient_stops = removeStopAt($gradient_stops, index)
     }
     else {
-      stop.color = colorOnFocus
+      // it may already have been empty on focus, so never write an empty color back
+      stop.color = String(colorOnFocus ?? '').trim() || `oklch(80% 0.3 ${randomNumber(0,360)})`
       $gradient_stops = [...$gradient_stops]
     }
   }
