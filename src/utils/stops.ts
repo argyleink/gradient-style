@@ -51,19 +51,68 @@ export function updateStops(stops: Stop[]): Stop[] {
       // Clear the manual flag after one normalization pass so future edits behave normally
       if (stop._manual) delete stop._manual
     }
-    // is a hint
-    else {
-      // Only auto-assign hint percentage when it's unset or previously auto-managed
-      if (stop.percentage == null || (stop.auto != null && String(stop.percentage) == String(stop.auto)))
-        stop.percentage = autoVal
-    }
+    // hints are resolved below, once every color stop has its final position
+    else return stop
 
     // Persist the computed auto value for future comparisons
     stop.auto = autoVal
     return stop
   })
 
+  // A hint's default is the midpoint between its two neighbouring color stops (that's where the
+  // browser puts it when the hint is omitted), not an even slot on the 0-100 line. With stops at
+  // 0%, 80% and 100% the second transition sits at 90%, not 75% (#34).
+  const mids = hintMidpoints(updated)
+  updated.forEach((stop: Stop, i: number) => {
+    if (stop.kind === 'stop') return
+    const autoVal = mids[i] ?? autoStops[i]
+    // Only auto-assign hint percentage when it's unset or previously auto-managed
+    if (stop.percentage == null || (stop.auto != null && String(stop.percentage) == String(stop.auto)))
+      stop.percentage = autoVal
+    stop.auto = autoVal
+  })
+
   return updated
+}
+
+/**
+ * Midpoint for every hint whose neighbouring stops have percentage positions, after CSS's
+ * position fixup (a stop placed before an earlier one is clamped up to it). Hints next to
+ * length-positioned stops (px, em, calc...) are left out so callers fall back to the even map.
+ */
+function hintMidpoints(stops: Stop[]): Record<number, number> {
+  const out: Record<number, number> = {}
+  let floor = -Infinity
+  let prevEnd: number | null = null
+  let pendingHint: number | null = null
+  let unknown = false
+
+  for (let i = 0; i < stops.length; i++) {
+    const s = stops[i]
+    if (s.kind !== 'stop') {
+      pendingHint = i
+      // an explicit hint is a position too, and pushes the floor for later stops
+      const n = isAuto(s.percentage, s.auto) ? null : numericPct(s.percentage)
+      if (n != null) floor = Math.max(floor, n)
+      continue
+    }
+    const p1 = numericPct(s.position1)
+    const p2 = s.position2 == null ? p1 : numericPct(s.position2)
+    if (p1 == null || p2 == null) {
+      unknown = true
+      pendingHint = null
+      continue
+    }
+    const start = Math.max(floor, p1)
+    const end = Math.max(start, p2)
+    if (pendingHint != null && prevEnd != null && !unknown)
+      out[pendingHint] = Number(round2((prevEnd + start) / 2))
+    floor = end
+    prevEnd = end
+    pendingHint = null
+    unknown = false
+  }
+  return out
 }
 
 export function removeStop(stops: Stop[], pos: number): Stop[] {
