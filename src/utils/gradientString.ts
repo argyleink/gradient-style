@@ -157,7 +157,9 @@ function stopsToStrings(stops: any[], { convert_colors, new_lines, repeating }: 
       const pct = s.percentage
       if (pct == null) continue
       if (s.auto != null && String(pct) == String(s.auto)) continue
-      if (isPctFifty(pct)) continue
+      // 50% is only the default when nothing says where the midpoint really is: with stops at
+      // 0% and 80% an explicit 50% hint is a real choice (the midpoint is 40%), so keep it (#34)
+      if (s.auto == null && isPctFifty(pct)) continue
       out.push({ kind: 'hint', text: fmtPos(pct) as string })
     }
   }
