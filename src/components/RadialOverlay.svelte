@@ -10,6 +10,7 @@
   import {contrast_color_prefer_white} from '../utils/color.ts'
   import {updateStops, removeStop} from '../utils/stops.ts'
   import {randomNumber} from '../utils/numbers.ts'
+  import {visibleEllipsePath} from '../utils/ellipse.ts'
 
   /**
    * @typedef {Object} Props
@@ -534,7 +535,26 @@
     $radial_named_position,
     w, h
   ))
+
+  // Size guide, clipped to what can be seen (#77). Padding = one box size on
+  // every side, since the guide used to spill past the preview into the panel.
+  let edgePath = $derived.by(() => {
+    if (!w || !h) return ''
+    const c = determineAbsPosition($radial_position, $radial_named_position)
+    const pad = Math.max(w, h)
+    // the old guide was a 2px border drawn inside the box: stroke its centerline
+    return visibleEllipsePath(
+      {cx: c.x, cy: c.y, rx: size.w / 2 - 1, ry: size.h / 2 - 1},
+      {x0: -pad, y0: -pad, x1: w + pad, y1: h + pad},
+    )
+  })
 </script>
+
+{#if edgePath}
+  <svg class="edge" aria-hidden="true" width={w} height={h} viewBox="0 0 {w} {h}">
+    <path d={edgePath} />
+  </svg>
+{/if}
 
 <div class="overlay" use:dragula  style="
   left: {position.x};
@@ -543,10 +563,6 @@
 ">
   <div class="dot"></div>
   <div tabindex="0" class="dragzone" use:tooltip={{content: $radial_named_position == '--' ? `${position.x} ${position.y}` : $radial_named_position}} style="max-inline-size: {size.w * .2}px"></div>
-  <div class="edge" style="
-    width:{size.w}px;
-    height:{size.h}px;
-  "></div>
   <div class="invisible-track" onclick={addStop} onmousemove={onTrackMove} onmouseenter={onTrackEnter} onmouseleave={onTrackLeave}></div>
   <div class="line" style="width: {gradientLineLength(size)}">
     {#if showGhost && ghostPercent !== null}
@@ -619,11 +635,14 @@
   }
 
   .edge {
-    pointer-events: none;
-    position: absolute;
+    grid-area: 1/1;
     place-self: center;
-    border: 2px dashed var(--line-2);
-    border-radius: 50%;
+    pointer-events: none;
+    overflow: visible;
+    fill: none;
+    stroke: hsl(0 0% 100% / 50%);
+    stroke-width: 2px;
+    stroke-dasharray: 6px 6px;
   }
 
   .dot {
