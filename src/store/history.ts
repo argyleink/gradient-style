@@ -29,6 +29,8 @@ export type HistorySnapshot = {
   key: string
 }
 
+export type HistoryStacks = { past: HistorySnapshot[]; future: HistorySnapshot[] }
+
 export type HistoryState = { layers: GradientLayer[]; active: number; grain?: number }
 
 const LIMIT = 100
@@ -122,6 +124,16 @@ export function createHistory({ read, write, limit = LIMIT }: {
       present = next
       write(next, focus)
       return true
+    },
+    /** The undo/redo stacks behind the present state (copies). */
+    stacks(): HistoryStacks {
+      return { past: [...past], future: [...future] }
+    },
+    /** Swap in another version's stacks; the live state becomes the present. */
+    setStacks(next: HistoryStacks) {
+      past = [...next.past]
+      future = [...next.future]
+      present = takeSnapshot(read())
     },
     get canUndo() { return past.length > 0 },
     get canRedo() { return future.length > 0 },
@@ -234,6 +246,35 @@ export function redo() {
   const ok = history.redo()
   syncFlags()
   return ok
+}
+
+/** A copy of the live undo/redo stacks (null before history starts). */
+export function historyStacks(): HistoryStacks | null {
+  if (!history) return null
+  commit()
+  return history.stacks()
+}
+
+/**
+ * Load a different version of the gradient (A/B compare) without recording
+ * it as an edit: `load` sets the stores, then the version's own undo/redo
+ * stacks are swapped in, so undo never crosses from one version into the
+ * other. Returns the outgoing version's stacks, or false if a gesture,
+ * dialog or previous swap is still in flight.
+ */
+export function switchVersion(load: () => void, incoming: HistoryStacks | null): HistoryStacks | null | false {
+  if (applying || (history && blocked())) return false
+  if (!history) { load(); return null }
+  commit()
+  const outgoing = history.stacks()
+  applying = true
+  load()
+  tick().then(() => setTimeout(() => {
+    history?.setStacks(incoming ?? { past: [], future: [] })
+    applying = false
+    syncFlags()
+  }, 0))
+  return outgoing
 }
 
 let teardown: (() => void) | null = null

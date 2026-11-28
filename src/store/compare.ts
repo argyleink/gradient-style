@@ -3,6 +3,7 @@ import { writable, get } from 'svelte/store'
 import { layers, active_layer_index, selectLayer, type GradientLayer } from './layers'
 import { gradient_grain } from './gradient'
 import { buildGradientStrings } from '../utils/gradientString'
+import { historyStacks, switchVersion, type HistoryStacks } from './history'
 
 /*
  * A/B compare (#101)
@@ -15,7 +16,7 @@ import { buildGradientStrings } from '../utils/gradientString'
  * and a flip is one undo step like any other edit.
  */
 
-export type CompareSlot = { layers: GradientLayer[]; active: number; grain: number }
+export type CompareSlot = { layers: GradientLayer[]; active: number; grain: number; history?: HistoryStacks | null }
 export type CompareState = { other: CompareSlot | null; showing: 'a' | 'b' }
 
 export const compare = writable<CompareState>({ other: null, showing: 'b' })
@@ -41,24 +42,22 @@ function apply(slot: CompareSlot) {
   selectLayer(idx) // re-sync the single-value stores the editor reads
 }
 
-// the color picker and import dialog hold references to live stop objects
-function busy() {
-  return typeof document !== 'undefined' && !!document.querySelector('dialog[open]')
-}
-
 /** Pin what's on screen as A; you keep editing B (a copy of it). */
 export function pinA() {
   if (!get(layers).length) return
-  compare.set({ other: capture(), showing: 'b' })
+  // A shares B's past so far; from here on each keeps its own undo stack
+  compare.set({ other: { ...capture(), history: historyStacks() }, showing: 'b' })
 }
 
 /** Load A or B into the editor, stashing the one on screen. */
 export function show(which: 'a' | 'b') {
   const state = get(compare)
-  if (!state.other || state.showing === which || busy()) return false
+  if (!state.other || state.showing === which) return false
+  const target = state.other
   const current = capture()
-  apply(state.other)
-  compare.set({ other: current, showing: which })
+  const outgoing = switchVersion(() => apply(target), target.history ?? null)
+  if (outgoing === false) return false
+  compare.set({ other: { ...current, history: outgoing }, showing: which })
   return true
 }
 

@@ -3,6 +3,9 @@ import { get } from 'svelte/store'
 import { compare, pinA, show, toggleAB, unpin } from './compare'
 import { layers, active_layer_index, defaultLayer, selectLayer } from './layers'
 import { gradient_grain, gradient_space } from './gradient'
+import { initHistory, undo, redo } from './history'
+
+const wait = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 function edit(fn: (l: any) => void) {
   const list = structuredClone(get(layers))
@@ -82,5 +85,34 @@ describe('A/B compare (#101)', () => {
     edit(l => { l.stops[0].color = 'red' })
     show('a')
     expect(get(layers)[0].stops[0].color).not.toBe('red')
+  })
+
+  it('each version keeps its own undo stack, and a flip is not an undo step', async () => {
+    const stop = initHistory()
+    await wait(20)
+    edit(l => { l.space = 'srgb' }) // shared past
+    await wait(450)
+    pinA() // A = srgb
+    edit(l => { l.space = 'hsl' }) // B edit
+    await wait(450)
+
+    show('a')
+    await wait(20)
+    expect(space()).toBe('srgb')
+    // undo on A walks A's own past (back to oklab), never into B's hsl
+    expect(undo()).toBe(true)
+    await wait(20)
+    expect(space()).toBe('oklab')
+    expect(redo()).toBe(true)
+    await wait(20)
+    expect(space()).toBe('srgb')
+
+    show('b')
+    await wait(20)
+    expect(space()).toBe('hsl')
+    expect(undo()).toBe(true) // B's last edit
+    await wait(20)
+    expect(space()).toBe('srgb')
+    stop()
   })
 })
