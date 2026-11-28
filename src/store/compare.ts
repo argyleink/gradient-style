@@ -12,8 +12,9 @@ import { historyStacks, switchVersion, type HistoryStacks } from './history'
  * the two. Both versions stay fully editable: flipping stashes whatever is
  * on screen and loads the other one into the editor, so tweaks made to A
  * survive a round trip. `other` always holds the version that is NOT on
- * screen. Flips go through the normal layer stores, so the URL follows along
- * and a flip is one undo step like any other edit.
+ * screen. Flips go through the normal layer stores, so the URL follows
+ * along, but they are not edits: each version keeps its own undo/redo
+ * stacks and a flip swaps them, so undo never leaks from A into B.
  */
 
 export type CompareSlot = { layers: GradientLayer[]; active: number; grain: number; history?: HistoryStacks | null }
