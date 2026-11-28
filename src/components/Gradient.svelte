@@ -42,6 +42,7 @@ import GradientImportDialog from './GradientImportDialog.svelte'
   import { initHistory } from '../store/history.ts'
 
   import Hint from './Hint.svelte'
+  import ABCompare from './ABCompare.svelte'
 
   let preview_resizer = $state()
   let preview_hd = $state(true)
@@ -549,6 +550,7 @@ let user_gradient = $derived(gensyntax[$gradient_type](
             {/if}
             <input bind:checked={preview_hd} type="checkbox" name="hd-gradient" use:tooltip={{html: true, content: '<span class="rich-tooltip">Toggle between high and standard gradient previews.<br><br>(HDR) high dynamic range.</span>'}}/>
           </label>
+          <ABCompare />
           <div
             bind:this={preview_resizer}
             class="resizer"
